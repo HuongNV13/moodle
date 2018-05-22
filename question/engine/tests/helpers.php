@@ -1242,3 +1242,10 @@ class question_test_recordset extends moodle_recordset {
         $this->records = null;
     }
 }
+
+class testable_core_question_renderer extends core_question_renderer {
+
+    public function number($number) {
+        return parent::number($number);
+    }
+}
