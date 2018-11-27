@@ -14,6 +14,11 @@ information provided here is intended especially for developers.
   - isfavourite: Whether the user marked the course as favourite.
   - hidden: Whether the user hide the course from the dashboard.
 
+* Functions get_potential_users() and search_other_users() now return more information to avoid extra count query:
+  - users: List of user objects returned by the query.
+  - moreusers: True if there are still more users, otherwise is False.
+  - totalusers: Number users matching the search. (This element only exist if the function was called with $returnexactcount param was set to true).
+
 === 3.5 ===
 
 * Default sorting in enrol_get_my_courses(), enrol_get_all_users_courses() and enrol_get_users_courses() now respects
