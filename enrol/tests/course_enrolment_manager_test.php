@@ -239,4 +239,155 @@ class core_course_enrolment_manager_testcase extends advanced_testcase {
         $this->assertCount(1, $users, 'Only suspended users must be returned when suspended users filtering is applied.');
         $this->assertArrayHasKey($this->users['user22']->id, $users);
     }
+
+    /**
+     * Test get_potential_users function.
+     *
+     * @throws dml_exception
+     */
+    public function test_get_potential_users() {
+        global $DB, $PAGE;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Create course.
+        $course = $this->getDataGenerator()->create_course();
+        // Create sample users.
+        $this->generate_sample_test_users('testuser', 100);
+        // Create manual enrolment record.
+        $manualenroldata['enrol'] = 'manual';
+        $manualenroldata['status'] = 0;
+        $manualenroldata['courseid'] = $this->course->id;
+        $enrolid = $DB->insert_record('enrol', $manualenroldata);
+
+        $manager = new course_enrolment_manager($PAGE, $course);
+
+        $users = $manager->get_potential_users($enrolid,
+                'testuser',
+                true,
+                0,
+                100,
+                0,
+                false);
+
+        $this->assertEquals(100, $users['totalusers']);
+        $this->assertCount(100, $users['users']);
+        $this->assertArrayNotHasKey('moreusers', $users);
+
+        $users = $manager->get_potential_users($enrolid,
+                'testuser',
+                true,
+                0,
+                50,
+                0,
+                false);
+
+        $this->assertEquals(100, $users['totalusers']);
+        $this->assertCount(50, $users['users']);
+        $this->assertArrayNotHasKey('moreusers', $users);
+
+        $users = $manager->get_potential_users($enrolid,
+                'testuser',
+                true,
+                0,
+                100,
+                0,
+                true);
+
+        $this->assertEquals(100, $users['totalusers']);
+        $this->assertCount(100, $users['users']);
+        $this->assertArrayHasKey('moreusers', $users);
+        $this->assertEquals(false, $users['moreusers']);
+
+        $users = $manager->get_potential_users($enrolid,
+                'testuser',
+                true,
+                0,
+                50,
+                0,
+                true);
+
+        $this->assertEquals(100, $users['totalusers']);
+        $this->assertCount(50, $users['users']);
+        $this->assertArrayHasKey('moreusers', $users);
+        $this->assertEquals(true, $users['moreusers']);
+    }
+
+    /**
+     * Test search_other_users function.
+     *
+     * @throws dml_exception
+     */
+    public function test_search_other_users() {
+        global $PAGE;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Create course.
+        $course = $this->getDataGenerator()->create_course();
+        // Create sample users.
+        $this->generate_sample_test_users('testuser', 100);
+
+        $manager = new course_enrolment_manager($PAGE, $course);
+
+        $users = $manager->search_other_users(
+                'testuser',
+                true,
+                0,
+                100,
+                false);
+
+        $this->assertEquals(100, $users['totalusers']);
+        $this->assertCount(100, $users['users']);
+        $this->assertArrayNotHasKey('moreusers', $users);
+
+        $users = $manager->search_other_users(
+                'testuser',
+                true,
+                0,
+                50,
+                false);
+
+        $this->assertEquals(100, $users['totalusers']);
+        $this->assertCount(50, $users['users']);
+        $this->assertArrayNotHasKey('moreusers', $users);
+
+        $users = $manager->search_other_users(
+                'testuser',
+                true,
+                0,
+                100,
+                true);
+
+        $this->assertEquals(100, $users['totalusers']);
+        $this->assertCount(100, $users['users']);
+        $this->assertArrayHasKey('moreusers', $users);
+
+        $users = $manager->search_other_users(
+                'testuser',
+                true,
+                0,
+                50,
+                true);
+
+        $this->assertEquals(100, $users['totalusers']);
+        $this->assertCount(50, $users['users']);
+        $this->assertArrayHasKey('moreusers', $users);
+        $this->assertEquals(true, $users['moreusers']);
+    }
+
+    /**
+     * Generate sample test user data with given prefix and quantity.
+     *
+     * @param string $prefix Prefix of username and firstname.
+     * @param int $quantity Number of needed users.
+     */
+    private function generate_sample_test_users($prefix, $quantity) {
+        for ($i = 0; $i < $quantity; $i++) {
+            $this->getDataGenerator()->create_user([
+                    'username' => $prefix . $i,
+                    'firstname' => $prefix . $i
+            ]);
+        }
+    }
 }
