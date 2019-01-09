@@ -276,28 +276,31 @@ function groups_get_all_groups($courseid, $userid=0, $groupingid=0, $fields='g.*
 
     array_unshift($params, $courseid);
 
-    $results = $DB->get_records_sql("SELECT $memberselect $fields
+    $results = $DB->get_recordset_sql("SELECT $memberselect $fields
                                    FROM {groups} g $userfrom $groupingfrom $memberjoin
                                   WHERE g.courseid = ? $userwhere $groupingwhere
                                ORDER BY name ASC", $params);
 
-    if ($withmembers) {
-        // We need to post-process the results back into standard format.
-        $groups = [];
-        foreach ($results as $row) {
-            if (!isset($groups[$row->id])) {
+    $responses = [];
+    foreach ($results as $key => $row) {
+        if (!$withmembers) {
+            $responses[$key] = $row;
+        } else {
+            // We need to post-process the results back into standard format.
+            if (!isset($responses[$row->id])) {
                 $row->members = [$row->userid => $row->userid];
                 unset($row->userid);
                 unset($row->ugmid);
-                $groups[$row->id] = $row;
+                $responses[$row->id] = $row;
             } else {
-                $groups[$row->id]->members[$row->userid] = $row->userid;
+                $responses[$row->id]->members[$row->userid] = $row->userid;
             }
         }
-        $results = $groups;
     }
 
-    return $results;
+    $results->close();
+
+    return $responses;
 }
 
 /**
