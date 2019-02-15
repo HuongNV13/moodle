@@ -43,13 +43,20 @@ function atto_managefiles_params_for_js($elementid, $options, $fpoptions) {
     global $CFG, $USER;
     require_once($CFG->dirroot . '/repository/lib.php');  // Load constants.
 
+    $context = $options['context'];
+    if (!$context) {
+        $context = context_system::instance();
+    }
+
     // Disabled if:
     // - Not logged in or guest.
     // - Files are not allowed.
     // - Only URL are supported.
+    // - Logged in but do not have permission.
     $disabled = !isloggedin() || isguestuser() ||
             (!isset($options['maxfiles']) || $options['maxfiles'] == 0) ||
-            (isset($options['return_types']) && !($options['return_types'] & ~FILE_EXTERNAL));
+            (isset($options['return_types']) && !($options['return_types'] & ~FILE_EXTERNAL)) ||
+            !has_capability('moodle/editor:managefilesuse', $context);
 
     $params = array('disabled' => $disabled, 'area' => array(), 'usercontext' => null);
 

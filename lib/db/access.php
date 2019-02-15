@@ -2469,4 +2469,13 @@ $capabilities = array(
             'user' => CAP_ALLOW,
         ],
     ],
+
+    // Use Manage File plugin in editor.
+    'moodle/editor:managefilesuse' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => [
+            'user' => CAP_ALLOW
+        ]
+    ]
 );

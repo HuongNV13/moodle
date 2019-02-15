@@ -215,6 +215,7 @@ $string['deleterolesure'] = '<p>Are you sure that you want to delete role "{$a->
 $string['deletexrole'] = 'Delete {$a} role';
 $string['duplicaterole'] = 'Duplicate role';
 $string['duplicaterolesure'] = '<p>Are you sure that you want to duplicate role "{$a->name} ({$a->shortname})"?</p>';
+$string['editor:managefilesuse'] = 'Use manage files in editor';
 $string['editingrolex'] = 'Editing role \'{$a}\'';
 $string['editrole'] = 'Edit role';
 $string['editxrole'] = 'Edit {$a} role';
