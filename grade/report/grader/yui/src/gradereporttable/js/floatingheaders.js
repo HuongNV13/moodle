@@ -32,7 +32,8 @@ var HEIGHT = 'height',
     WIDTH = 'width',
     OFFSETWIDTH = 'offsetWidth',
     OFFSETHEIGHT = 'offsetHeight',
-    LOGNS = 'moodle-core-grade-report-grader';
+    LOGNS = 'moodle-core-grade-report-grader',
+    BORDERWIDTH = 1;
 
 CSS.FLOATING = 'floating';
 
@@ -410,7 +411,7 @@ FloatingHeaders.prototype = {
      * @return {Array} Containing X and Y.
      */
     _getRelativeXYFromXY: function(x, y) {
-        var parentXY = this.container.getXY();
+        var parentXY = this.graderTable.getXY();
         return [x - parentXY[0], y - parentXY[1]];
     },
 
@@ -466,7 +467,7 @@ FloatingHeaders.prototype = {
     _setupEventHandlers: function() {
         this._eventHandles.push(
             // Listen for window scrolls, resizes, and rotation events.
-            Y.one(Y.config.win).on('scroll', this._handleScrollEvent, this),
+            Y.one(SELECTORS.GRADEPARENT).on('scroll', this._handleScrollEvent, this),
             Y.one(Y.config.win).on('resize', this._handleResizeEvent, this),
             Y.one(Y.config.win).on('orientationchange', this._handleResizeEvent, this),
             Y.Global.on('dock:shown', this._handleResizeEvent, this),
@@ -495,14 +496,7 @@ FloatingHeaders.prototype = {
             var height = node.getComputedStyle(HEIGHT);
             // Nasty hack to account for Internet Explorer
             if (Y.UA.ie !== 0) {
-                var allHeight = node.get('offsetHeight');
-                var marginHeight = parseInt(node.getComputedStyle('marginTop'), 10) +
-                    parseInt(node.getComputedStyle('marginBottom'), 10);
-                var paddingHeight = parseInt(node.getComputedStyle('paddingTop'), 10) +
-                    parseInt(node.getComputedStyle('paddingBottom'), 10);
-                var borderHeight = parseInt(node.getComputedStyle('borderTopWidth'), 10) +
-                    parseInt(node.getComputedStyle('borderBottomWidth'), 10);
-                height = allHeight - marginHeight - paddingHeight - borderHeight;
+                height = node.get('offsetHeight');
             }
             // Create and configure the new container.
             var containerNode = Y.Node.create('<div></div>');
@@ -511,7 +505,7 @@ FloatingHeaders.prototype = {
                     .setAttribute('data-uid', node.ancestor('tr').getData('uid'))
                     .setStyles({
                         height: height,
-                        width:  node.getComputedStyle(WIDTH)
+                        width: node.getComputedStyle(WIDTH)
                     });
 
             // Add the new nodes to our floating table.
@@ -549,7 +543,12 @@ FloatingHeaders.prototype = {
             floatingUserHeaderCell = Y.Node.create('<div></div>'),
             nodepos = this._getRelativeXY(this.headerCell)[0],
             coordinates = this._getRelativeXY(this.headerRow),
-            gradeHeadersOffset = coordinates[0];
+            gradeHeadersOffset = coordinates[0],
+            width = this.firstUserCell.getComputedStyle(WIDTH);
+        // Particular way for Internet Explorer.
+        if (Y.UA.ie !== 0) {
+            width = this.firstUserCell.get(OFFSETWIDTH) + 'px';
+        }
 
         // Append the content and style to the floating cell.
         floatingUserHeaderCell
@@ -557,7 +556,7 @@ FloatingHeaders.prototype = {
             .setAttribute('class', this.headerCell.getAttribute('class'))
             .setStyles({
                 // The header is larger than the user cells, so we take the user cell.
-                width:      this.firstUserCell.getComputedStyle(WIDTH),
+                width:      width,
                 left:       (nodepos - gradeHeadersOffset) + 'px'
             });
 
@@ -601,14 +600,22 @@ FloatingHeaders.prototype = {
             var nodepos = this._getRelativeXY(node)[0];
 
             var newnode = Y.Node.create('<div></div>');
+            var width = node.getComputedStyle(WIDTH),
+                height = node.getComputedStyle(HEIGHT);
+
+            // Particular way for Internet Explorer.
+            if (Y.UA.ie !== 0) {
+                width = node.get(OFFSETWIDTH) + 'px';
+                height = node.get(OFFSETHEIGHT) + 'px';
+            }
             newnode.append(node.getHTML())
                 .setAttribute('class', node.getAttribute('class'))
                 .setData('itemid', node.getData('itemid'))
                 .setStyles({
-                    height:     node.getComputedStyle(HEIGHT),
+                    height:     height,
                     left:       (nodepos - gradeHeadersOffset) + 'px',
                     position:   'absolute',
-                    width:      node.getComputedStyle(WIDTH)
+                    width:      width
                 });
 
             // Sum up total widths - these are used in the container styles.
@@ -664,13 +671,21 @@ FloatingHeaders.prototype = {
         footerCells.each(function(node) {
             var newnode = Y.Node.create('<div></div>');
             var nodepos = this._getRelativeXY(node)[0];
+            var width = node.getComputedStyle(WIDTH),
+                height = node.getComputedStyle(HEIGHT);
+
+            // Particular way for Internet Explorer.
+            if (Y.UA.ie !== 0) {
+                width = node.get(OFFSETWIDTH) + 'px';
+                height = node.get(OFFSETHEIGHT) + 'px';
+            }
             newnode.set('innerHTML', node.getHTML())
                 .setAttribute('class', node.getAttribute('class'))
                 .setStyles({
-                    height:     node.getComputedStyle(HEIGHT),
+                    height:     height,
                     left:       (nodepos - footerRowOffset) + 'px',
                     position:   'absolute',
-                    width:      node.getComputedStyle(WIDTH)
+                    width:      width
                 });
 
             floatingGraderFooter.append(newnode);
@@ -729,15 +744,21 @@ FloatingHeaders.prototype = {
             floatingCell = Y.Node.create('<div></div>'),
             coordinates = this._getRelativeXY(origin),
             width = this.firstUserCell.getComputedStyle(WIDTH),
-            height = origin.get(OFFSETHEIGHT);
+            height = origin.getComputedStyle(HEIGHT);
 
+        // Particular way for Internet Explorer.
+        if (Y.UA.ie !== 0) {
+            width = this.firstUserCell.get(OFFSETWIDTH) + 'px';
+            height = origin.get(OFFSETHEIGHT) + 'px';
+        }
         // Append the content and style to the floating cell.
         floatingCell
             .set('innerHTML', origin.getHTML())
             .setAttribute('class', origin.getAttribute('class'))
             .setStyles({
                 // The header is larger than the user cells, so we take the user cell.
-                width:      width
+                width:      width,
+                height:     height
             });
 
         // Style the floating row.
@@ -776,7 +797,6 @@ FloatingHeaders.prototype = {
             userColumnStyles = {},
             footerStyles = {},
             coord = 0,
-            floatingUserTriggerPoint = 0,       // The X position at which the floating should start.
             floatingUserRelativePoint = 0,      // The point to use when calculating the new position.
             headerFloats = false,
             userFloats = false,
@@ -785,7 +805,13 @@ FloatingHeaders.prototype = {
             floatingHeaderStyles = {},
             floatingFooterTitleStyles = {},
             floatingFooterTitleRow = false,
-            bodyMargin = 0;
+            bodyMargin = 0,
+            tableTopPosition = this._getRelativeYFromY(this.container.getY()),
+            containerWidth = this.container.get('clientWidth'),
+            tableWidth = this.graderTable.get('clientWidth'),
+            containerPadding = this.container.get(OFFSETWIDTH) - this.container.get('clientWidth'),
+            footerTitleWidth = Y.one(SELECTORS.FOOTERTITLE).get('clientWidth'),
+            tableTopRow = Y.one('#user-grades tr:first-child');
 
         if (window.right_to_left()) {
             bodyMargin = parseInt(Y.one(Y.config.doc.body).getComputedStyle('marginRight'), 10);
@@ -799,42 +825,49 @@ FloatingHeaders.prototype = {
         }
 
         // Header position.
-        gradeItemHeadingContainerStyles.left = this._getRelativeXFromX(this.headerRow.getX());
-        if (Y.config.win.pageYOffset + this.pageHeaderHeight > this.headerRowTop) {
+        // Support right-to-left languages.
+        if (window.right_to_left()) {
+            gradeItemHeadingContainerStyles.left = containerWidth - tableWidth - BORDERWIDTH + 'px';
+        } else {
+            gradeItemHeadingContainerStyles.left = BORDERWIDTH + 'px';
+        }
+
+        if (tableTopPosition > this._getRelativeYFromY(this.headerRow.getY())) {
             headerFloats = true;
-            if (Y.config.win.pageYOffset + this.pageHeaderHeight < this.lastUserCellTop) {
-                coord = this._getRelativeYFromY(Y.config.win.pageYOffset + this.pageHeaderHeight);
-                gradeItemHeadingContainerStyles.top = coord + 'px';
-                userColumnHeaderStyles.top = coord + 'px';
-            } else {
-                coord = this._getRelativeYFromY(this.lastUserCellTop);
-                gradeItemHeadingContainerStyles.top = coord + 'px';
-                userColumnHeaderStyles.top = coord + 'px';
-            }
+            coord = tableTopPosition;
+            gradeItemHeadingContainerStyles.top = coord + 'px';
+            userColumnHeaderStyles.top = coord + 'px';
         } else {
             headerFloats = false;
             coord = this._getRelativeYFromY(this.headerRowTop);
             gradeItemHeadingContainerStyles.top = coord + 'px';
-            userColumnHeaderStyles.top = coord + 'px';
+
+            // Particular way for Internet Explorer.
+            if (Y.UA.ie !== 0) {
+                userColumnHeaderStyles.top = this.headerCell.get('offsetTop') - tableTopRow.get('offsetTop');
+            } else {
+                userColumnHeaderStyles.top = tableTopRow.getComputedStyle('height');
+            }
         }
 
         // User column position.
 
+        // Support right-to-left languages.
         if (window.right_to_left()) {
-            floatingUserTriggerPoint = Y.config.win.innerWidth + Y.config.win.pageXOffset - this.dockWidth;
-            floatingUserRelativePoint = floatingUserTriggerPoint - this.firstUserCellWidth - bodyMargin;
-            userFloats = floatingUserTriggerPoint < (this.firstUserCellLeft + this.firstUserCellWidth + bodyMargin);
-            leftTitleFloats = (floatingUserTriggerPoint - this.firstNonUserCellWidth) <
-                              (this.firstNonUserCellLeft + this.firstUserCellWidth);
+            var userCellPoint = containerWidth + containerPadding - this.firstUserCellWidth - BORDERWIDTH;
+            var rightScrolledPoint = tableWidth - this._getRelativeXFromX(this.container.getX() + containerWidth);
+            floatingUserRelativePoint = userCellPoint - rightScrolledPoint;
+            userFloats = this._getRelativeXFromX(this.container.getX()) + this.container.get(OFFSETWIDTH) < tableWidth;
+            leftTitleFloats = this._getRelativeXFromX(this.container.getX()) + this.container.get(OFFSETWIDTH) <
+                (tableWidth + this.firstUserCellWidth - footerTitleWidth);
         } else {
-            floatingUserRelativePoint = Y.config.win.pageXOffset + bodyMargin;
-            floatingUserTriggerPoint = floatingUserRelativePoint + this.dockWidth + bodyMargin;
-            userFloats = floatingUserTriggerPoint > this.firstUserCellLeft + bodyMargin;
-            leftTitleFloats = floatingUserTriggerPoint > (this.firstNonUserCellLeft - this.firstUserCellWidth);
+            floatingUserRelativePoint = this._getRelativeXFromX(this.container.getX());
+            userFloats = floatingUserRelativePoint > 0;
+            leftTitleFloats = footerTitleWidth - this._getRelativeXFromX(this.container.getX()) < this.firstUserCellWidth;
         }
 
         if (userFloats) {
-            coord = this._getRelativeXFromX(floatingUserRelativePoint);
+            coord = floatingUserRelativePoint;
             userColumnStyles.left = coord + 'px';
             userColumnHeaderStyles.left = coord + 'px';
         } else {
@@ -852,24 +885,31 @@ FloatingHeaders.prototype = {
 
         // Update footer.
         if (this.footerRow) {
-            footerStyles.left = this._getRelativeXFromX(this.headerRow.getX());
+            // Support right-to-left languages.
+            if (window.right_to_left()) {
+                footerStyles.left = containerWidth - tableWidth - BORDERWIDTH + 'px';
+            } else {
+                footerStyles.left = BORDERWIDTH + 'px';
+            }
 
             // Determine whether the footer should now be shown as sticky.
-            var pageHeight = Y.config.win.innerHeight,
-                pageOffset = Y.config.win.pageYOffset,
-                bottomScrollPosition = pageHeight - this._getScrollBarHeight() + pageOffset,
-                footerRowHeight = parseInt(this.footerRow.getComputedStyle(HEIGHT), 10),
-                footerBottomPosition = footerRowHeight + this.footerRowPosition;
+            var bottomScrollPosition = this._getRelativeYFromY(this.container.getY()) + this.container.get('clientHeight'),
+                tableHeight = parseInt(this.graderTable.getComputedStyle('height'));
+
+            // Particular way for Internet Explorer.
+            if (Y.UA.ie !== 0) {
+                tableHeight = this.graderTable.get('clientHeight');
+            }
 
             floatingFooterTitleStyles = floatingHeaderStyles[SELECTORS.FOOTERTITLE];
             floatingFooterTitleRow = this.floatingHeaderRow[SELECTORS.FOOTERTITLE];
-            if (bottomScrollPosition < footerBottomPosition && bottomScrollPosition > this.firstUserCellBottom) {
+            if (tableHeight > bottomScrollPosition) {
                 // We have not scrolled below the footer, nor above the first row.
-                footerStyles.bottom = Math.ceil(footerBottomPosition - bottomScrollPosition) + 'px';
+                footerStyles.bottom = Math.floor(-1 * tableTopPosition) + 'px';
                 footerFloats = true;
             } else {
                 // The footer should not float any more.
-                footerStyles.bottom = '1px';
+                footerStyles.bottom = (this.container.get('clientHeight') - tableHeight) + 'px';
                 footerFloats = false;
             }
             if (floatingFooterTitleStyles) {
@@ -958,22 +998,20 @@ FloatingHeaders.prototype = {
         // Resize user cells.
         var userWidth = this.firstUserCell.getComputedStyle(WIDTH);
         var userCells = Y.all(SELECTORS.USERCELL);
+
+        // Particular way for Internet Explorer.
+        if (Y.UA.ie !== 0) {
+            userWidth = this.firstUserCell.get(OFFSETWIDTH) + 'px';
+        }
         this.userColumnHeader.one('.cell').setStyle('width', userWidth);
         this.userColumn.all('.cell').each(function(cell, idx) {
             var height = userCells.item(idx).getComputedStyle(HEIGHT);
             // Nasty hack to account for Internet Explorer
             if (Y.UA.ie !== 0) {
                 var node = userCells.item(idx);
-                var allHeight = node.getDOMNode ?
+                height = node.getDOMNode ?
                     node.getDOMNode().getBoundingClientRect().height :
                     node.get('offsetHeight');
-                var marginHeight = parseInt(node.getComputedStyle('marginTop'), 10) +
-                    parseInt(node.getComputedStyle('marginBottom'), 10);
-                var paddingHeight = parseInt(node.getComputedStyle('paddingTop'), 10) +
-                    parseInt(node.getComputedStyle('paddingBottom'), 10);
-                var borderHeight = parseInt(node.getComputedStyle('borderTopWidth'), 10) +
-                    parseInt(node.getComputedStyle('borderBottomWidth'), 10);
-                height = allHeight - marginHeight - paddingHeight - borderHeight;
             }
             cell.setStyles({
                 width: userWidth,
@@ -989,14 +1027,20 @@ FloatingHeaders.prototype = {
         var headeroffsetleft = this.headerRow.getX();
         var newcontainerwidth = 0;
         resizedcells.each(function(cell, idx) {
-            var headercell = headers.item(idx);
+            var headerCell = headers.item(idx),
+                width = cell.getComputedStyle(WIDTH);
+
+            // Particular way for Internet Explorer.
+            if (Y.UA.ie !== 0) {
+                width = cell.get(OFFSETWIDTH);
+            }
 
             newcontainerwidth += cell.get(OFFSETWIDTH);
             var styles = {
-                width: cell.getComputedStyle(WIDTH),
+                width: width,
                 left: cell.getX() - headeroffsetleft + 'px'
             };
-            headercell.setStyles(styles);
+            headerCell.setStyles(styles);
         });
 
         if (this.footerRow) {
@@ -1005,12 +1049,18 @@ FloatingHeaders.prototype = {
                 var resizedavgcells = Y.all(SELECTORS.FOOTERCELLS);
 
                 resizedavgcells.each(function(cell, idx) {
-                    var footercell = footers.item(idx);
+                    var footerCell = footers.item(idx),
+                        width = cell.getComputedStyle(WIDTH);
+
+                    // Particular way for Internet Explorer.
+                    if (Y.UA.ie !== 0) {
+                        width = cell.get(OFFSETWIDTH);
+                    }
                     var styles = {
-                        width: cell.getComputedStyle(WIDTH),
+                        width: width,
                         left: cell.getX() - headeroffsetleft + 'px'
                     };
-                    footercell.setStyles(styles);
+                    footerCell.setStyles(styles);
                 });
             }
         }

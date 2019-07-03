@@ -1,8 +1,13 @@
+.path-grade-report-grader #region-main {
+    max-width: 100%;
+}
 /**
  * Container.
  */
 .path-grade-report-grader .gradeparent {
     position: relative;
+    overflow-x: scroll;
+    max-height: 80vh;
 }
 
 /**
@@ -58,6 +63,7 @@
  */
 .path-grade-report-grader .gradeparent .floater {
     display: none;
+    border-top: 1px solid #ccc;
 }
 
 .path-grade-report-grader .gradeparent .floating {
@@ -90,6 +96,21 @@
     width: 200px;
     white-space: normal;
     vertical-align: top;
+    border-left: 1px solid #ccc;
+}
+
+.path-grade-report-grader .gradeparent .sideonly.heading .cell.header {
+    border-left: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+}
+
+.path-grade-report-grader .gradeparent .floater.sideonly {
+    border-top: none;
+}
+
+.path-grade-report-grader .gradeparent .floater.avg {
+    border-top: none;
+    border-bottom: 1px solid #ccc;
 }
 
 .path-grade-report-grader .gradeparent .user.cell .userpicture {
@@ -127,6 +148,10 @@
  */
 .path-grade-report-grader .gradeparent .avg.floating .cell {
     border-top-width: 1px;
+}
+
+.path-grade-report-grader .gradeparent .avg.sideonly .cell.header {
+    border-left: 1px solid #ccc;
 }
 
 /**
