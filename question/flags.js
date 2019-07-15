@@ -60,17 +60,31 @@ M.core_question_flags = {
         });
 
         Y.delegate('click', function(e) {
-            var input = this.one('input.questionflagvalue');
-            input.set('value', 1 - input.get('value'));
-            M.core_question_flags.update_flag(input, this.one('input.questionflagimage'),
-                    this.one('span.questionflagtext'));
-            var postdata = this.one('input.questionflagpostdata').get('value') +
-                    input.get('value');
-
-            e.halt();
-            Y.io(M.core_question_flags.actionurl , {method: 'POST', 'data': postdata});
-            M.core_question_flags.fire_listeners(postdata);
+            M.core_question_flags.change_flag(e, this);
         }, document.body, 'div.questionflag');
+
+        // Ensure that we toggle question flag icon when the spacebar is pressed.
+        Y.delegate('key', function(e) {
+            M.core_question_flags.change_flag(e, this);
+        }, 'div.questionflag', 'enter');
+    },
+
+    /**
+     * Change flag state when the input is checked / unchecked.
+     *
+     * @param {Event} e
+     * @param {DOM} element
+     */
+    change_flag: function(e, element) {
+        var input = element.one('input.questionflagvalue');
+        input.set('value', 1 - input.get('value'));
+        M.core_question_flags.update_flag(input, element.one('input.questionflagimage'),
+                element.one('span.questionflagtext'));
+        var postData = element.one('input.questionflagpostdata').get('value') + input.get('value');
+
+        e.halt();
+        Y.io(M.core_question_flags.actionurl, {method: 'POST', 'data': postData});
+        M.core_question_flags.fire_listeners(postData);
     },
 
     update_flag: function(input, image, flagtext) {
