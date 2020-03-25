@@ -41,6 +41,9 @@ form.mform fieldset#id_previewareaheader div.ddarea .markertexts {
 form.mform fieldset#id_previewareaheader .dropbackground {
     margin: 0 auto;
     border: 1px solid black;
+}
+
+form.mform fieldset#id_previewareaheader .dropbackground {
     max-width: none;
 }
 
@@ -71,6 +74,7 @@ form.mform fieldset#id_previewareaheader div.markertexts span.markertext {
     background-color: yellow;
     border: 2px solid khaki;
     position: absolute;
+    white-space: nowrap;
 }
 
 .que.ddmarker span.wrongpart {
@@ -154,6 +158,78 @@ form.mform fieldset#id_previewareaheader div.markertexts span.markertext {
 .que.ddmarker .dropzone.active .handle {
     display: inherit;
 }
+
+/* Start new. */
+.que.ddmarker .droparea {
+    display: inline-block;
+    position: relative;
+    /*transform: scale(0.765);*/
+}
+
+.que.ddmarker .draghomes .marker,
+.que.ddmarker .droparea .marker {
+    vertical-align: top;
+    cursor: move;
+}
+
+.que.ddmarker .droparea .marker {
+    position: absolute;
+}
+
+.que.ddmarker .draghomes .marker {
+    position: relative;
+    display: inline-block;
+    margin: 10px;
+}
+
+.que.ddmarker .draghomes .marker.dragplaceholder {
+    display: none;
+}
+
+.que.ddmarker .draghomes .marker.dragplaceholder.active {
+    visibility: hidden;
+    display: inline-block;
+}
+
+.que.ddmarker .droparea .marker span.markertext,
+.que.ddmarker .draghomes .marker span.markertext {
+    margin: 0 5px;
+    z-index: 3;
+    background-color: white;
+    border: 2px solid black;
+    padding: 5px;
+    display: inline-block;
+    zoom: 1;
+    border-radius: 10px;
+    color: black;
+    opacity: 0.6;
+    white-space: nowrap;
+}
+
+.que.ddmarker .droparea .marker img.target,
+.que.ddmarker .draghomes .marker img.target {
+    position: absolute;
+    top: -7px;
+    left: -7px;
+}
+
+.que.ddmarker .marker.beingdragged {
+    position: absolute;
+}
+
+.que.ddmarker .marker.beingdragged span.markertext {
+    z-index: 3;
+    box-shadow: 3px 3px 4px #000;
+}
+
+.que.ddmarker .droparea .dropzones,
+.que.ddmarker .droparea .markertexts {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* End new. */
 
 /* Editing form. Style repeated elements*/
 /*Top*/

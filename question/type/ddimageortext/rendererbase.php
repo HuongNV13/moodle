@@ -173,7 +173,7 @@ class qtype_ddtoimage_renderer_base extends qtype_with_combined_feedback_rendere
             $value = $qa->get_last_qt_var($varname);
         }
         $fieldname = $qa->get_qt_field_name($varname);
-        $attributes = array('type' => 'hidden',
+        $attributes = array('type' => 'text',
                                 'id' => str_replace(':', '_', $fieldname),
                                 'name' => $fieldname,
                                 'value' => $value);
