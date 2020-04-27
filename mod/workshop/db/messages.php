@@ -15,15 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the version of workshop
+ * Defines message providers for mod_workshop.
  *
  * @package    mod_workshop
- * @copyright  2009 David Mudrak <david.mudrak@gmail.com>
+ * @copyright  2020 Huong Nguyen <huongnv13@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2020042604;        // The current module version (YYYYMMDDXX)
-$plugin->requires  = 2019111200;        // Requires this Moodle version.
-$plugin->component = 'mod_workshop';
+$messageproviders = [
+        // Notification when phase changed.
+        'phasechanged' => []
+];

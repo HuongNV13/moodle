@@ -1929,6 +1929,7 @@ class workshop {
     public function switch_phase($newphase) {
         global $DB;
 
+        $oldphase = $this->phase;
         $known = $this->available_phases_list();
         if (!isset($known[$newphase])) {
             return false;
@@ -1957,6 +1958,9 @@ class workshop {
         );
         $event = \mod_workshop\event\phase_switched::create($eventdata);
         $event->trigger();
+
+        self::send_phase_change_notification($this->id, $this->course->id, $this->cm->id, $oldphase, $newphase);
+
         return true;
     }
 
@@ -3527,6 +3531,104 @@ class workshop {
 
         $DB->set_field('workshop', 'phase', self::PHASE_SETUP, array('id' => $this->id));
         $this->phase = self::PHASE_SETUP;
+    }
+
+    /**
+     * Returns the list of all options to setting notification in the workshop
+     *
+     * @return array List of options.
+     */
+    public static function get_all_notification_options(): array {
+        $roles = get_roles_for_contextlevels(CONTEXT_COURSE);
+        $names = role_get_names();
+
+        $options = [0 => get_string('customnotificationemail', 'workshop')];
+        foreach ($roles as $idx => $roleid) {
+            $options[$roleid] = $names[$roleid]->localname;
+        }
+        asort($options);
+
+        return $options;
+    }
+
+    /**
+     * Return the list of option that have the given capbility.
+     *
+     * @param array $alloptions List of options.
+     * @param string $capability Capability to check.
+     * @return array List of options.
+     */
+    public static function get_notification_options_by_capability($alloptions, $capability): array {
+        global $COURSE;
+
+        $options = [0 => get_string('customnotificationemail', 'workshop')];
+        foreach ($alloptions as $roleid => $option) {
+            if ($roleid) {
+                $rolecap = role_context_capabilities($roleid, context_course::instance($COURSE->id), $capability);
+                if (!empty($rolecap) && $rolecap[$capability] == CAP_ALLOW) {
+                    $options[$roleid] = $option;
+                }
+            }
+        }
+
+        return $options;
+    }
+
+        /**
+     * Returns the list of all phases to setting notification in the workshop
+     *
+     * @return array List of phases
+     */
+    public static function get_notification_phases(): array {
+        return [
+                workshop::PHASE_SETUP,
+                workshop::PHASE_SUBMISSION,
+                workshop::PHASE_ASSESSMENT,
+                workshop::PHASE_EVALUATION,
+                workshop::PHASE_CLOSED
+        ];
+    }
+
+    /**
+     * Get the phase name by given phase code
+     *
+     * @return string Phase name
+     */
+    public static function get_phase_name_by_value($phasecode): string {
+        switch ($phasecode) {
+            case workshop::PHASE_SETUP: return get_string('phasesetup', 'workshop');
+            case workshop::PHASE_SUBMISSION: return get_string('phasesubmission', 'workshop');
+            case workshop::PHASE_ASSESSMENT: return get_string('phaseassessment', 'workshop');
+            case workshop::PHASE_EVALUATION: return get_string('phaseevaluation', 'workshop');
+            case workshop::PHASE_CLOSED: return get_string('phaseclosed', 'workshop');
+        }
+    }
+
+    /**
+     * Add the notification to the ad-hoc task.
+     *
+     * @param int $workshopid Workshop id
+     * @param int $courseid Course id
+     * @param int $cmid Cm id
+     * @param int $oldphase Old phase id
+     * @param int $newphase New phase id
+     */
+    public static function send_phase_change_notification($workshopid, $courseid, $cmid, $oldphase, $newphase): void {
+        $singlephase = false;
+        if ($newphase == workshop::PHASE_SETUP || $newphase == workshop::PHASE_CLOSED) {
+            $singlephase = true;
+        }
+        $task = new \mod_workshop\task\send_notification_task();
+        $task->set_custom_data([
+                'workshopid' => $workshopid,
+                'courseid' => $courseid,
+                'cmid' => $cmid,
+                'singlephase' => $singlephase,
+                'oldphase' => $oldphase,
+                'newphase' => $newphase
+        ]);
+        $task->set_component('mod_workshop');
+        \core\task\manager::queue_adhoc_task($task);
     }
 }
 

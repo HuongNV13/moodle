@@ -248,6 +248,24 @@ class mod_workshop_mod_form extends moodleform_mod {
         $label = get_string('assessmentend', 'workshop');
         $mform->addElement('date_time_selector', 'assessmentend', $label, array('optional' => true));
 
+        // Phase-change notifications.
+        $mform->addElement('header', 'phasechangenotification', get_string('phasechangenotification', 'workshop'));
+        $mform->addHelpButton('phasechangenotification', 'phasechangenotification', 'workshop');
+
+        $this->add_phase_change_notification_options_group($mform, workshop::PHASE_SETUP, get_string('setup', 'workshop'));
+        $this->add_phase_change_notification_options_group($mform, workshop::PHASE_SUBMISSION,
+                get_string('submission', 'workshop'));
+        $this->add_phase_change_notification_options_group($mform, workshop::PHASE_ASSESSMENT,
+                get_string('assessment', 'workshop'));
+        $this->add_phase_change_notification_options_group($mform, workshop::PHASE_EVALUATION,
+                get_string('evaluation', 'workshop'));
+        $this->add_phase_change_notification_options_group($mform, workshop::PHASE_CLOSED, get_string('phaseclosed', 'workshop'));
+
+        $mform->addElement('text', 'customnotificationemail', get_string('customnotificationemail', 'workshop'), ['size' => 64]);
+        $mform->setType('customnotificationemail', PARAM_TEXT);
+        $mform->addRule('customnotificationemail', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
+        $mform->addHelpButton('customnotificationemail', 'customnotificationemail', 'workshop');
+
         $coursecontext = context_course::instance($this->course->id);
         // To be removed (deprecated) with MDL-67526.
         plagiarism_get_form_elements_module($mform, $coursecontext, 'mod_workshop');
@@ -323,6 +341,8 @@ class mod_workshop_mod_form extends moodleform_mod {
             file_prepare_draft_area($draftitemid, null, 'mod_workshop', 'conclusion', 0);    // no context yet, itemid not used
             $data['conclusioneditor'] = array('text' => '', 'format' => editors_get_preferred_format(), 'itemid' => $draftitemid);
         }
+
+        $this->preprocessing_for_notification_options($data);
     }
 
     /**
@@ -468,5 +488,82 @@ class mod_workshop_mod_form extends moodleform_mod {
         }
 
         return $errors;
+    }
+
+    /**
+     * Create options group for phase change notification
+     *
+     * @param object $mform The form
+     * @param int $phaseid Phase's name
+     * @param string $phasetext Phase's translated name
+     * @return void
+     */
+    protected function add_phase_change_notification_options_group($mform, $phaseid, $phasetext): void {
+        $optiongroups = [];
+        $extracapability = '';
+        switch ($phaseid) {
+            case workshop::PHASE_SETUP:
+                $extracapability = 'mod/workshop:editdimensions';
+                $serversettings = get_config('workshop', 'allowrolesforsetupphase');
+                $servervalues = get_config('workshop', 'defaultrolesforsetupphase');
+                break;
+            case workshop::PHASE_SUBMISSION:
+                $serversettings = get_config('workshop', 'allowrolesforsubmissionphase');
+                $servervalues = get_config('workshop', 'defaultrolesforsubmissionphase');
+                break;
+            case workshop::PHASE_ASSESSMENT:
+                $serversettings = get_config('workshop', 'allowrolesforassessmentphase');
+                $servervalues = get_config('workshop', 'defaultrolesforassessmentphase');
+                break;
+            case workshop::PHASE_EVALUATION:
+                $extracapability = 'mod/workshop:overridegrades';
+                $serversettings = get_config('workshop', 'allowrolesforevaluationphase');
+                $servervalues = get_config('workshop', 'defaultrolesforevaluationphase');
+                break;
+            case workshop::PHASE_CLOSED:
+                $serversettings = get_config('workshop', 'allowrolesforclosephase');
+                $servervalues = get_config('workshop', 'defaultrolesforclosephase');
+                break;
+        }
+        $options = workshop::get_all_notification_options();
+        if (!empty($extracapability)) {
+            $options = workshop::get_notification_options_by_capability($options, $extracapability);
+        }
+
+        foreach ($options as $key => $option) {
+            if (is_array($serversettings)) {
+                if (in_array($option, $serversettings)) {
+                    $field = 'notifyto' . $phaseid . $key;
+                    $optiongroups[] = $mform->createElement('checkbox', $field, $option);
+                }
+            } else {
+                $field = 'notifyto' . $phaseid . $key;
+                $optiongroups[] = $mform->createElement('checkbox', $field, $option);
+            }
+
+            if (is_array($servervalues) && in_array($option, $servervalues)) {
+                $mform->setDefault($field, 1);
+            }
+        }
+
+        $mform->addGroup($optiongroups, 'notifyto' . $phaseid, $phasetext, null, false);
+    }
+
+    /**
+     * Prepares the notification options for the form.
+     *
+     * @param array $data to be set
+     * @return void
+     */
+    protected function preprocessing_for_notification_options(&$data): void {
+        global $DB;
+        if (empty($data['id'])) {
+            return;
+        }
+        $notificationoptions = $DB->get_records('workshop_notifications', ['workshopid' => $data['id']]);
+        foreach ($notificationoptions as $option) {
+            $fieldname = 'notifyto' . $option->phase . $option->roleid;
+            $data[$fieldname] = $option->value;
+        }
     }
 }

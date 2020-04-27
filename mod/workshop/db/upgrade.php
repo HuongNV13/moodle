@@ -91,6 +91,47 @@ function xmldb_workshop_upgrade($oldversion) {
 
     // Automatically generated Moodle v3.8.0 release upgrade line.
     // Put any upgrade step following this.
+    if ($oldversion < 2020042600) {
+
+        // Define table workshop_notifications to be created.
+        $table = new xmldb_table('workshop_notifications');
+
+        // Adding fields to table workshop_notifications.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null);
+        $table->add_field('workshopid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, 'id');
+        $table->add_field('phase', XMLDB_TYPE_INTEGER, '3', null, XMLDB_NOTNULL, null, null, 'workshopid');
+        $table->add_field('roleid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, 'phase');
+        $table->add_field('value', XMLDB_TYPE_INTEGER, '1', null, null, null, '0', 'roleid');
+
+        // Adding keys to table workshop_notifications.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('workshop_fk', XMLDB_KEY_FOREIGN, ['workshopid'], 'workshop', ['id']);
+        $table->add_key('role_pk', XMLDB_KEY_FOREIGN, ['roleid'], 'role', ['id']);
+
+        // Conditionally launch create table for workshop_notifications.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Workshop savepoint reached.
+        upgrade_mod_savepoint(true, 2020042600, 'workshop');
+    }
+
+    if ($oldversion < 2020042604) {
+
+        // Define field customnotificationemail to be added to workshop.
+        $table = new xmldb_table('workshop');
+        $field = new xmldb_field('customnotificationemail', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'overallfeedbackmaxbytes');
+
+        // Conditionally launch add field customnotificationemail.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Workshop savepoint reached.
+        upgrade_mod_savepoint(true, 2020042604, 'workshop');
+    }
+
 
     return true;
 }

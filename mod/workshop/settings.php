@@ -59,6 +59,102 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('workshop/examplesmode', get_string('examplesmode', 'workshop'),
                         get_string('configexamplesmode', 'workshop'), workshop::EXAMPLES_VOLUNTARY, $options));
 
+    $settings->add(new admin_setting_heading(
+            'workshop/sectionallowedrole',
+            get_string('allowedrolesforphasenotification', 'workshop'),
+            ''
+    ));
+
+    $options = workshop::get_all_notification_options();
+    // Replace all value to 1 for default value.
+    $defaultoptionss = array_map(function($val) {
+        return 1;
+    }, $options);
+
+    $editdimensionsoptions = workshop::get_notification_options_by_capability($options, 'mod/workshop:editdimensions');
+    $overridegradesoptions = workshop::get_notification_options_by_capability($options, 'mod/workshop:overridegrades');
+
+    $settings->add(new admin_setting_configmulticheckbox('workshop/allowrolesforsetupphase',
+            get_string('setup', 'workshop'),
+            '',
+            array_map(function($val) {
+                return 1;
+            }, $editdimensionsoptions),
+            $editdimensionsoptions
+    ));
+
+    $settings->add(new admin_setting_configmulticheckbox('workshop/allowrolesforsubmissionphase',
+            get_string('submission', 'workshop'),
+            '',
+            $defaultoptionss,
+            $options
+    ));
+
+    $settings->add(new admin_setting_configmulticheckbox('workshop/allowrolesforassessmentphase',
+            get_string('assessment', 'workshop'),
+            '',
+            $defaultoptionss,
+            $options
+    ));
+
+    $settings->add(new admin_setting_configmulticheckbox('workshop/allowrolesforevaluationphase',
+            get_string('evaluation', 'workshop'),
+            '',
+            array_map(function($val) {
+                return 1;
+            }, $overridegradesoptions),
+            $overridegradesoptions
+    ));
+
+    $settings->add(new admin_setting_configmulticheckbox('workshop/allowrolesforclosephase',
+            get_string('phaseclosed', 'workshop'),
+            '',
+            $defaultoptionss,
+            $options
+    ));
+
+    $settings->add(new admin_setting_heading(
+            'workshop/sectiondefaultrole',
+            get_string('defaultrolesforphasenotification', 'workshop'),
+            ''
+    ));
+
+    $settings->add(new admin_setting_configmulticheckbox('workshop/defaultrolesforsetupphase',
+            get_string('setup', 'workshop'),
+            '',
+            [],
+            $editdimensionsoptions
+    ));
+
+    $settings->add(new admin_setting_configmulticheckbox('workshop/defaultrolesforsubmissionphase',
+            get_string('submission', 'workshop'),
+            '',
+            [],
+            $options
+    ));
+
+    $settings->add(new admin_setting_configmulticheckbox('workshop/defaultrolesforassessmentphase',
+            get_string('assessment', 'workshop'),
+            '',
+            [],
+            $options
+    ));
+
+    $settings->add(new admin_setting_configmulticheckbox('workshop/defaultrolesforevaluationphase',
+            get_string('evaluation', 'workshop'),
+            '',
+            [],
+            $overridegradesoptions
+    ));
+
+    $settings->add(new admin_setting_configmulticheckbox('workshop/defaultrolesforclosephase',
+            get_string('phaseclosed', 'workshop'),
+            '',
+            [],
+            $options
+    ));
+
+
     // include the settings of allocation subplugins
     $allocators = core_component::get_plugin_list('workshopallocation');
     foreach ($allocators as $allocator => $path) {

@@ -112,6 +112,9 @@ function workshop_add_instance(stdclass $workshop) {
     // insert the new record so we get the id
     $workshop->id = $DB->insert_record('workshop', $workshop);
 
+    // Process the notification setting.
+    workshop_process_notification_options($workshop);
+
     // we need to use context now, so we need to make sure all needed info is already in db
     $cmid = $workshop->coursemodule;
     $DB->set_field('course_modules', 'instance', $workshop->id, array('id' => $cmid));
@@ -148,6 +151,9 @@ function workshop_add_instance(stdclass $workshop) {
     if (!empty($workshop->completionexpected)) {
         \core_completion\api::update_completion_date_event($cmid, 'workshop', $workshop->id, $workshop->completionexpected);
     }
+
+    workshop::send_phase_change_notification($workshop->id, $workshop->course, $cmid, workshop::PHASE_SETUP,
+            workshop::PHASE_SETUP);
 
     return $workshop->id;
 }
@@ -191,6 +197,9 @@ function workshop_update_instance(stdclass $workshop) {
         $overallfeedbackfiletypes = $filetypesutil->normalize_file_types($workshop->overallfeedbackfiletypes);
         $workshop->overallfeedbackfiletypes = implode(' ', $overallfeedbackfiletypes);
     }
+
+    // Process the notification setting.
+    workshop_process_notification_options($workshop);
 
     // todo - if the grading strategy is being changed, we may want to replace all aggregated peer grades with nulls
 
@@ -2204,4 +2213,34 @@ function mod_workshop_get_path_from_pluginfile(string $filearea, array $args) : 
         'itemid' => 0,
         'filepath' => $filepath,
     ];
+}
+
+/**
+ * Modify the notification options for the form.
+ *
+ * @param object $workshop An object from the form in mod_form.php
+ * @return void
+ */
+function workshop_process_notification_options($workshop): void {
+    global $DB;
+
+    $availableoptions = workshop::get_all_notification_options();
+    foreach (workshop::get_notification_phases() as $phase) {
+        foreach ($availableoptions as $roleid => $option) {
+            $fieldname = 'notifyto' . $phase . $roleid;
+            $record = $DB->get_record('workshop_notifications',
+                    ['workshopid' => $workshop->id, 'roleid' => $roleid, 'phase' => $phase]);
+            if ($record) {
+                $record->value = isset($workshop->$fieldname) ? $workshop->$fieldname : 0;
+                $DB->update_record('workshop_notifications', $record);
+            } else {
+                $obj = new stdClass();
+                $obj->workshopid = $workshop->id;
+                $obj->phase = $phase;
+                $obj->roleid = $roleid;
+                $obj->value = isset($workshop->$fieldname) ? $workshop->$fieldname : 0;
+                $DB->insert_record('workshop_notifications', $obj);
+            }
+        }
+    }
 }
