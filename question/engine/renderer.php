@@ -53,19 +53,20 @@ class core_question_renderer extends plugin_renderer_base {
         if ($showlabel) {
             $alt = '';
             $label = get_string('preview');
-            $attributes = array();
         } else {
             $alt = get_string('preview');
             $label = '';
-            $attributes = array('title' => $alt);
         }
-
+        $question = question_bank::load_question($questionid);
+        $attributes = [
+                'title' => get_string('previewquestioninnewwindow', '', $question->name),
+                'aria-label' => get_string('previewquestioninnewwindow', '', $question->name),
+                'target' => 'questionpreview'
+        ];
         $image = $this->pix_icon('t/preview', $alt, '', array('class' => 'iconsmall'));
         $link = question_preview_url($questionid, null, null, null, null, $context);
-        $action = new popup_action('click', $link, 'questionpreview',
-                question_preview_popup_params());
 
-        return $this->action_link($link, $image . $label, $action, $attributes);
+        return $this->action_link($link, $image . $label, null, $attributes);
     }
 
     /**

@@ -831,14 +831,12 @@ class edit_renderer extends \plugin_renderer_base {
         }
 
         // Build the icon.
-        $strpreviewquestion = get_string('previewquestion', 'quiz');
+        $strpreviewquestion = get_string('previewquestioninnewwindow', '', $question->name);
         $image = $this->pix_icon('t/preview', $strpreviewquestion);
 
-        $action = new \popup_action('click', $url, 'questionpreview',
-                                        question_preview_popup_params());
-
-        return $this->action_link($url, $image . $strpreviewlabel, $action,
-                array('title' => $strpreviewquestion, 'class' => 'preview'));
+        return $this->action_link($url, $image . $strpreviewlabel, null,
+                ['title' => $strpreviewquestion, 'aria-label' => $strpreviewquestion, 'class' => 'preview',
+                        'target' => 'questionpreview']);
     }
 
     /**
