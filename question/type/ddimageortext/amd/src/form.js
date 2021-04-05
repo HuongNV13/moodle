@@ -218,9 +218,9 @@ define(['jquery', 'core/dragdrop'], function($, dragDrop) {
 
                 drop.offset({
                     left: dropBackgroundPosition.left +
-                            parseInt(dragDropToImageForm.form.getFormValue('drops', [dropNo, 'xleft'])),
+                            (parseInt(dragDropToImageForm.form.getFormValue('drops', [dropNo, 'xleft'])) || 0),
                     top: dropBackgroundPosition.top +
-                            parseInt(dragDropToImageForm.form.getFormValue('drops', [dropNo, 'ytop']))
+                            (parseInt(dragDropToImageForm.form.getFormValue('drops', [dropNo, 'ytop'])) || 0)
                 });
 
                 var label = dragDropToImageForm.form.getFormValue('draglabel', [dragNo]);
@@ -233,7 +233,7 @@ define(['jquery', 'core/dragdrop'], function($, dragDrop) {
 
             // Resize them to the same size.
             $('.dropzones .droppreview').css('padding', '0');
-            var numGroups = $('select.draggroup').first().find('option').length;
+            var numGroups = $('.draggroup select').first().find('option').length;
             for (var group = 1; group <= numGroups; group++) {
                 dragDropToImageForm.resizeAllDragsAndDropsInGroup(group);
             }
@@ -420,9 +420,8 @@ define(['jquery', 'core/dragdrop'], function($, dragDrop) {
                 top = Math.round(dropPosition.top - backgroundPosition.top);
 
             // Constrain coordinates to be inside the background.
-            // The -10 here matches the +10 in resizeAllDragsAndDropsInGroup().
-            left = Math.max(0, Math.min(left, backgroundImage.width() - drop.width() - 10));
-            top = Math.max(0, Math.min(top, backgroundImage.height() - drop.height() - 10));
+            left = Math.round(Math.max(0, Math.min(left, backgroundImage.outerWidth() - drop.outerWidth())));
+            top = Math.round(Math.max(0, Math.min(top, backgroundImage.outerHeight() - drop.outerHeight())));
 
             // Update the form.
             dragDropToImageForm.form.setFormValue('drops', [dropNo, 'xleft'], left);

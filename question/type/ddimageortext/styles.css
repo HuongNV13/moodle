@@ -60,6 +60,7 @@ form.mform fieldset#id_previewareaheader .droppreview {
     position: absolute;
     cursor: move;
     z-index: 2;
+    white-space: nowrap;
 }
 
 .que.ddimageortext .dragitems.readonly .drag {
