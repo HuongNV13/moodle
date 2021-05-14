@@ -245,7 +245,7 @@ abstract class question_edit_form extends question_wizard_form {
                              get_string('savechangesandcontinueediting', 'question'));
         if ($this->can_preview()) {
             $previewlink = $PAGE->get_renderer('core_question')->question_preview_link(
-                    $this->question->id, $this->context, true);
+                    $this->question->id, $this->context, true, $this->question->name);
             $buttonarray[] = $mform->createElement('static', 'previewlink', '', $previewlink);
         }
 

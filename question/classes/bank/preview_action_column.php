@@ -59,7 +59,7 @@ class preview_action_column extends action_column_base implements menuable_actio
 
         if (question_has_capability_on($question, 'use')) {
             echo $PAGE->get_renderer('core_question')->question_preview_link(
-                    $question->id, $this->qbank->get_most_specific_context(), false);
+                    $question->id, $this->qbank->get_most_specific_context(), false, $question->name);
         }
     }
 

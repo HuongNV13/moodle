@@ -48,24 +48,30 @@ class core_question_renderer extends plugin_renderer_base {
      *      Must be a course or category context.
      * @param bool $showlabel if true, show the word 'Preview' after the icon.
      *      If false, just show the icon.
+     * @param string $questioname the name of the question to be previewed.
      */
-    public function question_preview_link($questionid, context $context, $showlabel) {
+    public function question_preview_link($questionid, context $context, $showlabel, $questioname = '') {
         if ($showlabel) {
             $alt = '';
             $label = get_string('preview');
-            $attributes = array();
         } else {
             $alt = get_string('preview');
             $label = '';
-            $attributes = array('title' => $alt);
         }
+
+        $linktitle = empty($questioname) ? get_string('previewquestioninnewwindow', 'question') :
+                get_string('previewquestioninnewwindowwithname', 'question', $questioname);
+
+        $attributes = [
+                'title' => $linktitle,
+                'aria-label' => $linktitle,
+                'target' => 'questionpreview'
+        ];
 
         $image = $this->pix_icon('t/preview', $alt, '', array('class' => 'iconsmall'));
         $link = question_preview_url($questionid, null, null, null, null, $context);
-        $action = new popup_action('click', $link, 'questionpreview',
-                question_preview_popup_params());
 
-        return $this->action_link($link, $image . $label, $action, $attributes);
+        return $this->action_link($link, $image . $label, null, $attributes);
     }
 
     /**

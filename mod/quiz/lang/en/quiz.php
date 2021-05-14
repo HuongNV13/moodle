@@ -640,7 +640,6 @@ $string['popupblockerwarning'] = 'This section of the test is in secure mode, th
 $string['popupnotice'] = 'Students will see this quiz in a secure window';
 $string['preprocesserror'] = 'Error occurred during pre-processing!';
 $string['preview'] = 'Preview';
-$string['previewquestion'] = 'Preview question';
 $string['previewquiz'] = 'Preview {$a}';
 $string['previewquiznow'] = 'Preview quiz now';
 $string['previous'] = 'Previous state';
