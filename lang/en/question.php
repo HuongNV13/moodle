@@ -406,6 +406,8 @@ The penalty is a proportion of the total question grade, so if the question is w
 
 For some multi-part questions this scoring logic is applied separately to each part of the question. The details depend on the question type and can be complicated, but the principle is to give students credit for the knowledge they have demonstrated as fairly as possible.';
 $string['previewquestion'] = 'Preview question: {$a}';
+$string['previewquestioninnewwindow'] = 'Preview this question in a new window';
+$string['previewquestioninnewwindowwithname'] = 'Preview {$a} in a new window';
 $string['privacy:metadata:database:question'] = 'The details about a specific question.';
 $string['privacy:metadata:database:question:createdby'] = 'The person who created the question.';
 $string['privacy:metadata:database:question:generalfeedback'] = 'The general feedback for this question.';

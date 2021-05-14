@@ -339,7 +339,7 @@ class question_dataset_dependent_items_form extends question_wizard_form {
                     'submit', 'savechanges', get_string('savechanges'));
 
             $previewlink = $PAGE->get_renderer('core_question')->question_preview_link(
-                        $this->question->id, $this->categorycontext, true);
+                        $this->question->id, $this->categorycontext, true, $this->question->name);
             $buttonarray[] = $mform->createElement('static', 'previewlink', '', $previewlink);
 
             $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
