@@ -64,8 +64,9 @@ class cm_completion_details {
      * @param bool $returndetails Whether to return completion details or not.
      */
     public function __construct(completion_info $completioninfo, cm_info $cminfo, int $userid, bool $returndetails = true) {
+        $getwholecourse = empty($completioninfo->is_cache_valid($cminfo, $userid));
         $this->completioninfo = $completioninfo;
-        $this->completiondata = $completioninfo->get_data($cminfo, false, $userid);
+        $this->completiondata = $completioninfo->get_data($cminfo, $getwholecourse, $userid);
         $this->cminfo = $cminfo;
         $this->userid = $userid;
         $this->returndetails = $returndetails;

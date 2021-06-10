@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace mod_assign\cache;
 
+use cache;
 use cache_definition;
 
 /**
@@ -66,6 +67,21 @@ class overrides implements \cache_data_source {
 
         [$assignid, $ug, $ugid] = explode('_', $key);
         $assignid = (int) $assignid;
+        //$override = null;
+        //
+        //if ($ug == 'u') {
+        //    $userid = (int) $ugid;
+        //    $datas = $DB->get_records('assign_overrides', ['userid' => $userid], '', 'id, sortorder, duedate, cutoffdate, allowsubmissionsfromdate, userid');
+        //    $override = $this->rebuild_cache($datas, $key, $ug);
+        //} else if ($ug == 'g') {
+        //    $groupid = (int) $ugid;
+        //    $datas = $DB->get_records('assign_overrides', ['groupid' => $groupid], '', 'id, sortorder, duedate, cutoffdate, allowsubmissionsfromdate, groupid');
+        //    $override = $this->rebuild_cache($datas, $key, $ug);
+        //} else {
+        //    throw new \coding_exception('Invalid cache key');
+        //}
+        //
+        //return $override ?: null;
 
         switch ($ug) {
             case 'u':
@@ -106,5 +122,25 @@ class overrides implements \cache_data_source {
         }
 
         return $results;
+    }
+
+    private function rebuild_cache(array $datas, $currentkey, $type) {
+        $cache = cache::make('mod_assign', 'overrides');
+        $returncache = null;
+        foreach ($datas as $data) {
+            if ($type == 'u') {
+                $cachekey = $data->id . '_u_' . $data->userid;
+            } else if ($type == 'g') {
+                $cachekey = $data->id . '_g_' . $data->groupid;
+            } else {
+                throw new \coding_exception('Invalid cache key');
+            }
+            $cache->set($cachekey, $data);
+            if ($cachekey == $currentkey) {
+                $returncache = $data;
+            }
+        }
+
+        return $returncache;
     }
 }

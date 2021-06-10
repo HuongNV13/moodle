@@ -989,6 +989,23 @@ class completion_info {
         }
     }
 
+    public function is_cache_valid(cm_info $cm, int $userid): array {
+        $cacheddata = [];
+        $completioncache = cache::make('core', 'completion');
+
+        $key = $userid . '_' . $this->course->id;
+        if (!isset($this->course->cacherev)) {
+            $this->course = get_course($this->course_id);
+        }
+        if ($data = $completioncache->get($key)) {
+            if (isset($data[$cm->id]) && $data['cacherev'] == $this->course->cacherev) {
+                $cacheddata = $data[$cm->id];
+            }
+        }
+
+        return $cacheddata;
+    }
+
     /**
      * Obtains completion data for a particular activity and user (from the
      * completion cache if available, or by SQL query)
@@ -1009,7 +1026,7 @@ class completion_info {
     public function get_data($cm, $wholecourse = false, $userid = 0, $modinfo = null) {
         global $USER, $DB;
         $completioncache = cache::make('core', 'completion');
-
+        $key = $userid . '_' . $this->course->id;
         // Get user ID
         if (!$userid) {
             $userid = $USER->id;
@@ -1017,20 +1034,9 @@ class completion_info {
 
         // See if requested data is present in cache (use cache for current user only).
         $usecache = $userid == $USER->id;
-        $cacheddata = array();
-        if ($usecache) {
-            $key = $userid . '_' . $this->course->id;
-            if (!isset($this->course->cacherev)) {
-                $this->course = get_course($this->course_id);
-            }
-            if ($cacheddata = $completioncache->get($key)) {
-                if ($cacheddata['cacherev'] != $this->course->cacherev) {
-                    // Course structure has been changed since the last caching, forget the cache.
-                    $cacheddata = array();
-                } else if (isset($cacheddata[$cm->id])) {
-                    return (object)$cacheddata[$cm->id];
-                }
-            }
+        $cacheddata = $this->is_cache_valid($cm, $userid);
+        if (!empty($cacheddata)) {
+            return (object) $cacheddata;
         }
 
         // Some call completion_info::get_data and pass $cm as an object with ID only. Make sure course is set as well.
