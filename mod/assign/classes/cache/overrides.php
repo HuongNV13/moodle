@@ -67,45 +67,45 @@ class overrides implements \cache_data_source {
 
         [$assignid, $ug, $ugid] = explode('_', $key);
         $assignid = (int) $assignid;
-        //$override = null;
-        //
-        //if ($ug == 'u') {
-        //    $userid = (int) $ugid;
-        //    $datas = $DB->get_records('assign_overrides', ['userid' => $userid], '', 'id, sortorder, duedate, cutoffdate, allowsubmissionsfromdate, userid');
-        //    $override = $this->rebuild_cache($datas, $key, $ug);
-        //} else if ($ug == 'g') {
-        //    $groupid = (int) $ugid;
-        //    $datas = $DB->get_records('assign_overrides', ['groupid' => $groupid], '', 'id, sortorder, duedate, cutoffdate, allowsubmissionsfromdate, groupid');
-        //    $override = $this->rebuild_cache($datas, $key, $ug);
-        //} else {
-        //    throw new \coding_exception('Invalid cache key');
-        //}
-        //
-        //return $override ?: null;
+        $override = null;
 
-        switch ($ug) {
-            case 'u':
-                $userid = (int) $ugid;
-                $override = $DB->get_record(
-                    'assign_overrides',
-                    ['assignid' => $assignid, 'userid' => $userid],
-                    'duedate, cutoffdate, allowsubmissionsfromdate'
-                );
-                break;
-            case 'g':
-                $groupid = (int) $ugid;
-                $override = $DB->get_record(
-                    'assign_overrides',
-                    ['assignid' => $assignid, 'groupid' => $groupid],
-                    'sortorder, duedate, cutoffdate, allowsubmissionsfromdate'
-                );
-                break;
-            default:
-                throw new \coding_exception('Invalid cache key');
+        if ($ug == 'u') {
+            $userid = (int) $ugid;
+            $datas = $DB->get_records('assign_overrides', ['userid' => $userid], '', 'id, sortorder, duedate, cutoffdate, allowsubmissionsfromdate, userid');
+            $override = $this->rebuild_cache($datas, $key, $ug);
+        } else if ($ug == 'g') {
+            $groupid = (int) $ugid;
+            $datas = $DB->get_records('assign_overrides', ['groupid' => $groupid], '', 'id, sortorder, duedate, cutoffdate, allowsubmissionsfromdate, groupid');
+            $override = $this->rebuild_cache($datas, $key, $ug);
+        } else {
+            throw new \coding_exception('Invalid cache key');
         }
 
-        // Return null instead of false, because false will not be cached.
         return $override ?: null;
+
+        //switch ($ug) {
+        //    case 'u':
+        //        $userid = (int) $ugid;
+        //        $override = $DB->get_record(
+        //            'assign_overrides',
+        //            ['assignid' => $assignid, 'userid' => $userid],
+        //            'duedate, cutoffdate, allowsubmissionsfromdate'
+        //        );
+        //        break;
+        //    case 'g':
+        //        $groupid = (int) $ugid;
+        //        $override = $DB->get_record(
+        //            'assign_overrides',
+        //            ['assignid' => $assignid, 'groupid' => $groupid],
+        //            'sortorder, duedate, cutoffdate, allowsubmissionsfromdate'
+        //        );
+        //        break;
+        //    default:
+        //        throw new \coding_exception('Invalid cache key');
+        //}
+        //
+        //// Return null instead of false, because false will not be cached.
+        //return $override ?: null;
     }
 
     /**
