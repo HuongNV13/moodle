@@ -536,7 +536,7 @@ class badgeslib_test extends advanced_testcase {
         $this->assertTrue(isset($activities[$this->module->cmid]));
         $this->assertEquals($activities[$this->module->cmid]->name, $this->module->name);
 
-        $current = $c->get_data($activities[$this->module->cmid], false, $this->user->id);
+        $current = $c->get_completion_data($activities[$this->module->cmid], $this->user->id);
         $current->completionstate = COMPLETION_COMPLETE;
         $current->timemodified = time();
         $sink = $this->redirectEmails();

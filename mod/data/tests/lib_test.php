@@ -78,7 +78,7 @@ class mod_data_lib_testcase extends advanced_testcase {
 
         $cm = get_coursemodule_from_instance('data', $module->id, $course->id);
         $completion = new completion_info($course);
-        $completiondata = $completion->get_data($cm, true, 0);
+        $completiondata = $completion->get_completion_data($cm, 0);
         /* Confirm it is not complete as there are no entries */
         $this->assertNotEquals(1, $completiondata->completionstate);
 
@@ -103,7 +103,7 @@ class mod_data_lib_testcase extends advanced_testcase {
 
         $cm = get_coursemodule_from_instance('data', $module->id, $course->id);
         $completion = new completion_info($course);
-        $completiondata = $completion->get_data($cm);
+        $completiondata = $completion->get_completion_data($cm);
         /* Confirm it is complete because it has 1 entry */
         $this->assertEquals(1, $completiondata->completionstate);
     }
@@ -972,7 +972,7 @@ class mod_data_lib_testcase extends advanced_testcase {
 
         // Check completion status.
         $completion = new completion_info($course);
-        $completiondata = $completion->get_data($cm);
+        $completiondata = $completion->get_completion_data($cm);
         $this->assertEquals(1, $completiondata->completionstate);
     }
 

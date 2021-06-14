@@ -66,10 +66,10 @@ class mod_glossary_lib_testcase extends advanced_testcase {
         $this->setUser($u1);
 
         // Confirm what we've set up.
-        $this->assertEquals(COMPLETION_NOT_VIEWED, $completion->get_data($cm1, false, $u1->id)->viewed);
-        $this->assertEquals(COMPLETION_INCOMPLETE, $completion->get_data($cm1, false, $u1->id)->completionstate);
-        $this->assertEquals(COMPLETION_NOT_VIEWED, $completion->get_data($cm2, false, $u1->id)->viewed);
-        $this->assertEquals(COMPLETION_INCOMPLETE, $completion->get_data($cm2, false, $u1->id)->completionstate);
+        $this->assertEquals(COMPLETION_NOT_VIEWED, $completion->get_completion_data($cm1, $u1->id)->viewed);
+        $this->assertEquals(COMPLETION_INCOMPLETE, $completion->get_completion_data($cm1, $u1->id)->completionstate);
+        $this->assertEquals(COMPLETION_NOT_VIEWED, $completion->get_completion_data($cm2, $u1->id)->viewed);
+        $this->assertEquals(COMPLETION_INCOMPLETE, $completion->get_completion_data($cm2, $u1->id)->completionstate);
 
         // Simulate the view call.
         $sink = $this->redirectEvents();
@@ -83,10 +83,10 @@ class mod_glossary_lib_testcase extends advanced_testcase {
         $this->assertEquals('\mod_glossary\event\course_module_viewed', $events[2]->eventname);
         $this->assertEquals($g1->id, $events[2]->objectid);
         $this->assertEquals('letter', $events[2]->other['mode']);
-        $this->assertEquals(COMPLETION_VIEWED, $completion->get_data($cm1, false, $u1->id)->viewed);
-        $this->assertEquals(COMPLETION_COMPLETE, $completion->get_data($cm1, false, $u1->id)->completionstate);
-        $this->assertEquals(COMPLETION_NOT_VIEWED, $completion->get_data($cm2, false, $u1->id)->viewed);
-        $this->assertEquals(COMPLETION_INCOMPLETE, $completion->get_data($cm2, false, $u1->id)->completionstate);
+        $this->assertEquals(COMPLETION_VIEWED, $completion->get_completion_data($cm1, $u1->id)->viewed);
+        $this->assertEquals(COMPLETION_COMPLETE, $completion->get_completion_data($cm1, $u1->id)->completionstate);
+        $this->assertEquals(COMPLETION_NOT_VIEWED, $completion->get_completion_data($cm2, $u1->id)->viewed);
+        $this->assertEquals(COMPLETION_INCOMPLETE, $completion->get_completion_data($cm2, $u1->id)->completionstate);
 
         // Tear down.
         $sink->close();

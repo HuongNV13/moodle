@@ -470,7 +470,7 @@ class core_course_renderer extends plugin_renderer_base {
                     $completionicon = 'auto-enabled'; break;
             }
         } else {
-            $completiondata = $completioninfo->get_data($mod, true);
+            $completiondata = $completioninfo->get_completion_data($mod);
             if ($completion == COMPLETION_TRACKING_MANUAL) {
                 switch($completiondata->completionstate) {
                     case COMPLETION_INCOMPLETE:

@@ -103,7 +103,7 @@ class mod_imscp_lib_testcase extends advanced_testcase {
 
         // Check completion status.
         $completion = new completion_info($course);
-        $completiondata = $completion->get_data($cm);
+        $completiondata = $completion->get_completion_data($cm);
         $this->assertEquals(1, $completiondata->completionstate);
     }
 

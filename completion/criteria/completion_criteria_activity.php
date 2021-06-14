@@ -153,7 +153,7 @@ class completion_criteria_activity extends completion_criteria {
         $cm = $DB->get_record('course_modules', array('id' => $this->moduleinstance));
         $info = new completion_info($course);
 
-        $data = $info->get_data($cm, false, $completion->userid);
+        $data = $info->get_completion_data($cm, $completion->userid);
 
         // If the activity is complete
         if (in_array($data->completionstate, array(COMPLETION_COMPLETE, COMPLETION_COMPLETE_PASS, COMPLETION_COMPLETE_FAIL))) {

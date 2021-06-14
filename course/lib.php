@@ -4561,7 +4561,7 @@ function course_check_module_updates_since($cm, $from, $fileareas = array(), $fi
         $updates->completion = (object) array('updated' => false);
         $completion = new completion_info($course);
         // Use wholecourse to cache all the modules the first time.
-        $completiondata = $completion->get_data($cm, true);
+        $completiondata = $completion->get_completion_data($cm);
         if ($updates->completion->updated = !empty($completiondata->timemodified) && $completiondata->timemodified > $from) {
             $updates->completion->timemodified = $completiondata->timemodified;
         }

@@ -144,8 +144,7 @@ class condition extends \core_availability\condition {
             $allow = false;
         } else {
             // The completion system caches its own data so no caching needed here.
-            $completiondata = $completion->get_data((object)['id' => $cmid],
-                    $grabthelot, $userid, $modinfo);
+            $completiondata = $completion->get_completion_data((object) ['id' => $cmid], $userid);
 
             $allow = true;
             if ($this->expectedcompletion == COMPLETION_COMPLETE) {

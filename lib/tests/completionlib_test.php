@@ -129,7 +129,7 @@ class core_completionlib_testcase extends advanced_testcase {
         $this->mock_setup();
 
         $mockbuilder = $this->getMockBuilder('completion_info');
-        $mockbuilder->onlyMethods(array('is_enabled', 'get_data', 'internal_get_state', 'internal_set_data',
+        $mockbuilder->onlyMethods(array('is_enabled', 'get_comletion_data', 'internal_get_state', 'internal_set_data',
                                        'user_can_override_completion'));
         $mockbuilder->setConstructorArgs(array((object)array('id' => 42)));
         $cm = (object)array('id' => 13, 'course' => 42);
@@ -151,7 +151,7 @@ class core_completionlib_testcase extends advanced_testcase {
             ->with($cm)
             ->will($this->returnValue(true));
         $c->expects($this->once())
-            ->method('get_data')
+            ->method('get_comletion_data')
             ->will($this->returnValue($current));
         $c->update_state($cm, COMPLETION_COMPLETE);
 
@@ -164,7 +164,7 @@ class core_completionlib_testcase extends advanced_testcase {
             ->with($cm)
             ->will($this->returnValue(true));
         $c->expects($this->once())
-            ->method('get_data')
+            ->method('get_comletion_data')
             ->will($this->returnValue($current));
         $c->update_state($cm, COMPLETION_COMPLETE);
 
@@ -177,7 +177,7 @@ class core_completionlib_testcase extends advanced_testcase {
             ->with($cm)
             ->will($this->returnValue(true));
         $c->expects($this->once())
-            ->method('get_data')
+            ->method('get_comletion_data')
             ->will($this->returnValue($current));
         $c->update_state($cm, COMPLETION_COMPLETE);
 
@@ -188,7 +188,7 @@ class core_completionlib_testcase extends advanced_testcase {
             ->with($cm)
             ->will($this->returnValue(true));
         $c->expects($this->once())
-            ->method('get_data')
+            ->method('get_comletion_data')
             ->will($this->returnValue($current));
         $changed = clone($current);
         $changed->timemodified = time();
@@ -209,7 +209,7 @@ class core_completionlib_testcase extends advanced_testcase {
             ->with($cm)
             ->will($this->returnValue(true));
         $c->expects($this->once())
-            ->method('get_data')
+            ->method('get_comletion_data')
             ->will($this->returnValue($current));
         $c->expects($this->once())
             ->method('internal_get_state')
@@ -237,8 +237,8 @@ class core_completionlib_testcase extends advanced_testcase {
             ->method('user_can_override_completion')
             ->will($this->returnValue(true));
         $c->expects($this->exactly(2))
-            ->method('get_data')
-            ->with($cm, false, 100)
+            ->method('get_comletion_data')
+            ->with($cm, 100)
             ->willReturnOnConsecutiveCalls($current1, $current2);
         $changed1 = clone($current1);
         $changed1->timemodified = time();
@@ -274,8 +274,8 @@ class core_completionlib_testcase extends advanced_testcase {
             ->method('user_can_override_completion')
             ->will($this->returnValue(true));
         $c->expects($this->once())
-            ->method('get_data')
-            ->with($cm, false, 100)
+            ->method('get_comletion_data')
+            ->with($cm, 100)
             ->will($this->returnValue($current));
         $changed = clone($current);
         $changed->timemodified = time();
@@ -300,8 +300,8 @@ class core_completionlib_testcase extends advanced_testcase {
             ->method('user_can_override_completion')
             ->will($this->returnValue(true));
         $c->expects($this->once())
-            ->method('get_data')
-            ->with($cm, false, 100)
+            ->method('get_comletion_data')
+            ->with($cm, 100)
             ->will($this->returnValue($current));
         $changed = clone($current);
         $changed->timemodified = time();
@@ -449,7 +449,7 @@ class core_completionlib_testcase extends advanced_testcase {
         $this->mock_setup();
 
         $mockbuilder = $this->getMockBuilder('completion_info');
-        $mockbuilder->onlyMethods(array('is_enabled', 'get_data', 'internal_set_data', 'update_state'));
+        $mockbuilder->onlyMethods(array('is_enabled', 'get_comletion_data', 'internal_set_data', 'update_state'));
         $mockbuilder->setConstructorArgs(array((object)array('id' => 42)));
         $cm = (object)array('id' => 13, 'course' => 42);
 
@@ -475,7 +475,7 @@ class core_completionlib_testcase extends advanced_testcase {
             ->with($cm)
             ->will($this->returnValue(true));
         $c->expects($this->once())
-            ->method('get_data')
+            ->method('get_comletion_data')
             ->with($cm, 0)
             ->will($this->returnValue((object)array('viewed' => COMPLETION_VIEWED)));
         $c->set_module_viewed($cm);
@@ -488,8 +488,8 @@ class core_completionlib_testcase extends advanced_testcase {
             ->with($cm)
             ->will($this->returnValue(true));
         $c->expects($this->once())
-            ->method('get_data')
-            ->with($cm, false, 1337)
+            ->method('get_comletion_data')
+            ->with($cm, 1337)
             ->will($this->returnValue((object)array('viewed' => COMPLETION_NOT_VIEWED)));
         $c->expects($this->once())
             ->method('internal_set_data')
@@ -651,7 +651,7 @@ class core_completionlib_testcase extends advanced_testcase {
         // Mock other completion data.
         $completioninfo = new completion_info($this->course);
 
-        $result = $completioninfo->get_data($cm, $wholecourse, $user->id);
+        $result = $completioninfo->get_completion_data($cm, $user->id);
 
         // Course module ID of the returned completion data must match this activity's course module ID.
         $this->assertEquals($cm->id, $result->coursemoduleid);
@@ -675,14 +675,10 @@ class core_completionlib_testcase extends advanced_testcase {
             // Check cached data for other course modules in the course.
             // The sample module created in setup_data() should suffice to confirm this.
             $othercm = get_coursemodule_from_instance('forum', $this->module1->id);
-            if ($wholecourse) {
-                $this->assertArrayHasKey($othercm->id, $cache->get($key));
-            } else {
-                $this->assertArrayNotHasKey($othercm->id, $cache->get($key));
-            }
+            $this->assertArrayHasKey($othercm->id, $cache->get($key));
         } else {
             // Otherwise, this should not be cached.
-            $this->assertFalse($cache->get($key));
+            $this->assertFalse($cache->has($key));
         }
 
         // Check that we are including relevant completion data for the module.
@@ -789,8 +785,11 @@ class core_completionlib_testcase extends advanced_testcase {
         $this->assertEquals($d1, $data->id);
         $cache = cache::make('core', 'completion');
         // Cache was not set for another user.
-        $this->assertEquals(array('cacherev' => $this->course->cacherev, $cm->id => $data),
-            $cache->get($data->userid . '_' . $cm->course));
+        $cachevalue = $cache->get($data->userid . '_' . $cm->course);
+        $this->assertArrayHasKey('cacherev', $cachevalue);
+        $this->assertArrayHasKey($cm->id, $cachevalue);
+        $this->assertEquals($this->course->cacherev, $cachevalue['cacherev']);
+        $this->assertEquals($data, (object) $cachevalue[$cm->id]);
 
         // 2) Test with existing data and for different user.
         $forum2 = $this->getDataGenerator()->create_module('forum', array('course' => $this->course->id), $completionauto);
@@ -808,9 +807,7 @@ class core_completionlib_testcase extends advanced_testcase {
         $c->internal_set_data($cm2, $d2);
         // Cache for current user returns the data.
         $cachevalue = $cache->get($data->userid . '_' . $cm->course);
-        $this->assertEquals($data, $cachevalue[$cm->id]);
-        // Cache for another user is not filled.
-        $this->assertEquals(false, $cache->get($d2->userid . '_' . $cm2->course));
+        $this->assertEquals($data, (object) $cachevalue[$cm->id]);
 
         // 3) Test where it THINKS the data is new (from cache) but actually in the database it has been set since.
         $forum3 = $this->getDataGenerator()->create_module('forum', array('course' => $this->course->id), $completionauto);
@@ -1147,7 +1144,7 @@ class core_completionlib_testcase extends advanced_testcase {
         $this->assertTrue(isset($activities[$forum->cmid]));
         $this->assertEquals($activities[$forum->cmid]->name, $forum->name);
 
-        $current = $c->get_data($activities[$forum->cmid], false, $this->user->id);
+        $current = $c->get_completion_data($activities[$forum->cmid], $this->user->id);
         $current->completionstate = COMPLETION_COMPLETE;
         $current->timemodified = time();
         $sink = $this->redirectEvents();

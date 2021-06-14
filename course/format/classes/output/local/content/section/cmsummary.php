@@ -114,7 +114,7 @@ class cmsummary implements renderable, templatable {
                 }
                 if ($cancomplete && $completioninfo->is_enabled($thismod) != COMPLETION_TRACKING_NONE) {
                     $total++;
-                    $completiondata = $completioninfo->get_data($thismod, true);
+                    $completiondata = $completioninfo->get_completion_data($thismod);
                     if ($completiondata->completionstate == COMPLETION_COMPLETE ||
                             $completiondata->completionstate == COMPLETION_COMPLETE_PASS) {
                         $complete++;

@@ -3806,7 +3806,7 @@ Anchor link 2:<a title=\"bananas\" href=\"../logo-240x60.gif\">Link text</a>
 
         // Check that completion is not met yet.
         $completion = new completion_info($course);
-        $completiondata = $completion->get_data($cm, false, $student->id);
+        $completiondata = $completion->get_completion_data($cm, $student->id);
         $this->assertEquals(0, $completiondata->completionstate);
 
         // Update to mark as complete.
@@ -3815,7 +3815,7 @@ Anchor link 2:<a title=\"bananas\" href=\"../logo-240x60.gif\">Link text</a>
             $student->id, COMPLETION_COMPLETE, $completion);
 
         // Completion should now be met.
-        $completiondata = $completion->get_data($cm, false, $student->id);
+        $completiondata = $completion->get_completion_data($cm, $student->id);
         $this->assertEquals(1, $completiondata->completionstate);
     }
 
@@ -3850,10 +3850,10 @@ Anchor link 2:<a title=\"bananas\" href=\"../logo-240x60.gif\">Link text</a>
         $completion = new completion_info($course);
 
         // Check that completion is not met yet.
-        $completiondata = $completion->get_data($cm, false, $student->id);
+        $completiondata = $completion->get_completion_data($cm, $student->id);
         $this->assertEquals(0, $completiondata->completionstate);
 
-        $completiondata = $completion->get_data($cm, false, $otherstudent->id);
+        $completiondata = $completion->get_completion_data($cm, $otherstudent->id);
         $this->assertEquals(0, $completiondata->completionstate);
 
         $submission = $assign->get_user_submission($student->id, true);
@@ -3863,10 +3863,10 @@ Anchor link 2:<a title=\"bananas\" href=\"../logo-240x60.gif\">Link text</a>
         $assign->testable_update_activity_completion_records(1, 0, $submission, $student->id, COMPLETION_COMPLETE, $completion);
 
         // Completion should now be met.
-        $completiondata = $completion->get_data($cm, false, $student->id);
+        $completiondata = $completion->get_completion_data($cm, $student->id);
         $this->assertEquals(1, $completiondata->completionstate);
 
-        $completiondata = $completion->get_data($cm, false, $otherstudent->id);
+        $completiondata = $completion->get_completion_data($cm, $otherstudent->id);
         $this->assertEquals(1, $completiondata->completionstate);
     }
 
@@ -3902,10 +3902,10 @@ Anchor link 2:<a title=\"bananas\" href=\"../logo-240x60.gif\">Link text</a>
         $completion = new completion_info($course);
 
         // Completion should now be met.
-        $completiondata = $completion->get_data($cm, false, $student->id);
+        $completiondata = $completion->get_completion_data($cm, $student->id);
         $this->assertEquals(1, $completiondata->completionstate);
 
-        $completiondata = $completion->get_data($cm, false, $otherstudent->id);
+        $completiondata = $completion->get_completion_data($cm, $otherstudent->id);
         $this->assertEquals(1, $completiondata->completionstate);
     }
 

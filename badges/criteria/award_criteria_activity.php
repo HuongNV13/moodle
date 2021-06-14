@@ -201,7 +201,7 @@ class award_criteria_activity extends award_criteria {
             $cm = new stdClass();
             $cm->id = $param['module'];
 
-            $data = $info->get_data($cm, false, $userid);
+            $data = $info->get_completion_data($cm, $userid);
             $check_date = true;
 
             if (isset($param['bydate'])) {

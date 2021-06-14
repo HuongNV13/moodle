@@ -72,7 +72,7 @@ class core_completion_externallib_testcase extends externallib_advanced_testcase
 
         // Check using the API.
         $completion = new completion_info($course);
-        $completiondata = $completion->get_data($cm);
+        $completiondata = $completion->get_completion_data($cm);
         $this->assertEquals(1, $completiondata->completionstate);
         $this->assertTrue($result['status']);
 
@@ -83,7 +83,7 @@ class core_completion_externallib_testcase extends externallib_advanced_testcase
 
         $this->assertEquals(0, $DB->get_field('course_modules_completion', 'completionstate',
                             array('coursemoduleid' => $data->cmid)));
-        $completiondata = $completion->get_data($cm);
+        $completiondata = $completion->get_completion_data($cm);
         $this->assertEquals(0, $completiondata->completionstate);
         $this->assertTrue($result['status']);
     }
@@ -315,28 +315,28 @@ class core_completion_externallib_testcase extends externallib_advanced_testcase
         $result = core_completion_external::override_activity_completion_status($student->id, $data->cmid, COMPLETION_INCOMPLETE);
         $result = external_api::clean_returnvalue(core_completion_external::override_activity_completion_status_returns(), $result);
         $this->assertEquals($result['state'], COMPLETION_INCOMPLETE);
-        $completiondata = $completion->get_data($cmdata, false, $student->id);
+        $completiondata = $completion->get_completion_data($cmdata, $student->id);
         $this->assertEquals(COMPLETION_INCOMPLETE, $completiondata->completionstate);
 
         // Test overriding the status of the manual-completion-activity back to 'complete'.
         $result = core_completion_external::override_activity_completion_status($student->id, $data->cmid, COMPLETION_COMPLETE);
         $result = external_api::clean_returnvalue(core_completion_external::override_activity_completion_status_returns(), $result);
         $this->assertEquals($result['state'], COMPLETION_COMPLETE);
-        $completiondata = $completion->get_data($cmdata, false, $student->id);
+        $completiondata = $completion->get_completion_data($cmdata, $student->id);
         $this->assertEquals(COMPLETION_COMPLETE, $completiondata->completionstate);
 
         // Test overriding the status of the auto-completion-activity to 'complete'.
         $result = core_completion_external::override_activity_completion_status($student->id, $forum->cmid, COMPLETION_COMPLETE);
         $result = external_api::clean_returnvalue(core_completion_external::override_activity_completion_status_returns(), $result);
         $this->assertEquals($result['state'], COMPLETION_COMPLETE);
-        $completionforum = $completion->get_data($cmforum, false, $student->id);
+        $completionforum = $completion->get_completion_data($cmforum, $student->id);
         $this->assertEquals(COMPLETION_COMPLETE, $completionforum->completionstate);
 
         // Test overriding the status of the auto-completion-activity to 'incomplete'.
         $result = core_completion_external::override_activity_completion_status($student->id, $forum->cmid, COMPLETION_INCOMPLETE);
         $result = external_api::clean_returnvalue(core_completion_external::override_activity_completion_status_returns(), $result);
         $this->assertEquals($result['state'], COMPLETION_INCOMPLETE);
-        $completionforum = $completion->get_data($cmforum, false, $student->id);
+        $completionforum = $completion->get_completion_data($cmforum, $student->id);
         $this->assertEquals(COMPLETION_INCOMPLETE, $completionforum->completionstate);
 
         // Test overriding the status of the auto-completion-activity to an invalid state.

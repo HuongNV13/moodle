@@ -861,7 +861,7 @@ class mod_scorm_external_testcase extends externallib_advanced_testcase {
 
         // Check completion status.
         $completion = new completion_info($this->course);
-        $completiondata = $completion->get_data($this->cm);
+        $completiondata = $completion->get_completion_data($this->cm);
         $this->assertEquals(COMPLETION_VIEWED, $completiondata->completionstate);
 
         // Invalid SCO.

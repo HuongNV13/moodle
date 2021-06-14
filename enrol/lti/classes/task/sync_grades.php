@@ -123,7 +123,7 @@ class sync_grades extends \core\task\scheduled_task {
                             $cm = get_coursemodule_from_id(false, $context->instanceid, 0, false, MUST_EXIST);
 
                             if ($tool->gradesynccompletion) {
-                                $data = $completion->get_data($cm, false, $ltiuser->userid);
+                                $data = $completion->get_completion_data($cm, $ltiuser->userid);
                                 if ($data->completionstate != COMPLETION_COMPLETE_PASS &&
                                     $data->completionstate != COMPLETION_COMPLETE) {
                                     mtrace("Skipping - Activity not completed $mtracecontent.");

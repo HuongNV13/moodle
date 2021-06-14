@@ -74,7 +74,7 @@ class cm_completion_details_test extends advanced_testcase {
 
         if (!empty($mockcompletiondata)) {
             $this->completioninfo->expects($this->any())
-                ->method('get_data')
+                ->method('get_comletion_data')
                 ->willReturn($mockcompletiondata);
         }
 

@@ -239,6 +239,7 @@ $definitions = array(
         'ttl' => 3600,
         'staticacceleration' => true,
         'staticaccelerationsize' => 2, // Should be current course and site course.
+        'datasource' => '\core_completion\cache\completion_data'
     ),
 
     // Used to cache course completion status.

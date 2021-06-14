@@ -161,7 +161,7 @@ class core_completion_external extends external_api {
 
         // Update completion state and get the new state back.
         $completion->update_state($cm, $newstate, $userid, true);
-        $completiondata = $completion->get_data($cm, false, $userid);
+        $completiondata = $completion->get_completion_data($cm, $userid);
 
         // Return the current state of completion.
         return [

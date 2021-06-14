@@ -1436,7 +1436,7 @@ function mod_chat_core_calendar_provide_event_action(calendar_event $event,
 
     $completion = new \completion_info($cm->get_course());
 
-    $completiondata = $completion->get_data($cm, false, $userid);
+    $completiondata = $completion->get_completion_data($cm, $userid);
 
     if ($completiondata->completionstate != COMPLETION_INCOMPLETE) {
         return null;

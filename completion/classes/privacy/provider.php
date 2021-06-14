@@ -146,7 +146,7 @@ class provider implements
     public static function get_activity_completion_info(\stdClass $user, \stdClass $course, $cm) : \stdClass {
         $completioninfo = new \completion_info($course);
         $completion = $completioninfo->is_enabled($cm);
-        return ($completion != COMPLETION_TRACKING_NONE) ? $completioninfo->get_data($cm, true, $user->id) : new \stdClass();
+        return ($completion != COMPLETION_TRACKING_NONE) ? $completioninfo->get_completion_data($cm, $user->id) : new \stdClass();
     }
 
     /**
