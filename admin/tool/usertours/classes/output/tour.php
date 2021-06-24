@@ -60,6 +60,7 @@ class tour implements \renderable {
         $result = (object) [
             'name'  => $this->tour->get_tour_key(),
             'steps' => [],
+            'displaystepnumbers' => $this->tour->get_display_step_numbers(),
             'endtourlabel' => $this->tour->get_endtourlabel(),
         ];
 
