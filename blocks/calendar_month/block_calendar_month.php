@@ -65,6 +65,7 @@ class block_calendar_month extends block_base {
         }
 
         $this->content->text .= $renderer->complete_layout();
+        $this->page->requires->js_call_amd('core_calendar/calendar_popover', 'init', [$this->instance->id]);
 
         return $this->content;
     }

@@ -116,6 +116,51 @@ $calendarEventColor: #0d5ca1 !default;
     }
 }
 
+[data-region="blocks-column"] {
+    .maincalendar {
+        div.header {
+            visibility: hidden;
+            height: 0;
+        }
+        .calendarwrapper {
+            .calendar-controls {
+                .arrow,
+                .current {
+                    font-size: inherit;
+                    line-height: inherit;
+                }
+                .current {
+                    width: 40%;
+                }
+                .previous,
+                .next {
+                    width: 30%;
+                    font-size: 0.8em;
+                }
+            }
+            .calendartable {
+                &.calendarmonth {
+                    th,
+                    td {
+                        border: none;
+                    }
+                    td {
+                        height: 1.5em;
+                        text-align: center !important; // stylelint-disable-line declaration-no-important
+                        font-size: 0.8em;
+
+                        &.hasevent {
+                            [data-region="day-content"] {
+                                display: none;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 .maincalendar {
     vertical-align: top;
     padding: 0;
