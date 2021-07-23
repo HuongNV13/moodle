@@ -48,6 +48,16 @@ export const eventTypes = {
      * @property {number} detail.instanceId The block instance id
      */
     blockContentUpdated: 'core_block/contentUpdated',
+    /**
+     * An event triggered when the content of a block has changed.
+     *
+     * @event blockMoved
+     * @type {CustomEvent}
+     * @property {HTMLElement} target The block element that was updated
+     * @property {object} detail
+     * @property {number} detail.instanceId The block instance id
+     */
+    blockMoved: 'core_block/moved'
 };
 
 /**
@@ -60,6 +70,22 @@ export const eventTypes = {
  */
 export const notifyBlockContentUpdated = element => dispatchEvent(
     eventTypes.blockContentUpdated,
+    {
+        instanceId: element.dataset.instanceId,
+    },
+    element
+);
+
+/**
+ * Trigger an event to indicate that the block was moved.
+ *
+ * @method notifyBlockMoved
+ * @param {HTMLElement} element The HTMLElement containing the moved block.
+ * @returns {CustomEvent}
+ * @fires blockMoved
+ */
+export const notifyBlockMoved = element => dispatchEvent(
+    eventTypes.blockMoved,
     {
         instanceId: element.dataset.instanceId,
     },
