@@ -12900,7 +12900,8 @@ input[disabled] {
 
 .calendar-controls .current {
   text-align: center;
-  width: 50%; }
+  width: 50%;
+  font-size: 1.5em; }
 
 .calendar-controls .next {
   text-align: right;
@@ -13126,6 +13127,46 @@ table.calendartable caption {
 @media (min-width: 768px) {
   #page-calender-view .container-fluid, #page-calender-view .container-sm, #page-calender-view .container-md, #page-calender-view .container-lg, #page-calender-view .container-xl {
     min-width: 1024px; } }
+
+@media (min-width: 1200px) {
+  [data-region="blocks-column"] .maincalendar div.header {
+    visibility: hidden;
+    height: 0; }
+  [data-region="blocks-column"] .maincalendar .calendarwrapper .current {
+    width: 40%;
+    font-size: inherit;
+    line-height: inherit; }
+  [data-region="blocks-column"] .maincalendar .calendarwrapper .previous,
+  [data-region="blocks-column"] .maincalendar .calendarwrapper .next {
+    width: 30%;
+    font-size: 0.8em; }
+  [data-region="blocks-column"] .maincalendar .calendartable.calendarmonth th,
+  [data-region="blocks-column"] .maincalendar .calendartable.calendarmonth td {
+    border: none; }
+  [data-region="blocks-column"] .maincalendar .calendartable.calendarmonth td {
+    height: auto;
+    text-align: center !important;
+    font-size: 0.8em;
+    padding: 0; }
+    [data-region="blocks-column"] .maincalendar .calendartable.calendarmonth td.hasevent [data-region="day-content"] {
+      display: none; }
+    [data-region="blocks-column"] .maincalendar .calendartable.calendarmonth td:after {
+      content: '';
+      display: block;
+      margin-top: calc(100% - 1.5em); } }
+
+@media (max-width: 1200px) {
+  .maincalendar .calendartable.calendarmonth td {
+    height: auto;
+    text-align: center !important;
+    font-size: inherit;
+    padding: 0; }
+    .maincalendar .calendartable.calendarmonth td.hasevent [data-region="day-content"] {
+      display: none; }
+    .maincalendar .calendartable.calendarmonth td:after {
+      content: '';
+      display: block;
+      margin-top: calc(100% - 1.5em); } }
 
 .calendarwrapper {
   position: relative; }

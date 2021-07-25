@@ -104,6 +104,7 @@ $calendarEventColor: #0d5ca1 !default;
     .current {
         text-align: center;
         width: 50%;
+        font-size: 1.5em;
     }
 
     .next {
@@ -491,6 +492,80 @@ table.calendartable caption {
     #page-calender-view {
         .container-fluid {
             min-width: 1024px;
+        }
+    }
+}
+
+@media (min-width: 1200px) {
+    [data-region="blocks-column"] {
+        .maincalendar {
+            div.header {
+                visibility: hidden;
+                height: 0;
+            }
+            .calendarwrapper {
+                .current {
+                    width: 40%;
+                    font-size: inherit;
+                    line-height: inherit;
+                }
+                .previous,
+                .next {
+                    width: 30%;
+                    font-size: 0.8em;
+                }
+            }
+            .calendartable {
+                &.calendarmonth {
+                    th,
+                    td {
+                        border: none;
+                    }
+                    td {
+                        height: auto;
+                        text-align: center !important; // stylelint-disable-line declaration-no-important
+                        font-size: 0.8em;
+                        padding: 0;
+
+                        &.hasevent {
+                            [data-region="day-content"] {
+                                display: none;
+                            }
+                        }
+                        &:after {
+                            content: '';
+                            display: block;
+                            margin-top: calc(100% - 1.5em);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 1200px) {
+    .maincalendar {
+        .calendartable {
+            &.calendarmonth {
+                td {
+                    height: auto;
+                    text-align: center !important; // stylelint-disable-line declaration-no-important
+                    font-size: inherit;
+                    padding: 0;
+
+                    &.hasevent {
+                        [data-region="day-content"] {
+                            display: none;
+                        }
+                    }
+                    &:after {
+                        content: '';
+                        display: block;
+                        margin-top: calc(100% - 1.5em);
+                    }
+                }
+            }
         }
     }
 }

@@ -66,6 +66,8 @@
                             }}{{#durationevents.0}} duration{{/durationevents.0}}{{!
                             }}{{#durationevents}} duration_{{.}}{{/durationevents}}{{!
                             }}{{#defaulteventcontext}} clickable{{/defaulteventcontext}}{{!
+                            }}{{#hasevents}} hasevent{{/hasevents}}{{!
+                            }}{{#hasevents}} calendar_event_{{events.0.normalisedeventtype}}{{/hasevents}}{{!
                         }}"
                         data-day-timestamp="{{timestamp}}"
                         data-drop-zone="month-view-day"
@@ -77,7 +79,7 @@
                                 <a data-action="view-day-link" href="#" class="aalink day" aria-label="{{viewdaylinktitle}}"
                                     data-year="{{date.year}}" data-month="{{date.mon}}" data-day="{{mday}}"
                                     data-courseid="{{courseid}}" data-categoryid="{{categoryid}}"
-                                    data-timestamp="{{timestamp}}">{{mday}}</a>
+                                    data-timestamp="{{timestamp}}" data-title="{{viewdaylinktitle}}">{{mday}}</a>
                             {{/hasevents}}
                             {{^hasevents}}
                                 <span aria-hidden="true">{{mday}}</span>
@@ -122,6 +124,14 @@
                                         {{/underway}}
                                         {{/events}}
                                     </ul>
+                                    <div class="hidden">
+                                        {{#events}}
+                                            <div data-popover-eventtype-{{normalisedeventtype}}="1">
+                                                {{> core_calendar/event_icon}}
+                                                {{{name}}}
+                                            </div>
+                                        {{/events}}
+                                    </div>
                                 </div>
                             {{/hasevents}}
                         </div>
