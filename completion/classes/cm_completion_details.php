@@ -65,7 +65,7 @@ class cm_completion_details {
      */
     public function __construct(completion_info $completioninfo, cm_info $cminfo, int $userid, bool $returndetails = true) {
         $this->completioninfo = $completioninfo;
-        $this->completiondata = $completioninfo->get_data($cminfo, false, $userid);
+        $this->completiondata = $completioninfo->get_data($cminfo, true, $userid);
         $this->cminfo = $cminfo;
         $this->userid = $userid;
         $this->returndetails = $returndetails;
