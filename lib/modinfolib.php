@@ -1400,7 +1400,7 @@ class cm_info implements IteratorAggregate {
      * @return string
      */
     public function get_name() {
-        $this->obtain_dynamic_data();
+        $this->obtain_dynamic_data(true);
         return $this->name;
     }
 
@@ -1454,7 +1454,7 @@ class cm_info implements IteratorAggregate {
      * @return mixed Optional custom data stored in modinfo cache for this activity, or null if none
      */
     public function get_custom_data() {
-        $this->obtain_dynamic_data();
+        $this->obtain_dynamic_data(true);
         return $this->customdata;
     }
 
@@ -1482,7 +1482,7 @@ class cm_info implements IteratorAggregate {
      */
     public function get_icon_url($output = null) {
         global $OUTPUT;
-        $this->obtain_dynamic_data();
+        $this->obtain_dynamic_data(true);
         if (!$output) {
             $output = $OUTPUT;
         }
@@ -1929,9 +1929,10 @@ class cm_info implements IteratorAggregate {
      * As part of this function, the module's _cm_info_dynamic function from its lib.php will
      * be called (if it exists). Make sure that the functions that are called here do not use
      * any getter magic method from cm_info.
+     * @param bool $loadavailability Load the availability information or not.
      * @return void
      */
-    private function obtain_dynamic_data() {
+    private function obtain_dynamic_data(bool $loadavailability = false) {
         global $CFG;
         $userid = $this->modinfo->get_user_id();
         if ($this->state >= self::STATE_BUILDING_DYNAMIC || $userid == -1) {
@@ -1939,31 +1940,33 @@ class cm_info implements IteratorAggregate {
         }
         $this->state = self::STATE_BUILDING_DYNAMIC;
 
-        if (!empty($CFG->enableavailability)) {
-            // Get availability information.
-            $ci = new \core_availability\info_module($this);
+        if ($loadavailability) {
+            if (!empty($CFG->enableavailability)) {
+                // Get availability information.
+                $ci = new \core_availability\info_module($this);
 
-            // Note that the modinfo currently available only includes minimal details (basic data)
-            // but we know that this function does not need anything more than basic data.
-            $this->available = $ci->is_available($this->availableinfo, true,
+                // Note that the modinfo currently available only includes minimal details (basic data)
+                // but we know that this function does not need anything more than basic data.
+                $this->available = $ci->is_available($this->availableinfo, true,
                     $userid, $this->modinfo);
-        } else {
-            $this->available = true;
-        }
-
-        // Check parent section.
-        if ($this->available) {
-            $parentsection = $this->modinfo->get_section_info($this->sectionnum);
-            if (!$parentsection->get_available()) {
-                // Do not store info from section here, as that is already
-                // presented from the section (if appropriate) - just change
-                // the flag
-                $this->available = false;
+            } else {
+                $this->available = true;
             }
-        }
 
-        // Update visible state for current user.
-        $this->update_user_visible();
+            // Check parent section.
+            if ($this->available) {
+                $parentsection = $this->modinfo->get_section_info($this->sectionnum);
+                if (!$parentsection->get_available()) {
+                    // Do not store info from section here, as that is already
+                    // presented from the section (if appropriate) - just change
+                    // the flag.
+                    $this->available = false;
+                }
+            }
+
+            // Update visible state for current user.
+            $this->update_user_visible();
+        }
 
         // Let module make dynamic changes at this point
         $this->call_mod_function('cm_info_dynamic');
@@ -1980,7 +1983,7 @@ class cm_info implements IteratorAggregate {
      * @return bool
      */
     public function get_user_visible() {
-        $this->obtain_dynamic_data();
+        $this->obtain_dynamic_data(true);
         return $this->uservisible;
     }
 
@@ -2177,7 +2180,7 @@ class cm_info implements IteratorAggregate {
         if ($this->state >= self::STATE_BUILDING_VIEW || $this->modinfo->get_user_id() == -1) {
             return;
         }
-        $this->obtain_dynamic_data();
+        $this->obtain_dynamic_data(true);
         $this->state = self::STATE_BUILDING_VIEW;
 
         // Let module make changes at this point
