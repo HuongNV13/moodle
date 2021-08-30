@@ -30,6 +30,14 @@ import LocalStorage from 'core/localstorage';
 import Notification from 'core/notification';
 import jQuery from 'jquery';
 
+const ogvPromise = import(Config.wwwroot + '/media/player/videojs/ogvjs/ogv.js');
+ogvPromise.then(ogvBase => {
+    window.OGVCompat = ogvBase.OGVCompat;
+    window.OGVLoader = ogvBase.OGVLoader;
+    window.OGVPlayer = ogvBase.OGVPlayer;
+    return ogvBase;
+}).catch(Notification.exception);
+
 /** @var {bool} Whether this is the first load of videojs module */
 let firstLoad;
 
@@ -92,6 +100,13 @@ const notifyVideoJS = e => {
                 // Add Flash to the list of modules we require.
                 modulePromises.push(import('media_videojs/videojs-flash-lazy'));
             }
+            if (config.techOrder && config.techOrder.indexOf('OgvJS') !== -1) {
+                modulePromises.push(import('media_videojs/ogvjs'));
+            }
+            config.ogvjs = {
+                debug: true,
+                base: Config.wwwroot + '/media/player/videojs/ogvjs'
+            };
             Promise.all([langStrings, ...modulePromises])
             .then(([langJson, videojs]) => {
                 if (firstLoad) {
@@ -101,7 +116,6 @@ const notifyVideoJS = e => {
                         hotkeys: true,
                     };
                     videojs.addLanguage(language, langJson);
-
                     firstLoad = false;
                 }
                 videojs(id, config);

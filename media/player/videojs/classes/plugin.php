@@ -41,6 +41,8 @@ class media_videojs_plugin extends core_media_player_native {
     /** @var bool is this a youtube link */
     protected $youtube = false;
 
+    protected $ogg = false;
+
     /**
      * Generates code required to embed the player.
      *
@@ -149,6 +151,10 @@ class media_videojs_plugin extends core_media_player_native {
             $datasetup[] = '"aspectRatio": "1:0"';
         }
 
+        if ($this->ogg) {
+            $datasetup[] = '"techOrder": ["OgvJS"]';
+        }
+
         // Attributes for the video/audio tag.
         // We use data-setup-lazy as the attribute name for the config instead of
         // data-setup because data-setup will cause video.js to load the player as soon as the library is loaded,
@@ -193,7 +199,7 @@ class media_videojs_plugin extends core_media_player_native {
             // Create <video> or <audio> tag with necessary attributes and all sources.
             // We don't want fallback to another player because list_supported_urls() is already smart.
             // Otherwise we could end up with nested <audio> or <video> tags. Fallback to link only.
-            $attributes += ['preload' => 'auto', 'controls' => 'true', 'title' => $title];
+            $attributes += ['controls' => 'true', 'title' => $title];
             $text = html_writer::tag($isaudio ? 'audio' : 'video', $sources . self::LINKPLACEHOLDER, $attributes);
         }
 
@@ -305,8 +311,18 @@ class media_videojs_plugin extends core_media_player_native {
                 continue;
             }
 
+            if ($ext == '.ogg' || $ext == '.webm' || $ext == '.ogv') {
+                $this->ogg = true;
+            } else {
+                $this->ogg = false;
+            }
+
             if (!get_config('media_videojs', 'useflash')) {
-                return parent::list_supported_urls($urls, $options);
+                if (($ext == '.ogg' || $ext == '.webm' || $ext == '.ogv') && core_useragent::is_safari()) {
+                    $result[] = $url;
+                } else {
+                    return parent::list_supported_urls($urls, $options);
+                }
             } else {
                 // If Flash fallback is enabled we can not check if/when browser supports flash.
                 // We assume it will be able to handle any other extensions that player supports.
