@@ -35,7 +35,9 @@ use tool_usertours\tour;
  */
 function xmldb_tool_usertours_upgrade($oldversion) {
     global $CFG, $DB;
+
     $dbman = $DB->get_manager();
+
     // Automatically generated Moodle v3.6.0 release upgrade line.
     // Put any upgrade step following this.
 
@@ -94,6 +96,20 @@ function xmldb_tool_usertours_upgrade($oldversion) {
 
         // Assignment savepoint reached.
         upgrade_plugin_savepoint(true, 2021072200, 'tool', 'usertours');
+    }
+
+    if ($oldversion < 2021092300) {
+        // Define field endtourlabel to be added to tool_usertours_tours.
+        $table = new xmldb_table('tool_usertours_tours');
+        $field = new xmldb_field('endtourlabel', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'sortorder');
+
+        // Conditionally launch add field endtourlabel.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Usertours savepoint reached.
+        upgrade_plugin_savepoint(true, 2021092300, 'tool', 'usertours');
     }
 
     return true;

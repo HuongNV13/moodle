@@ -62,15 +62,11 @@ class tour implements \renderable {
             'steps' => [],
             'onesteptour' => false,
             'displaystepnumbers' => $this->tour->get_display_step_numbers(),
+            'endtourlabel' => $this->tour->get_endtourlabel(),
         ];
 
         foreach ($this->tour->get_steps() as $step) {
             $result->steps[] = (new step($step))->export_for_template($output);
-        }
-
-        // Check if its a only one step tour.
-        if (count($result->steps) == 1) {
-            $result->onesteptour = true;
         }
 
         return $result;

@@ -90,6 +90,11 @@ class tour {
     protected $enabled;
 
     /**
+     * @var $endtourlabel The end tour label.
+     */
+    protected $endtourlabel;
+
+    /**
      * @var $sortorder The sort order.
      */
     protected $sortorder;
@@ -192,6 +197,7 @@ class tour {
         if (isset($record->sortorder)) {
             $this->sortorder = $record->sortorder;
         }
+        $this->endtourlabel = $record->endtourlabel;
         $this->config       = json_decode($record->configdata);
         $this->dirty        = false;
         $this->steps        = [];
@@ -329,6 +335,36 @@ class tour {
     }
 
     /**
+     * The end tour label for the tour.
+     *
+     * @return string
+     */
+    public function get_endtourlabel(): string {
+        if ($this->endtourlabel) {
+            $label = $this->endtourlabel;
+        } else if ($this->count_steps() == 1) {
+            $label = get_string('endonesteptour', 'tool_usertours');
+        } else {
+            $label = get_string('endtour', 'tool_usertours');
+        }
+
+        return $label;
+    }
+
+    /**
+     * Set the endtourlabel of the tour to the specified value.
+     *
+     * @param string $value
+     * @return $this
+     */
+    public function set_endtourlabel(string $value): tour {
+        $this->endtourlabel = $value;
+        $this->dirty = true;
+
+        return $this;
+    }
+
+    /**
      * The link to view this tour.
      *
      * @return  moodle_url
@@ -389,13 +425,14 @@ class tour {
      */
     public function to_record() {
         return (object) array(
-            'id'                 => $this->id,
-            'name'               => $this->name,
-            'description'        => $this->description,
-            'pathmatch'          => $this->pathmatch,
-            'enabled'            => $this->enabled,
-            'sortorder'          => $this->sortorder,
-            'configdata'         => json_encode($this->config),
+            'id'            => $this->id,
+            'name'          => $this->name,
+            'description'   => $this->description,
+            'pathmatch'     => $this->pathmatch,
+            'enabled'       => $this->enabled,
+            'sortorder'     => $this->sortorder,
+            'endtourlabel'  => $this->endtourlabel,
+            'configdata'    => json_encode($this->config),
             'displaystepnumbers' => (int)$this->displaystepnumbers,
         );
     }
