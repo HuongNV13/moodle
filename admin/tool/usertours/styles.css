@@ -1,3 +1,16 @@
+.usertour-box {
+    max-width: 400px;
+}
+
+.usertour-box .modal-content .modal-header {
+    border-bottom: 0;
+}
+
+.usertour-box .modal-content .modal-footer {
+    justify-content: flex-start;
+    border-top: 0;
+}
+
 div[data-flexitour="backdrop"] {
     position: fixed;
     top: 0;
@@ -66,18 +79,6 @@ span[data-flexitour="container"].orphan div[data-role="arrow"] {
     display: block;
     padding: 1em;
 }
-
-span[data-flexitour="container"] .modal-footer {
-    padding-top: 11px;
-    padding-bottom: 11px;
-}
-
-span[data-flexitour="container"] span.number-of-steps {
-    margin: 8px 11px 7px 3px;
-    font-size: 0.875em;
-    flex-grow: 1;
-}
-
 @media (max-width: 575.98px) {
     span[data-flexitour="container"] {
         margin-left: 10px;

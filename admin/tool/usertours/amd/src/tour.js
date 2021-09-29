@@ -314,6 +314,7 @@ const Tour = class {
      * @method  isFirstStep
      * @param   {Number}   stepNumber  Step number to test
      * @return  {Boolean}               Whether the step is the first step
+     * @deprecated since version 4.0
      */
     isFirstStep(stepNumber) {
         let previousStepNumber = this.getPreviousStepNumber(stepNumber);
@@ -593,13 +594,10 @@ const Tour = class {
      */
     processStepListeners(stepConfig) {
         this.listeners.push(
-        // Next/Previous buttons.
+        // Next button.
         {
             node: this.currentStepNode,
             args: ['click', '[data-role="next"]', $.proxy(this.next, this)]
-        }, {
-            node: this.currentStepNode,
-            args: ['click', '[data-role="previous"]', $.proxy(this.previous, this)]
         },
 
         // Close and end tour buttons.
@@ -683,37 +681,31 @@ const Tour = class {
         template.find('[data-placeholder="body"]')
             .html(stepConfig.body);
 
-        // Is this the first step?
-        if (this.isFirstStep(stepConfig.stepNumber)) {
-            template.find('[data-role="previous"]').hide();
-        } else {
-            template.find('[data-role="previous"]').prop('disabled', false);
-        }
+        const nextBtn = template.find('[data-role="next"]');
+        const endBtn = template.find('[data-role="end"]');
 
         // Is this the final step?
         if (this.isLastStep(stepConfig.stepNumber)) {
-            template.find('[data-role="next"]').hide();
-            template.find('[data-role="end"]').removeClass("btn-secondary").addClass("btn-primary");
+            nextBtn.hide();
+            endBtn.html(endBtn.data('endlabel'));
+            endBtn.removeClass("btn-secondary").addClass("btn-primary");
         } else {
-            template.find('[data-role="next"]').prop('disabled', false);
+            nextBtn.prop('disabled', false);
         }
 
-        template.find('[data-role="previous"]').attr('role', 'button');
-        template.find('[data-role="next"]').attr('role', 'button');
-        template.find('[data-role="end"]').attr('role', 'button');
+        nextBtn.attr('role', 'button');
+        endBtn.attr('role', 'button');
 
-        if (template.find('[data-placeholder="step"]').length) {
+        if (nextBtn.data('displaysteps')) {
             const stepsPotentiallyVisible = this.getPotentiallyVisibleSteps(),
                 totalStepsPotentiallyVisible = stepsPotentiallyVisible.filter(x => x !== 'empty').length,
                 position = stepsPotentiallyVisible[stepConfig.stepNumber].position;
-            if (totalStepsPotentiallyVisible == 1) {
-                template.find('[data-placeholder="step"]').hide();
-            } else {
+            if (totalStepsPotentiallyVisible > 1) {
                 // Add 'position of total potentially visible steps' to template.
-                getString('numberofsteps', 'tool_usertours',
+                getString('nextstep_sequence', 'tool_usertours',
                     {position: position, total: totalStepsPotentiallyVisible}).then(value => {
-                    template.find('[data-placeholder="step"]').html(value);
-                    return;
+                    nextBtn.html(value);
+                    return nextBtn;
                 }).catch();
             }
         }

@@ -28,27 +28,27 @@ Feature: Add a new user tour
       | Selector                    | .usermenu            | User menu         | This is your personal user menu. You'll find your personal preferences and your user profile here. |
     When I am on homepage
     Then I should see "Welcome to your personal learning space. We'd like to give you a quick tour to show you some of the areas you may find helpful"
-    And I should see "1 of 4" in the ".number-of-steps" "css_element"
+    And "Next (1/4)" "button" should exist in the "[data-role='flexitour-step']" "css_element"
     And I click on "Next" "button" in the "[data-role='flexitour-step']" "css_element"
     And I should see "This area shows you what's happening in some of your courses"
-    And I should see "2 of 4" in the ".number-of-steps" "css_element"
+    And "Next (2/4)" "button" should exist in the "[data-role='flexitour-step']" "css_element"
     And I should not see "This is the Calendar. All of your assignments and due dates can be found here"
     And I click on "Next" "button" in the "[data-role='flexitour-step']" "css_element"
     And I should see "This is the Calendar. All of your assignments and due dates can be found here"
-    And I should see "3 of 4" in the ".number-of-steps" "css_element"
+    And "Next (3/4)" "button" should exist in the "[data-role='flexitour-step']" "css_element"
     And I should not see "This area shows you what's happening in some of your courses"
-    And I click on "Prev" "button" in the "[data-role='flexitour-step']" "css_element"
-    And I should not see "This is the Calendar. All of your assignments and due dates can be found here"
-    And I should see "This area shows you what's happening in some of your courses"
-    And I should see "2 of 4" in the ".number-of-steps" "css_element"
-    And I click on "End tour" "button" in the "[data-role='flexitour-step']" "css_element"
+#    And I click on "Prev" "button" in the "[data-role='flexitour-step']" "css_element"
+#    And I should not see "This is the Calendar. All of your assignments and due dates can be found here"
+#    And I should see "This area shows you what's happening in some of your courses"
+#    And I should see "2 of 4" in the ".number-of-steps" "css_element"
+    And I click on "Skip tour" "button" in the "[data-role='flexitour-step']" "css_element"
     And I should not see "This area shows you what's happening in some of your courses"
     And I am on homepage
     And I should not see "Welcome to your personal learning space. We'd like to give you a quick tour to show you some of the areas you may find helpful"
     And I should not see "This area shows you what's happening in some of your courses"
     And I follow "Reset user tour on this page"
     And I should see "Welcome to your personal learning space. We'd like to give you a quick tour to show you some of the areas you may find helpful"
-    And I should see "1 of 4" in the ".number-of-steps" "css_element"
+    And "Next (1/4)" "button" should exist in the "[data-role='flexitour-step']" "css_element"
 
   @javascript
   Scenario: A hidden tour should not be visible

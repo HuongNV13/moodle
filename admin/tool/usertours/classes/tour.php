@@ -433,7 +433,7 @@ class tour {
             'sortorder'     => $this->sortorder,
             'endtourlabel'  => $this->endtourlabel,
             'configdata'    => json_encode($this->config),
-            'displaystepnumbers' => (int)$this->displaystepnumbers,
+            'displaystepnumbers' => $this->displaystepnumbers,
         );
     }
 
@@ -869,6 +869,6 @@ class tour {
      * @return bool
      */
     public function get_display_step_numbers(): bool {
-        return $this->displaystepnumbers;
+        return (int) $this->displaystepnumbers;
     }
 }
