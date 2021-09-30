@@ -48,6 +48,7 @@ function(
         ROOT: '[data-region="event-list-container"]',
         EVENT_LIST_CONTENT: '[data-region="event-list-content"]',
         EVENT_LIST_LOADING_PLACEHOLDER: '[data-region="event-list-loading-placeholder"]',
+        MORE_EVENTS_BUTTON: '[data-action="more-events"]',
     };
 
     var TEMPLATES = {
@@ -64,11 +65,14 @@ function(
         }
     };
 
+    let rootElement;
+
     /**
      * Hide the content area and display the empty content message.
      *
      * @param {object} root The container element
      */
+        // eslint-disable-next-line no-unused-vars
     var hideContent = function(root) {
         root.find(SELECTORS.EVENT_LIST_CONTENT).addClass('hidden');
         root.find(SELECTORS.EMPTY_MESSAGE).removeClass('hidden');
@@ -158,6 +162,7 @@ function(
      * @param {Number} midnight A timestamp representing midnight for the user
      * @return {promise} Resolved with HTML and JS strings.
      */
+        // eslint-disable-next-line no-unused-vars
     var render = function(calendarEvents, midnight) {
         var templateContext = buildTemplateContext(calendarEvents, midnight);
         var templateName = TEMPLATES.EVENT_LIST_CONTENT;
@@ -221,6 +226,7 @@ function(
      * @param {int|undefined} daysLimit How many dates (from midnight) to limit the result to
      * @return {object} jQuery promise resolved with calendar events.
      */
+        // eslint-disable-next-line no-unused-vars
     var loadEventsFromPageData = function(
         pageData,
         actions,
@@ -288,6 +294,32 @@ function(
         });
     };
 
+    const loadEventsForLazy = function(midnight, lastIds, courseId, daysOffset, daysLimit, loadMoreBtn) {
+        const limit = 5;
+        const eventsPromise = load(midnight, limit, daysOffset, daysLimit, lastIds, courseId);
+        return eventsPromise.then(function(result) {
+            if (!result.events.length) {
+                return [];
+            }
+            const calendarEvents = result.events.filter(function(event) {
+                if (event.eventtype == "open" || event.eventtype == "opensubmission") {
+                    const dayTimestamp = UserDate.getUserMidnightForTimestamp(event.timesort, midnight);
+                    return dayTimestamp > midnight;
+                }
+                return true;
+            });
+
+            const lastEventId = calendarEvents.at(-1).id;
+            setOffset(loadMoreBtn, lastEventId);
+
+            if (calendarEvents.length < limit) {
+                loadMoreBtn.hide();
+            }
+
+            return calendarEvents;
+        });
+    };
+
     /**
      * Use the paged content factory to create a paged content element for showing
      * the event list. We only provide a page limit to the factory because we don't
@@ -317,14 +349,13 @@ function(
         daysOffset,
         daysLimit,
         paginationAriaLabel,
-        additionalConfig
+        additionalConfig,
+        loadMoreBtn
     ) {
         // Remember the last event id we loaded on each page because we can't
         // use the offset value since the backend can skip events if the user doesn't
         // have the capability to see them. Instead we load the next page of events
         // based on the last seen event id.
-        var lastIds = {'1': 0};
-        var hasContent = false;
         var config = $.extend({}, DEFAULT_PAGED_CONTENT_CONFIG, additionalConfig);
 
         return Str.get_string(
@@ -338,56 +369,22 @@ function(
                 return string;
             })
             .then(function() {
-                return PagedContentFactory.createWithLimit(
-                    pageLimit,
-                    function(pagesData, actions) {
-                        var promises = [];
+                var testPromise = loadEventsForLazy(
+                    midnight,
+                    0,
+                    courseId,
+                    daysOffset,
+                    daysLimit,
+                    loadMoreBtn
+                ).then(calendarEvents => {
+                    if (calendarEvents.length) {
+                        return render(calendarEvents, midnight);
+                    } else {
+                        return calendarEvents;
+                    }
+                }).catch(Notification.exception);
 
-                        pagesData.forEach(function(pageData) {
-                            var pageNumber = pageData.pageNumber;
-                            // Load the page data.
-                            var pagePromise = loadEventsFromPageData(
-                                pageData,
-                                actions,
-                                midnight,
-                                lastIds,
-                                preloadedPages,
-                                courseId,
-                                daysOffset,
-                                daysLimit
-                            ).then(function(calendarEvents) {
-                                if (calendarEvents.length) {
-                                    // Remember that we've loaded content.
-                                    hasContent = true;
-                                    // Remember the last id we've seen.
-                                    var lastEventId = calendarEvents[calendarEvents.length - 1].id;
-                                    // Record the id that the next page will need to start from.
-                                    lastIds[pageNumber + 1] = lastEventId;
-                                    // Get the HTML and JS for these calendar events.
-                                    return render(calendarEvents, midnight);
-                                } else {
-                                    return calendarEvents;
-                                }
-                            })
-                            .catch(Notification.exception);
-
-                            promises.push(pagePromise);
-                        });
-
-                        $.when.apply($, promises).then(function() {
-                            // Tell the calling code that the first page has been loaded
-                            // and whether it contains any content.
-                            firstLoad.resolve(hasContent);
-                            return;
-                        })
-                        .catch(function() {
-                            firstLoad.resolve(hasContent);
-                        });
-
-                        return promises;
-                    },
-                    config
-                );
+                return testPromise;
             });
     };
 
@@ -407,6 +404,8 @@ function(
      */
     var init = function(root, pageLimit, preloadedPages, paginationAriaLabel, additionalConfig) {
         root = $(root);
+        rootElement = root;
+        initEventListener();
 
         // Create a promise that will be resolved once the first set of page
         // data has been loaded. This ensures that the loading placeholder isn't
@@ -419,6 +418,7 @@ function(
         var daysOffset = parseInt(root.attr('data-days-offset'), 10);
         var daysLimit = root.attr('data-days-limit');
         var midnight = parseInt(root.attr('data-midnight'), 10);
+        var loadMoreBtn = root.parent().find(SELECTORS.MORE_EVENTS_BUTTON);
 
         // Make sure the content area and loading placeholder is visible.
         // This is because the init function can be called to re-initialise
@@ -434,37 +434,62 @@ function(
 
         // Created the paged content element.
         return createPagedContent(pageLimit, preloadedPages, midnight, firstLoad, courseId, daysOffset, daysLimit,
-                paginationAriaLabel, additionalConfig)
+                paginationAriaLabel, additionalConfig, loadMoreBtn)
             .then(function(html, js) {
                 html = $(html);
-                // Hide the content for now.
+                // // Hide the content for now.
                 html.addClass('hidden');
                 // Replace existing elements with the newly created paged content.
                 // If we're reinitialising an existing event list this will replace
                 // the old event list (including removing any event handlers).
                 Templates.replaceNodeContents(eventListContent, html, js);
-
-                firstLoad.then(function(hasContent) {
-                    // Prevent changing page elements too much by only showing the content
-                    // once we've loaded some data for the first time. This allows our
-                    // fancy loading placeholder to shine.
-                    html.removeClass('hidden');
-                    loadingPlaceholder.addClass('hidden');
-
-                    if (!hasContent) {
-                        // If we didn't get any data then show the empty data message.
-                        hideContent(root);
-                    }
-
-                    return hasContent;
-                })
-                .catch(function() {
-                    return false;
-                });
-
+                html.removeClass('hidden');
+                loadingPlaceholder.addClass('hidden');
                 return html;
             })
             .catch(Notification.exception);
+    };
+
+    const getOffset = function(loadMoreButton) {
+        return parseInt(loadMoreButton.attr('data-offset'), 10);
+    };
+
+    const setOffset = function(loadMoreButton, offset) {
+        loadMoreButton.attr('data-offset', offset);
+    };
+
+    const initEventListener = function() {
+        const loadMoreButton = rootElement.parent().find(SELECTORS.MORE_EVENTS_BUTTON);
+        loadMoreButton.on('click', loadMoreEventForCourse);
+    };
+
+    const loadMoreEventForCourse = function() {
+        const loadMoreBtn = $(this);
+        const rootEle = loadMoreBtn.parent().find(SELECTORS.ROOT);
+        const midnight = parseInt(rootEle.attr('data-midnight'), 10);
+        const courseId = rootEle.attr('data-course-id');
+        const daysOffset = parseInt(rootEle.attr('data-days-offset'), 10);
+        const daysLimit = rootEle.attr('data-days-limit');
+        const lastIds = getOffset(loadMoreBtn);
+        const eventListContent = rootEle.find(SELECTORS.EVENT_LIST_CONTENT).find('div').first();
+        const testPromise = loadEventsForLazy(
+            midnight,
+            lastIds,
+            courseId,
+            daysOffset,
+            daysLimit,
+            loadMoreBtn
+        );
+        testPromise.then(calendarEvents => {
+            if (calendarEvents.length) {
+                const renderPromise = render(calendarEvents, midnight);
+                renderPromise.then((html, js) => {
+                    html = $(html);
+                    const content = html.find('div').first();
+                    Templates.appendNodeContents(eventListContent, content, js);
+                });
+            }
+        }).catch(Notification.exception);
     };
 
     return {
