@@ -11,11 +11,10 @@ Feature: Add a new user tour
       | student1 | Student | 1 | student1@example.com |
     And I log in as "admin"
     And I add a new user tour with:
-      | Name                 | First tour |
-      | Description          | My first tour |
-      | Apply to URL match   | /my/% |
-      | Tour is enabled      | 1 |
-      | Display step numbers | 1 |
+      | Name                | First tour |
+      | Description         | My first tour |
+      | Apply to URL match  | /my/% |
+      | Tour is enabled     | 1 |
     And I add steps to the "First tour" tour:
       | targettype                  | Title             | Content |
       | Display in middle of page   | Welcome           | Welcome to your personal learning space. We'd like to give you a quick tour to show you some of the areas you may find helpful |
@@ -28,19 +27,15 @@ Feature: Add a new user tour
       | Selector                    | .usermenu            | User menu         | This is your personal user menu. You'll find your personal preferences and your user profile here. |
     When I am on homepage
     Then I should see "Welcome to your personal learning space. We'd like to give you a quick tour to show you some of the areas you may find helpful"
-    And I should see "1 of 4" in the ".number-of-steps" "css_element"
     And I click on "Next" "button" in the "[data-role='flexitour-step']" "css_element"
     And I should see "This area shows you what's happening in some of your courses"
-    And I should see "2 of 4" in the ".number-of-steps" "css_element"
     And I should not see "This is the Calendar. All of your assignments and due dates can be found here"
     And I click on "Next" "button" in the "[data-role='flexitour-step']" "css_element"
     And I should see "This is the Calendar. All of your assignments and due dates can be found here"
-    And I should see "3 of 4" in the ".number-of-steps" "css_element"
     And I should not see "This area shows you what's happening in some of your courses"
     And I click on "Prev" "button" in the "[data-role='flexitour-step']" "css_element"
     And I should not see "This is the Calendar. All of your assignments and due dates can be found here"
     And I should see "This area shows you what's happening in some of your courses"
-    And I should see "2 of 4" in the ".number-of-steps" "css_element"
     And I click on "End tour" "button" in the "[data-role='flexitour-step']" "css_element"
     And I should not see "This area shows you what's happening in some of your courses"
     And I am on homepage
@@ -48,7 +43,6 @@ Feature: Add a new user tour
     And I should not see "This area shows you what's happening in some of your courses"
     And I follow "Reset user tour on this page"
     And I should see "Welcome to your personal learning space. We'd like to give you a quick tour to show you some of the areas you may find helpful"
-    And I should see "1 of 4" in the ".number-of-steps" "css_element"
 
   @javascript
   Scenario: A hidden tour should not be visible
@@ -85,3 +79,32 @@ Feature: Add a new user tour
     When I click on "Enable" "link" in the "My first tour" "table_row"
     And I am on homepage
     Then I should see "Welcome to your personal learning space. We'd like to give you a quick tour to show you some of the areas you may find helpful"
+
+  @javascript
+  Scenario: Display tour step
+    Given the following "users" exist:
+      | username | firstname | lastname  | email                |
+      | student1 | Student   | 1        | student1@example.com |
+    And I log in as "admin"
+    And I add a new user tour with:
+      | Name                 | Steps tour    |
+      | Description          | My steps tour |
+      | Apply to URL match   | /my/%         |
+      | Tour is enabled      | 1             |
+      | Display step numbers | 1             |
+    And I add steps to the "Steps tour" tour:
+      | targettype                | Title   | Content                |
+      | Display in middle of page | Welcome | First step of the Tour |
+    And I add steps to the "Steps tour" tour:
+      | targettype | targetvalue_block | Title           | Content                 |
+      | Block      | Course overview   | Course overview | Second step of the Tour |
+      | Block      | Calendar          | Calendar        | Third step of the Tour  |
+    When I am on homepage
+    Then I should see "First step of the Tour"
+    Then I should see "Next (1/3)"
+    And I click on "Next (1/3)" "button" in the "[data-role='flexitour-step']" "css_element"
+    And I should see "Second step of the Tour"
+    And I should see "Next (2/3)"
+    And I click on "Next (2/3)" "button" in the "[data-role='flexitour-step']" "css_element"
+    And I should see "Third step of the Tour"
+    And I should not see "Next (3/3)"

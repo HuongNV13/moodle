@@ -85,7 +85,7 @@ function xmldb_tool_usertours_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2021052508, 'tool', 'usertours');
     }
 
-    if ($oldversion < 2021072200) {
+    if ($oldversion < 2021100100) {
         // Define field displaystepnumbers to be added to tool_usertours_tours.
         $table = new xmldb_table('tool_usertours_tours');
         $field = new xmldb_field('displaystepnumbers', XMLDB_TYPE_INTEGER, '1', null, true, null, '0', 'configdata');
@@ -95,7 +95,7 @@ function xmldb_tool_usertours_upgrade($oldversion) {
         }
 
         // Assignment savepoint reached.
-        upgrade_plugin_savepoint(true, 2021072200, 'tool', 'usertours');
+        upgrade_plugin_savepoint(true, 2021100100, 'tool', 'usertours');
     }
 
     if ($oldversion < 2021092300) {

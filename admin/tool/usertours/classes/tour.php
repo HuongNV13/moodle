@@ -201,7 +201,7 @@ class tour {
         $this->config       = json_decode($record->configdata);
         $this->dirty        = false;
         $this->steps        = [];
-        $this->displaystepnumbers = $record->displaystepnumbers ? true : false;
+        $this->displaystepnumbers = $record->displaystepnumbers ?? 0;
 
         return $this;
     }
@@ -433,7 +433,7 @@ class tour {
             'sortorder'     => $this->sortorder,
             'endtourlabel'  => $this->endtourlabel,
             'configdata'    => json_encode($this->config),
-            'displaystepnumbers' => (int)$this->displaystepnumbers,
+            'displaystepnumbers' => $this->displaystepnumbers,
         );
     }
 
@@ -852,9 +852,9 @@ class tour {
     }
 
     /**
-     * Set the configure display step numbers setting.
+     * Set the value for the display step numbers setting.
      *
-     * @param bool $value The new state.
+     * @param bool $value True for enable.
      * @return tour
      */
     public function set_display_step_numbers(bool $value): tour {
@@ -864,7 +864,7 @@ class tour {
     }
 
     /**
-     * Get the configure display step numbers setting.
+     * Get the value of the display step numbers setting.
      *
      * @return bool
      */
