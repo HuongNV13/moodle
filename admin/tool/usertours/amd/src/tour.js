@@ -75,7 +75,8 @@ const Tour = class {
         }
 
         prefetchStrings('tool_usertours', [
-            'nextstep_sequence'
+            'nextstep_sequence',
+            'skip_tour'
         ]);
 
         return this;
@@ -319,6 +320,7 @@ const Tour = class {
      * @method  isFirstStep
      * @param   {Number}   stepNumber  Step number to test
      * @return  {Boolean}               Whether the step is the first step
+     * @deprecated since version 4.0
      */
     isFirstStep(stepNumber) {
         let previousStepNumber = this.getPreviousStepNumber(stepNumber);
@@ -598,13 +600,10 @@ const Tour = class {
      */
     processStepListeners(stepConfig) {
         this.listeners.push(
-        // Next/Previous buttons.
+        // Next button.
         {
             node: this.currentStepNode,
             args: ['click', '[data-role="next"]', $.proxy(this.next, this)]
-        }, {
-            node: this.currentStepNode,
-            args: ['click', '[data-role="previous"]', $.proxy(this.previous, this)]
         },
 
         // Close and end tour buttons.
@@ -690,15 +689,7 @@ const Tour = class {
 
         // Buttons.
         const nextBtn = template.find('[data-role="next"]');
-        const previousBtn = template.find('[data-role="previous"]');
         const endBtn = template.find('[data-role="end"]');
-
-        // Is this the first step?
-        if (this.isFirstStep(stepConfig.stepNumber)) {
-            previousBtn.hide();
-        } else {
-            previousBtn.prop('disabled', false);
-        }
 
         // Is this the final step?
         if (this.isLastStep(stepConfig.stepNumber)) {
@@ -706,9 +697,13 @@ const Tour = class {
             endBtn.removeClass("btn-secondary").addClass("btn-primary");
         } else {
             nextBtn.prop('disabled', false);
+            // Use Skip tour label for the End tour button.
+            getString('skip_tour', 'tool_usertours').then(value => {
+                endBtn.html(value);
+                return;
+            }).catch();
         }
 
-        previousBtn.attr('role', 'button');
         nextBtn.attr('role', 'button');
         endBtn.attr('role', 'button');
 
