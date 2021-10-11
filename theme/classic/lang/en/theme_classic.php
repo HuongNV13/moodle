@@ -39,3 +39,4 @@ $string['region-side-post'] = 'Right';
 $string['region-side-pre'] = 'Left';
 $string['sitetitle'] = 'Site title';
 $string['privacy:metadata'] = 'The Classic theme does not store any personal data.';
+$string['totop'] = 'Go to top';
