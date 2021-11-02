@@ -2343,6 +2343,10 @@ class html_writer {
         }
         $output .= html_writer::end_tag('table') . "\n";
 
+        if ($table->responsive) {
+            return self::div($output, 'table-responsive');
+        }
+
         return $output;
     }
 
@@ -2793,6 +2797,9 @@ class html_table {
      * $t->captionhide = true;
      */
     public $captionhide = false;
+
+    /** @var bool Whether to make the table to be scrolled horizontally with ease. Make table responsive across all viewports. */
+    public $responsive = true;
 
     /**
      * Constructor
