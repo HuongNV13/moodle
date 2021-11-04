@@ -1096,8 +1096,8 @@ abstract class base {
         }
         if ($needrebuild) {
             if ($sectionid) {
-                $sectionrecord = $DB->get_record('course_sections', ['id' => $sectionid], 'course, section', MUST_EXIST);
-                course_purge_section_cache($sectionrecord);
+                // Invalidate the section cache by given section id.
+                course_modinfo::purge_course_section_cache_by_id($this->courseid, $sectionid);
                 // Partial rebuild sections that have been invalidated.
                 rebuild_course_cache($this->courseid, true, true);
             } else {
@@ -1430,7 +1430,8 @@ abstract class base {
         // Delete section and it's format options.
         $DB->delete_records('course_format_options', array('sectionid' => $section->id));
         $DB->delete_records('course_sections', array('id' => $section->id));
-        course_purge_section_cache($section);
+        // Invalidate the section cache by given section id.
+        course_modinfo::purge_course_section_cache_by_id($course->id, $section->id);
         // Partial rebuild section cache that has been purged.
         rebuild_course_cache($course->id, true, true);
 
