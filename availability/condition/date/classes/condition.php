@@ -292,7 +292,8 @@ class condition extends \core_availability\condition {
                 $updatesection->availability = json_encode($tree->save());
                 $updatesection->timemodified = time();
                 $DB->update_record('course_sections', $updatesection);
-                course_purge_section_cache($section);
+                // Invalidate the section cache by given section id.
+                \course_modinfo::purge_course_section_cache_by_id($courseid, $section->id);
 
                 $anychanged = true;
             }
