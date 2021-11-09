@@ -87,7 +87,7 @@
                             {{#hasevents}}
                                 <div data-region="day-content">
                                     <ul>
-                                        {{#events}}
+                                        {{#limitedevents}}
                                         {{#underway}}
                                             <li class="events-underway">[{{{name}}}]</li>
                                         {{/underway}}
@@ -121,7 +121,19 @@
                                                 </a>
                                             </li>
                                         {{/underway}}
-                                        {{/events}}
+                                        {{/limitedevents}}
+                                        {{#hasmoreevents}}
+                                        <li data-action="view-more-events">
+                                            <strong>
+                                                <a data-action="view-day-link" href="#" class="aalink day" aria-label="{{viewdaylinktitle}}"
+                                                   data-year="{{date.year}}" data-month="{{date.mon}}" data-day="{{mday}}"
+                                                   data-courseid="{{courseid}}" data-categoryid="{{categoryid}}"
+                                                   data-timestamp="{{timestamp}}">
+                                                    {{hasmoreeventstitle}}
+                                                </a>
+                                            </strong>
+                                        </li>
+                                        {{/hasmoreevents}}
                                     </ul>
                                     <div class="hidden">
                                         {{#events}}

@@ -134,6 +134,10 @@ class day_exporter extends exporter {
                 'type' => calendar_event_exporter::read_properties_definition(),
                 'multiple' => true,
             ],
+            'limitedevents' => [
+                'type' => calendar_event_exporter::read_properties_definition(),
+                'multiple' => true,
+            ],
             'hasevents' => [
                 'type' => PARAM_BOOL,
                 'default' => false,
@@ -155,6 +159,14 @@ class day_exporter extends exporter {
                 'type' => PARAM_BOOL,
                 'default' => false,
             ],
+            'hasmoreevents' => [
+                'type' => PARAM_BOOL,
+                'default' => false,
+            ],
+            'hasmoreeventstitle' => [
+                'type' => PARAM_RAW,
+                'optional' => true,
+            ]
         ];
     }
 
@@ -228,6 +240,10 @@ class day_exporter extends exporter {
             }
         }
 
+        $return['limitedevents'] = $this->get_limited_events($return['events']);
+        $return['hasmoreevents'] = count($return['events']) > 5;
+        $return['hasmoreeventstitle'] = $this->get_more_events_title($return['events'], $return['limitedevents']);
+
         return $return;
     }
 
@@ -292,5 +308,29 @@ class day_exporter extends exporter {
         }
 
         return $title;
+    }
+
+    /**
+     * @param array $events
+     * @return array
+     */
+    protected function get_limited_events(array $events): array {
+        $numevents = count($events);
+
+        if ($numevents > 5) {
+            return array_slice($events, 0, 4, true);
+        }
+
+        return $events;
+    }
+
+    /**
+     * @param array $events
+     * @param array $limitedevents
+     * @return string
+     */
+    protected function get_more_events_title(array $events, array $limitedevents): string {
+        $remainevents = count($events) - count($limitedevents);
+        return get_string('moreevents', 'calendar', $remainevents);
     }
 }
