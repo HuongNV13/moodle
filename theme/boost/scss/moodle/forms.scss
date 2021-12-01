@@ -451,7 +451,8 @@ textarea[data-auto-rows] {
         /*rtl:remove*/
         background-image: url([[pix:t/collapsed]]);
     }
-    .mform fieldset.collapsible .col-form-label {
+    .mform fieldset.collapsible .col-form-label,
+    .mform > .form-group .col-form-label {
         padding-left: ($spacer * 2.5);
     }
 
