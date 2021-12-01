@@ -75,6 +75,11 @@ class step {
     protected $targetvalue;
 
     /**
+     * @var int $contenttypevalue The value for this type of content.
+     */
+    protected $contenttypevalue = helper::TOOL_USERTOURS_CONTENTTYPE_HTML;
+
+    /**
      * @var     int     $sortorder  The sort order.
      */
     protected $sortorder;
@@ -153,6 +158,7 @@ class step {
             $this->content  = $record->content;
         }
         $this->contentformat = isset($record->contentformat) ? $record->contentformat : 1;
+        $this->contenttypevalue = $record->contenttype ?? FORMAT_HTML;
         $this->targettype   = $record->targettype;
         $this->targetvalue  = $record->targetvalue;
         $this->sortorder    = $record->sortorder;
@@ -303,6 +309,27 @@ class step {
         $this->dirty = true;
 
         return $this;
+    }
+
+    /**
+     * Set the content type value for this step.
+     *
+     * @param int $value The new content type value to use.
+     * @return $this
+     */
+    public function set_contenttype(int $value): self {
+        $this->contenttypevalue = $value;
+        $this->dirty = true;
+        return $this;
+    }
+
+    /**
+     * Get the content type value for this step.
+     *
+     * @return int
+     */
+    public function get_contenttype(): int {
+        return $this->contenttypevalue;
     }
 
     /**
@@ -461,6 +488,7 @@ class step {
             'title'         => $this->title,
             'content'       => $this->content,
             'contentformat' => $this->contentformat,
+            'contenttype' => $this->contenttypevalue,
             'targettype'    => $this->targettype,
             'targetvalue'   => $this->targetvalue,
             'sortorder'     => $this->sortorder,
@@ -677,7 +705,16 @@ class step {
      */
     public function handle_form_submission(local\forms\editstep &$mform, \stdClass $data) {
         $this->set_title($data->title);
-        $this->set_content($data->content['text'], $data->content['format']);
+        $this->set_contenttype($data->contenttype);
+        if ($data->contenttype == helper::TOOL_USERTOURS_CONTENTTYPE_LANGSTRING) {
+            $content = [
+                trim($data->contentlangstring),
+                trim($data->component)
+            ];
+            $this->set_content(implode(',', $content));
+        } else if ($data->contenttype == helper::TOOL_USERTOURS_CONTENTTYPE_HTML) {
+            $this->set_content($data->content['text'], $data->content['format']);
+        }
         $this->set_targettype($data->targettype);
 
         $this->set_targetvalue($this->get_target()->get_value_from_form($data));

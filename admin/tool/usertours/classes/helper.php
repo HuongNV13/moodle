@@ -47,6 +47,16 @@ class helper {
     const MOVE_DOWN = 1;
 
     /**
+     * @var TOOL_USERTOURS_CONTENTTYPE_LANGSTRING Language string id.
+     */
+    const TOOL_USERTOURS_CONTENTTYPE_LANGSTRING = 0;
+
+    /**
+     * @var TOOL_USERTOURS_CONTENTTYPE_HTML Plain HTML (with some tags stripped).
+     */
+    const TOOL_USERTOURS_CONTENTTYPE_HTML = FORMAT_HTML;
+
+    /**
      * @var boolean Has it been bootstrapped?
      */
     private static $bootstrapped = false;

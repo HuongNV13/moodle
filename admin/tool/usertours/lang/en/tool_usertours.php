@@ -39,9 +39,16 @@ $string['confirmtourremovalquestion'] = 'Are you sure that you wish to remove th
 $string['confirmtourremovaltitle'] = 'Confirm tour removal';
 $string['content'] = 'Content';
 $string['content_heading'] = 'Content';
-$string['content_help'] = 'Content describing the step may be added as plain text, enclosed in multilang tags (for use with the multi-language content filter) if required.
+$string['content_help'] = 'Content describing the step may be added as plain text, enclosed in multilang tags (for use with the multi-language content filter) if required.';
+$string['content_type'] = 'Content type';
+$string['content_type_help'] = 'Content types are:
 
-Alternatively, a language string ID may be entered in the format identifier,component (with no brackets or space after the comma).';
+* Moodle language string - Language string ID may be entered
+* HTML - Using an HTML Editor to input the content';
+$string['content_type_langstring'] = 'Moodle language string';
+$string['content_type_html'] = 'HTML';
+$string['component'] = 'Component';
+$string['component_name'] = '{$a->displayname} ({$a->type}_{$a->name})';
 $string['cssselector'] = 'CSS selector';
 $string['defaultvalue'] = 'Default ({$a})';
 $string['delay'] = 'Delay before showing the step';
@@ -79,7 +86,9 @@ $string['filter_theme_help'] = 'Show the tour when the user is using one of the 
 $string['filter_role'] = 'Role';
 $string['filter_role_help'] = 'A tour may be restricted to users with selected roles in the context where the tour is shown. For example, restricting a Dashboard tour to users with the role of student won\'t work if users have the role of student in a course (as is generally the case). A Dashboard tour can only be restricted to users with a system role.';
 $string['importtour'] = 'Import tour';
+$string['invalid_lang_id'] = 'Invalid language identifier';
 $string['left'] = 'Left';
+$string['language_identifider'] = 'Language identifier';
 $string['modifyshippedtourwarning'] = 'This is a user tour that has shipped with Moodle. Any modifications you make may be overridden during your next site upgrade.';
 $string['movestepdown'] = 'Move step down';
 $string['movestepup'] = 'Move step up';

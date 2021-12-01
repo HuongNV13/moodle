@@ -24,6 +24,9 @@
 
 namespace tool_usertours\local\forms;
 
+use core_plugin_manager;
+use tool_usertours\helper;
+
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
 require_once($CFG->libdir . '/formslib.php');
@@ -81,17 +84,37 @@ class editstep extends \moodleform {
         $mform->setType('title', PARAM_TEXT);
         $mform->addHelpButton('title', 'title', 'tool_usertours');
 
+        // Content type.
+        $typeoptions = [
+            helper::TOOL_USERTOURS_CONTENTTYPE_LANGSTRING => get_string('content_type_langstring', 'tool_usertours'),
+            helper::TOOL_USERTOURS_CONTENTTYPE_HTML => get_string('content_type_html', 'tool_usertours')
+        ];
+        $mform->addElement('select', 'contenttype', get_string('content_type', 'tool_usertours'), $typeoptions);
+        $mform->addHelpButton('contenttype', 'content_type', 'tool_usertours');
+        $mform->setDefault('contenttype', helper::TOOL_USERTOURS_CONTENTTYPE_HTML);
+
+        // Language identifier.
+        $mform->addElement('text', 'contentlangstring', get_string('language_identifider', 'tool_usertours'));
+        $mform->setType('contentlangstring', PARAM_TEXT);
+        $mform->hideIf('contentlangstring', 'contenttype', 'eq', helper::TOOL_USERTOURS_CONTENTTYPE_HTML);
+
+        // Component.
+        $mform->addElement('autocomplete', 'component', get_string('component', 'tool_usertours'), $this->get_components_list());
+        $mform->hideIf('component', 'contenttype', 'eq', helper::TOOL_USERTOURS_CONTENTTYPE_HTML);
+
+        // HTML content.
         $editoroptions = [
             'subdirs' => 1,
             'maxbytes' => $CFG->maxbytes,
             'maxfiles' => EDITOR_UNLIMITED_FILES,
-            'changeformat' => 1,
+            'changeformat' => false,
             'trusttext' => true
         ];
-        $mform->addElement('editor', 'content', get_string('content', 'tool_usertours'), null, $editoroptions);
-        $mform->addRule('content', get_string('required'), 'required', null, 'client');
-        $mform->setType('content', PARAM_RAW);  // No XSS prevention here, users must be trusted.
-        $mform->addHelpButton('content', 'content', 'tool_usertours');
+        $objs = $mform->createElement('editor', 'content', get_string('content', 'tool_usertours'), null, $editoroptions);
+        // TODO: MDL-68540 We need to add the editor to a group element because editor element will not work with hideIf.
+        $mform->addElement('group', 'contenthtmlgrp', get_string('content', 'tool_usertours'), [$objs], ' ', false);
+        $mform->addHelpButton('contenthtmlgrp', 'content', 'tool_usertours');
+        $mform->hideIf('contenthtmlgrp', 'contenttype', 'eq', helper::TOOL_USERTOURS_CONTENTTYPE_LANGSTRING);
 
         // Add the step configuration.
         $mform->addElement('header', 'heading_options', get_string('options_heading', 'tool_usertours'));
@@ -106,4 +129,84 @@ class editstep extends \moodleform {
 
         $this->add_action_buttons();
     }
+
+    /**
+     * Get the available components list.
+     *
+     * @return array
+     */
+    private function get_components_list(): array {
+        $componentslist = [];
+        $componentslist[''] = '';
+        $pluginman = core_plugin_manager::instance();
+        $plugininfo = $pluginman->get_plugins();
+        foreach ($plugininfo as $plugins) {
+            foreach ($plugins as $plugin) {
+                $componentslist[$plugin->type . '_' . $plugin->name] = get_string('component_name', 'tool_usertours', $plugin);
+            }
+        }
+
+        return $componentslist;
+    }
+
+    /**
+     * Validate the data base on the submitted content type.
+     *
+     * @param array $data array of ("fieldname"=>value) of submitted data
+     * @param array $files array of uploaded files "element_name"=>tmp_file_path
+     * @return array of "element_name"=>"error_description" if there are errors,
+     *         or an empty array if everything is OK (true allowed for backwards compatibility too).
+     */
+    public function validation($data, $files): array {
+        $errors = parent::validation($data, $files);
+
+        if ($data['contenttype'] == helper::TOOL_USERTOURS_CONTENTTYPE_LANGSTRING) {
+            $langid = '';
+            $langcomponent = '';
+            if (!isset($data['contentlangstring']) || trim($data['contentlangstring']) == '') {
+                $errors['contentlangstring'] = get_string('required');
+            } else {
+                $langid = trim($data['contentlangstring']);
+            }
+            if (!isset($data['component']) || trim($data['component']) == '') {
+                $errors['component'] = get_string('required');
+            } else {
+                $langcomponent = trim($data['component']);
+            }
+            if (!empty($langid) && !empty($langcomponent)) {
+                if (!get_string_manager()->string_exists($langid, $langcomponent)) {
+                    $errors['contentlangstring'] = get_string('invalid_lang_id', 'tool_usertours');
+                }
+            }
+        }
+        if ($data['contenttype'] == helper::TOOL_USERTOURS_CONTENTTYPE_HTML) {
+            if (strip_tags($data['content']['text']) == '') {
+                $errors['content'] = get_string('required');
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * After definition hook.
+     * Check if the content type is language or not and set the correct value to the form.
+     *
+     * @return void
+     */
+    protected function after_definition(): void {
+        parent::after_definition();
+        $mform = $this->_form;
+
+        if ($this->step->get_contenttype() == helper::TOOL_USERTOURS_CONTENTTYPE_LANGSTRING) {
+            if (!empty($this->step->get_content())) {
+                $bit = explode(',', $this->step->get_content());
+                $contentlangstringele = $mform->getElement('contentlangstring');
+                $componentele = $mform->getElement('component');
+                $contentlangstringele->setValue($bit[0]);
+                $componentele->setValue($bit[1]);
+            }
+        }
+    }
+
 }
