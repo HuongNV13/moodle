@@ -24,6 +24,9 @@
 
 namespace tool_usertours;
 
+use context_system;
+use stdClass;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -78,6 +81,11 @@ class step {
      * @var     int     $sortorder  The sort order.
      */
     protected $sortorder;
+
+    /**
+     * @var stdClass[] $files The list of attached files for this step.
+     */
+    protected $files = [];
 
     /**
      * @var     object  $config     The configuration as an object.
@@ -158,6 +166,11 @@ class step {
         $this->sortorder    = $record->sortorder;
         $this->config       = json_decode($record->configdata);
         $this->dirty        = false;
+
+        if (isset($record->files)) {
+            // Import files.
+            $this->files = $record->files;
+        }
 
         return $this;
     }
@@ -450,6 +463,55 @@ class step {
     }
 
     /**
+     * Get the attached files for this step.
+     *
+     * @return array List of files.
+     */
+    protected function extract_files(): array {
+        $systemcontext = context_system::instance();
+        $fs = get_file_storage();
+        $areafiles = $fs->get_area_files($systemcontext->id, 'tool_usertours', 'stepcontent', $this->id);
+        $files = [];
+        foreach ($areafiles as $file) {
+            if ($file->is_directory()) {
+                continue;
+            }
+            $files[] = [
+                'name' => $file->get_filename(),
+                'path' => $file->get_filepath(),
+                'content' => base64_encode($file->get_content()),
+                'encode' => 'base64'
+            ];
+        }
+
+        return $files;
+    }
+
+    /**
+     * Embed attached file for step.
+     *
+     * @return void
+     */
+    protected function embed_files() {
+        $fs = get_file_storage();
+        $systemcontext = context_system::instance();
+        foreach ($this->files as $file) {
+            $filename = $file->name;
+            $filepath = $file->path;
+            $filecontent = $file->content;
+            $filerecord = [
+                'contextid' => $systemcontext->id,
+                'component' => 'tool_usertours',
+                'filearea' => 'stepcontent',
+                'itemid' => $this->get_id(),
+                'filepath' => $filepath,
+                'filename' => $filename,
+            ];
+            $fs->create_file_from_string($filerecord, base64_decode($filecontent));
+        }
+    }
+
+    /**
      * Prepare this step for saving to the database.
      *
      * @return  object
@@ -465,6 +527,7 @@ class step {
             'targetvalue'   => $this->targetvalue,
             'sortorder'     => $this->sortorder,
             'configdata'    => json_encode($this->config),
+            'files' => $this->extract_files()
         );
     }
 
@@ -521,6 +584,12 @@ class step {
             );
             $DB->set_field('tool_usertours_steps', 'content', $this->content, ['id' => $this->id]);
         }
+
+        if (!empty($this->files)) {
+            // Create store_file from the json record.
+            $this->embed_files();
+        }
+
         $this->reload();
 
         // Notify of a change to the step configuration.
