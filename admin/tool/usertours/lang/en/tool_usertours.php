@@ -253,6 +253,14 @@ $string['tour_activityinfo_course_student_content'] = 'Activity dates and/or wha
 $string['tour_activityinfo_course_teacher_title'] = 'New: Activity information';
 $string['tour_activityinfo_course_teacher_content'] = 'New course settings \'Show completion conditions\' and \'Show activity dates\' enable you to choose whether activity completion conditions (if set) and/or dates are displayed for students on the course page.';
 
+// 4.0 New navigation tour.
+$string['tour_navigation_dashboard_title'] = 'Expand to explore!';
+$string['tour_navigation_mycourse_title'] = 'Courses and categories';
+$string['tour_navigation_course_edit_teacher_title'] = 'Activate editing mode first';
+$string['tour_navigation_course_index_teacher_title'] = 'Course index';
+$string['tour_navigation_course_announcements_teacher_title'] = 'Something to say?';
+$string['tour_navigation_course_index_student_title'] = 'Don\'t get lost!';
+
 $string['tour_final_step_title'] = 'End of tour';
 $string['tour_final_step_content'] = 'This is the end of your user tour. It won\'t show again unless you reset it using the link in the footer.';
 
