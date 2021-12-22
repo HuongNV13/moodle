@@ -468,14 +468,15 @@ class helper {
      * Get all of the steps in the tour.
      *
      * @param   int         $tourid     The tour that the step belongs to.
+     * @param boolean $isexporting Whether the step is being exported or not.
      * @return  stdClass[]
      */
-    public static function get_steps($tourid) {
+    public static function get_steps($tourid, bool $isexporting = false) {
         $steps = cache::get_stepdata($tourid);
 
         $return = [];
         foreach ($steps as $step) {
-            $return[$step->id] = step::load_from_record($step);
+            $return[$step->id] = step::load_from_record($step, false, $isexporting);
         }
         return $return;
     }

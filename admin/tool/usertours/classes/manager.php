@@ -427,7 +427,7 @@ class manager {
 
         // Step export.
         $export->steps = [];
-        foreach ($tour->get_steps() as $step) {
+        foreach ($tour->get_steps(true) as $step) {
             $record = $step->to_record();
             unset($record->id);
             unset($record->tourid);
@@ -674,7 +674,7 @@ class manager {
         foreach ($steps as $stepconfig) {
             $stepconfig->id = null;
             $stepconfig->tourid = $tour->get_id();
-            $step = step::load_from_record($stepconfig, true);
+            $step = step::load_from_record($stepconfig, true, true);
             $step->persist(true);
         }
 
