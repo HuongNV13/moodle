@@ -209,11 +209,12 @@ class tour {
     /**
      * Fetch all steps in the tour.
      *
+     * @param boolean $isexporting Whether the step is being exported or not.
      * @return  stdClass[]
      */
-    public function get_steps() {
+    public function get_steps(bool $isexporting = false) {
         if (empty($this->steps)) {
-            $this->steps = helper::get_steps($this->id);
+            $this->steps = helper::get_steps($this->id, $isexporting);
         }
 
         return $this->steps;

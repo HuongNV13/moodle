@@ -24,6 +24,9 @@
 
 namespace tool_usertours;
 
+use context_system;
+use stdClass;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -90,6 +93,16 @@ class step {
     protected $dirty = false;
 
     /**
+     * @var bool $isimportingexporting Whether the step is being imported/exported or not.
+     */
+    protected $isimportingexporting;
+
+    /**
+     * @var stdClass[] $files The list of attached files for this step.
+     */
+    protected $files = [];
+
+    /**
      * Fetch the step instance.
      *
      * @param   int             $id         The id of the step to be retrieved.
@@ -105,10 +118,12 @@ class step {
      *
      * @param   stdClass        $record     The step record to be loaded.
      * @param   boolean         $clean      Clean the values.
+     * @param boolean $isimportingexporting Whether the step is being imported/exported or not.
      * @return  step
      */
-    public static function load_from_record($record, $clean = false) {
+    public static function load_from_record($record, $clean = false, bool $isimportingexporting = false) {
         $step = new self();
+        $step->set_importing_exporting($isimportingexporting);
         return $step->reload_from_record($record, $clean);
     }
 
@@ -159,7 +174,22 @@ class step {
         $this->config       = json_decode($record->configdata);
         $this->dirty        = false;
 
+        if ($this->isimportingexporting && isset($record->files)) {
+            // We are importing/exporting the step.
+            $this->files = $record->files;
+        }
+
         return $this;
+    }
+
+    /**
+     * Set the import/export state for the step.
+     *
+     * @param bool $isimportingexporting True if the step is imported/export, otherwise false.
+     * @return void
+     */
+    protected function set_importing_exporting(bool $isimportingexporting = false): void {
+        $this->isimportingexporting = $isimportingexporting;
     }
 
     /**
@@ -450,12 +480,61 @@ class step {
     }
 
     /**
+     * Embed attached file to the json file for step.
+     *
+     * @return array List of files.
+     */
+    protected function embed_files(): array {
+        $systemcontext = context_system::instance();
+        $fs = get_file_storage();
+        $areafiles = $fs->get_area_files($systemcontext->id, 'tool_usertours', 'stepcontent', $this->id);
+        $files = [];
+        foreach ($areafiles as $file) {
+            if ($file->is_directory()) {
+                continue;
+            }
+            $files[] = [
+                'name' => $file->get_filename(),
+                'path' => $file->get_filepath(),
+                'content' => base64_encode($file->get_content()),
+                'encode' => 'base64'
+            ];
+        }
+
+        return $files;
+    }
+
+    /**
+     * Get the embed files information and create store_file for this step.
+     *
+     * @return void
+     */
+    protected function extract_files() {
+        $fs = get_file_storage();
+        $systemcontext = context_system::instance();
+        foreach ($this->files as $file) {
+            $filename = $file->name;
+            $filepath = $file->path;
+            $filecontent = $file->content;
+            $filerecord = [
+                'contextid' => $systemcontext->id,
+                'component' => 'tool_usertours',
+                'filearea' => 'stepcontent',
+                'itemid' => $this->get_id(),
+                'filepath' => $filepath,
+                'filename' => $filename,
+            ];
+            $fs->create_file_from_string($filerecord, base64_decode($filecontent));
+        }
+    }
+
+    /**
      * Prepare this step for saving to the database.
      *
      * @return  object
      */
     public function to_record() {
-        return (object) array(
+        $record = [
             'id'            => $this->id,
             'tourid'        => $this->tourid,
             'title'         => $this->title,
@@ -465,7 +544,12 @@ class step {
             'targetvalue'   => $this->targetvalue,
             'sortorder'     => $this->sortorder,
             'configdata'    => json_encode($this->config),
-        );
+        ];
+        if ($this->isimportingexporting) {
+            // We are exporting the step, adding files node to the json record.
+            $record['files'] = $this->embed_files();
+        }
+        return (object) $record;
     }
 
     /**
@@ -521,6 +605,12 @@ class step {
             );
             $DB->set_field('tool_usertours_steps', 'content', $this->content, ['id' => $this->id]);
         }
+
+        if ($this->isimportingexporting) {
+            // We are importing the step, we need to create store_file from the json record.
+            $this->extract_files();
+        }
+
         $this->reload();
 
         // Notify of a change to the step configuration.
