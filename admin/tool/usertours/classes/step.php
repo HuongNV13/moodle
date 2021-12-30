@@ -90,6 +90,21 @@ class step {
     protected $dirty = false;
 
     /**
+     * @var TOOL_USERTOURS_CONTENTTYPE_LANGSTRING Language string id.
+     */
+    const TOOL_USERTOURS_CONTENTTYPE_LANGSTRING = 0;
+
+    /**
+     * @var TOOL_USERTOURS_CONTENTTYPE_HTML Plain HTML (with some tags stripped).
+     */
+    const TOOL_USERTOURS_CONTENTTYPE_HTML = 1;
+
+    /**
+     * @var TOOL_USERTOURS_LANG_STRING_REGEX Regex to check any matching lang string.
+     */
+    const TOOL_USERTOURS_LANG_STRING_REGEX = '|^([a-zA-Z][a-zA-Z0-9\.:/_-]*),([a-zA-Z][a-zA-Z0-9\.:/_-]*)$|';
+
+    /**
      * Fetch the step instance.
      *
      * @param   int             $id         The id of the step to be retrieved.
@@ -678,6 +693,11 @@ class step {
     public function handle_form_submission(local\forms\editstep &$mform, \stdClass $data) {
         $this->set_title($data->title);
         $this->set_content($data->content['text'], $data->content['format']);
+        if ($data->contenttype == self::TOOL_USERTOURS_CONTENTTYPE_LANGSTRING) {
+            $this->set_content(trim($data->contentlangstring));
+        } else if ($data->contenttype == self::TOOL_USERTOURS_CONTENTTYPE_HTML) {
+            $this->set_content($data->content['text'], $data->content['format']);
+        }
         $this->set_targettype($data->targettype);
 
         $this->set_targetvalue($this->get_target()->get_value_from_form($data));
@@ -712,7 +732,7 @@ class step {
     public static function get_string_from_input($string) {
         $string = trim($string);
 
-        if (preg_match('|^([a-zA-Z][a-zA-Z0-9\.:/_-]*),([a-zA-Z][a-zA-Z0-9\.:/_-]*)$|', $string, $matches)) {
+        if (preg_match(self::TOOL_USERTOURS_LANG_STRING_REGEX, $string, $matches)) {
             if ($matches[2] === 'moodle') {
                 $matches[2] = 'core';
             }
@@ -723,5 +743,15 @@ class step {
         }
 
         return $string;
+    }
+
+    /**
+     * Check if the given string contains any matching langstring.
+     *
+     * @param string $string
+     * @return bool
+     */
+    public static function is_language_string_from_input(string $string): bool {
+        return preg_match(self::TOOL_USERTOURS_LANG_STRING_REGEX, $string) == true;
     }
 }

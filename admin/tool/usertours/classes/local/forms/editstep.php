@@ -24,6 +24,8 @@
 
 namespace tool_usertours\local\forms;
 
+use tool_usertours\step;
+
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
 require_once($CFG->libdir . '/formslib.php');
@@ -81,6 +83,20 @@ class editstep extends \moodleform {
         $mform->setType('title', PARAM_TEXT);
         $mform->addHelpButton('title', 'title', 'tool_usertours');
 
+        // Content type.
+        $typeoptions = [
+            step::TOOL_USERTOURS_CONTENTTYPE_LANGSTRING => get_string('content_type_langstring', 'tool_usertours'),
+            step::TOOL_USERTOURS_CONTENTTYPE_HTML => get_string('content_type_html', 'tool_usertours')
+        ];
+        $mform->addElement('select', 'contenttype', get_string('content_type', 'tool_usertours'), $typeoptions);
+        $mform->addHelpButton('contenttype', 'content_type', 'tool_usertours');
+        $mform->setDefault('contenttype', step::TOOL_USERTOURS_CONTENTTYPE_HTML);
+
+        // Language identifier.
+        $mform->addElement('textarea', 'contentlangstring', get_string('moodle_language_identifider', 'tool_usertours'));
+        $mform->setType('contentlangstring', PARAM_TEXT);
+        $mform->hideIf('contentlangstring', 'contenttype', 'eq', step::TOOL_USERTOURS_CONTENTTYPE_HTML);
+
         $editoroptions = [
             'subdirs' => 1,
             'maxbytes' => $CFG->maxbytes,
@@ -88,10 +104,11 @@ class editstep extends \moodleform {
             'changeformat' => 1,
             'trusttext' => true
         ];
-        $mform->addElement('editor', 'content', get_string('content', 'tool_usertours'), null, $editoroptions);
-        $mform->addRule('content', get_string('required'), 'required', null, 'client');
-        $mform->setType('content', PARAM_RAW);  // No XSS prevention here, users must be trusted.
-        $mform->addHelpButton('content', 'content', 'tool_usertours');
+        $objs = $mform->createElement('editor', 'content', get_string('content', 'tool_usertours'), null, $editoroptions);
+        // TODO: MDL-68540 We need to add the editor to a group element because editor element will not work with hideIf.
+        $mform->addElement('group', 'contenthtmlgrp', get_string('content', 'tool_usertours'), [$objs], ' ', false);
+        $mform->addHelpButton('contenthtmlgrp', 'content', 'tool_usertours');
+        $mform->hideIf('contenthtmlgrp', 'contenttype', 'eq', step::TOOL_USERTOURS_CONTENTTYPE_LANGSTRING);
 
         // Add the step configuration.
         $mform->addElement('header', 'heading_options', get_string('options_heading', 'tool_usertours'));
@@ -105,5 +122,61 @@ class editstep extends \moodleform {
         }
 
         $this->add_action_buttons();
+    }
+
+    /**
+     * Validate the data base on the submitted content type.
+     *
+     * @param array $data array of ("fieldname"=>value) of submitted data
+     * @param array $files array of uploaded files "element_name"=>tmp_file_path
+     * @return array of "element_name"=>"error_description" if there are errors,
+     *         or an empty array if everything is OK (true allowed for backwards compatibility too).
+     */
+    public function validation($data, $files): array {
+        $errors = parent::validation($data, $files);
+
+        if ($data['contenttype'] == step::TOOL_USERTOURS_CONTENTTYPE_LANGSTRING) {
+            if (!isset($data['contentlangstring']) || trim($data['contentlangstring']) == '') {
+                $errors['contentlangstring'] = get_string('required');
+            } else {
+                $splitted = explode(',', trim($data['contentlangstring']), 2);
+                $langid = $splitted[0];
+                $langcomponent = $splitted[1];
+                if (!get_string_manager()->string_exists($langid, $langcomponent)) {
+                    $errors['contentlangstring'] = get_string('invalid_lang_id', 'tool_usertours');
+                }
+            }
+        }
+
+        if ($data['contenttype'] == step::TOOL_USERTOURS_CONTENTTYPE_HTML) {
+            if (strip_tags($data['content']['text']) == '') {
+                $errors['content'] = get_string('required');
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * After definition hook.
+     * Check if the content type is language or not and set the correct value to the form.
+     *
+     * @return void
+     */
+    function definition_after_data(): void {
+        parent::definition_after_data();
+        $mform = $this->_form;
+
+        if (!empty($this->step->get_content())) {
+            if (step::is_language_string_from_input($this->step->get_content())) {
+                // Moodle language string.
+                $mform->getElement('contenttype')->setSelected(step::TOOL_USERTOURS_CONTENTTYPE_LANGSTRING);
+                $contentlangstringele = $mform->getElement('contentlangstring');
+                $contentlangstringele->setValue($this->step->get_content());
+                // Empty the HTML content element.
+                $contenthtmlele = $mform->getElement('contenthtmlgrp')->getElements()[0];
+                $contenthtmlele->setValue(['text' => '']);
+            }
+        }
     }
 }
