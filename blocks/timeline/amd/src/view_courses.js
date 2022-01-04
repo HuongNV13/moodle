@@ -81,7 +81,7 @@ function(
      *
      * @param {object} root The rool element.
      */
-     var showLoadingPlaceholder = function(root) {
+    const showLoadingPlaceholder = function(root) {
         root.find(SELECTORS.COURSE_ITEMS_LOADING_PLACEHOLDER).removeClass('hidden');
     };
 
@@ -138,9 +138,9 @@ function(
      *
      * @param {object} root The rool element.
      */
-     var showNoCoursesWithEventsMessage = function(root) {
+    const showNoCoursesWithEventsMessage = function(root) {
         // Remove any course list contents, since we will display the no events message.
-        var container = root.find(SELECTORS.COURSES_LIST);
+        const container = root.find(SELECTORS.COURSES_LIST);
         Templates.replaceNodeContents(container, '', '');
         root.find(SELECTORS.NO_COURSES_WITH_EVENTS_MESSAGE).removeClass('hidden');
     };
@@ -150,7 +150,7 @@ function(
      *
      * @param {object} root The rool element.
      */
-     var hideNoCoursesWithEventsMessage = function(root) {
+    const hideNoCoursesWithEventsMessage = function(root) {
         root.find(SELECTORS.NO_COURSES_WITH_EVENTS_MESSAGE).addClass('hidden');
     };
 
@@ -403,8 +403,8 @@ function(
     var loadMoreCourses = function(root, append = false) {
         var offset = getOffset(root);
         var limit = getLimit(root);
-        var startTime = getStartTime(root);
-        var endTime = getEndTime(root);
+        const startTime = getStartTime(root);
+        const endTime = getEndTime(root);
         const searchValue = root.closest(SELECTORS.TIMELINE_BLOCK).find(SELECTORS.TIMELINE_SEARCH).val();
 
         // Start loading the next set of courses.
@@ -425,7 +425,7 @@ function(
             var daysOffset = getDaysOffset(root);
             var daysLimit = getDaysLimit(root);
             var midnight = getMidnight(root);
-            const morecoursesavailable = result.morecoursesavailable;
+            const moreCoursesAvailable = result.morecoursesavailable;
 
             // Record the next offset if we want to request more courses.
             setOffset(root, nextOffset);
@@ -444,15 +444,15 @@ function(
                     if (courses.length > 0) {
                         // Render the events in the correct course event list.
                         courses.forEach(function(course) {
-                            var courseId = course.id;
-                            var containerSelector = '[data-region="course-events-container"][data-course-id="' + courseId + '"]';
-                            var courseEventsContainer = root.find(containerSelector);
-                            var eventListRoot = courseEventsContainer.find(EventList.rootSelector);
+                            const courseId = course.id;
+                            const containerSelector = '[data-region="course-events-container"][data-course-id="' + courseId + '"]';
+                            const courseEventsContainer = root.find(containerSelector);
+                            const eventListRoot = courseEventsContainer.find(EventList.rootSelector);
 
                             EventList.init(eventListRoot, additionalConfig);
                         });
 
-                        if (!morecoursesavailable) {
+                        if (!moreCoursesAvailable) {
                             // If no more courses with events matching the current filtering exist, hide the more courses button.
                             hideMoreCoursesButton(root);
                         } else {
