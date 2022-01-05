@@ -28,7 +28,8 @@ define(
     'core/templates',
     'block_timeline/event_list',
     'core_course/repository',
-    'block_timeline/calendar_events_repository'
+    'block_timeline/calendar_events_repository',
+    'core/pending'
 ],
 function(
     $,
@@ -37,7 +38,8 @@ function(
     Templates,
     EventList,
     CourseRepository,
-    EventsRepository
+    EventsRepository,
+    Pending
 ) {
 
     var SELECTORS = {
@@ -401,6 +403,7 @@ function(
      * @return {object} jQuery promise resolved with courses and events.
      */
     var loadMoreCourses = function(root, append = false) {
+        const pendingPromise = new Pending('block/timeline:load-more-courses');
         var offset = getOffset(root);
         var limit = getLimit(root);
         const startTime = getStartTime(root);
@@ -418,7 +421,7 @@ function(
             searchValue,
             startTime,
             endTime
-        ).then(function(result, startTime, endTime) {
+        ).then(function(result) {
             var startEventLoadingTime = Date.now();
             var courses = result.courses;
             var nextOffset = result.nextoffset;
@@ -471,6 +474,8 @@ function(
 
                     return eventsByCourse;
                 });
+        }).then(() => {
+            return pendingPromise.resolve();
         }).catch(Notification.exception);
     };
 

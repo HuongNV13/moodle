@@ -108,6 +108,7 @@ Feature: The timeline block allows users to search for upcoming activities
     And I should see "Test choice 2" in the ".block-timeline [data-region='view-courses']" "css_element"
     And I should see "Test choice 3" in the ".block-timeline [data-region='view-courses']" "css_element"
     When I set the field "Search by activity type or name" to "choice 1"
+    And I wait until "Course 1" "text" does not exist
     Then I should see "Test choice 1" in the "Timeline" "block"
     And I should see "Course 2" in the ".block-timeline [data-region='view-courses']" "css_element"
     And I should not see "Course 1" in the ".block-timeline [data-region='view-courses']" "css_element"
