@@ -1424,13 +1424,13 @@ function move_section_to($course, $section, $destination, $ignorenumsections = f
     // uniqueness constraint
     $transaction = $DB->start_delegated_transaction();
     foreach ($movedsections as $id => $position) {
-        if ($sections[$id] !== $position) {
+        if ((int) $sections[$id] !== $position) {
             $DB->set_field('course_sections', 'section', -$position, ['id' => $id]);
             course_modinfo::purge_section_cache_by_id($course->id, $id);
         }
     }
     foreach ($movedsections as $id => $position) {
-        if ($sections[$id] !== $position) {
+        if ((int) $sections[$id] !== $position) {
             $DB->set_field('course_sections', 'section', $position, ['id' => $id]);
             course_modinfo::purge_section_cache_by_id($course->id, $id);
         }
