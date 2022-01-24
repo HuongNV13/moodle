@@ -93,11 +93,6 @@ class step {
     protected $dirty = false;
 
     /**
-     * @var string Regex to check any matching lang string.
-     */
-    protected const LANG_STRING_REGEX = '|^([a-zA-Z][a-zA-Z0-9\.:/_-]*),([a-zA-Z][a-zA-Z0-9\.:/_-]*)$|';
-
-    /**
      * @var bool $isimporting Whether the step is being imported or not.
      */
     protected $isimporting;
@@ -801,32 +796,13 @@ class step {
      * Attempt to fetch any matching langstring if the string is in the
      * format identifier,component.
      *
+     * @deprecated since Moodle 4.0 MDL-72783. Please use helper::get_string_from_input() instead.
      * @param   string  $string
      * @return  string
      */
     public static function get_string_from_input($string) {
-        $string = trim($string);
-
-        if (preg_match(static::LANG_STRING_REGEX, $string, $matches)) {
-            if ($matches[2] === 'moodle') {
-                $matches[2] = 'core';
-            }
-
-            if (get_string_manager()->string_exists($matches[1], $matches[2])) {
-                $string = get_string($matches[1], $matches[2]);
-            }
-        }
-
-        return $string;
-    }
-
-    /**
-     * Check if the given string contains any matching langstring.
-     *
-     * @param string $string Tour step content
-     * @return bool
-     */
-    public static function is_language_string_from_input(string $string): bool {
-        return preg_match(static::LANG_STRING_REGEX, $string) == true;
+        debugging('Use of ' . __FUNCTION__ .
+            '() have been deprecated, please update your code to use helper::get_string_from_input()', DEBUG_DEVELOPER);
+        return helper::get_string_from_input($string);
     }
 }
