@@ -160,7 +160,7 @@ class editstep extends \moodleform {
         }
 
         if ($data['contenttype'] == static::CONTENTTYPE_MANUAL) {
-            if (strip_tags($data['content']['text']) == '') {
+            if ((string) $data['content']['text'] == '') {
                 $errors['content'] = get_string('required');
             }
         }
