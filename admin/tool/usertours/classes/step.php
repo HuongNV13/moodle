@@ -805,4 +805,31 @@ class step {
             '() have been deprecated, please update your code to use helper::get_string_from_input()', DEBUG_DEVELOPER);
         return helper::get_string_from_input($string);
     }
+
+    /**
+     * Attempt to replace PIXICON placeholder with the correct images for tour step content.
+     *
+     * @param string $content Tour content
+     * @return string Processed tour content
+     */
+    public static function get_step_image_from_input(string $content): string {
+        if (strpos($content, '@@PIXICON') === false) {
+            return $content;
+        }
+
+        $content = preg_replace_callback('%@@PIXICON::(?P<identifier>([^::]*))::(?P<component>([^@@]*))@@%',
+            function(array $matches) {
+                global $OUTPUT;
+                $component = $matches['component'];
+                if ($component == 'moodle') {
+                    $component = 'core';
+                }
+                return \html_writer::img($OUTPUT->image_url($matches['identifier'], $component)->out(false), '',
+                    ['class' => 'img-fluid']);
+            },
+            $content
+        );
+
+        return $content;
+    }
 }
