@@ -447,6 +447,10 @@ M.course_dndupload = {
             return false;
         }
 
+        if (!e._event.target.closest('li.dndupload-preview')) {
+            return false;
+        }
+
         // Work out the number of the section we are on (from its id)
         var section = this.get_section(e.currentTarget);
         var sectionnumber = this.get_section_number(section);
@@ -584,7 +588,7 @@ M.course_dndupload = {
             namespan: document.createElement('span')
         };
 
-        preview.li.className = 'dndupload-preview dndupload-hidden';
+        preview.li.className = 'dndupload-preview dndupload-hidden undroppable';
 
         preview.div.className = 'mod-indent';
         preview.li.appendChild(preview.div);
