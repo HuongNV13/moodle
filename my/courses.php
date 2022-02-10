@@ -63,11 +63,12 @@ $PAGE->theme->addblockposition  = BLOCK_ADDBLOCK_POSITION_CUSTOM;
 
 // Add course management if the user has the capabilities for it.
 $coursecat = core_course_category::user_top();
-if ($coursecat->can_create_course() || $coursecat->has_manage_capability()) {
-    $data = [
-        'newcourseurl' => new moodle_url('/course/edit.php', ['category' => $coursecat->id]),
-        'manageurl' => new moodle_url('/course/management.php', ['categoryid' => $coursecat->id]),
-    ];
+if ($category = core_course_category::get_nearest_creatable_subcategory($coursecat)) {
+    $data['newcourseurl'] = new moodle_url('/course/edit.php', ['category' => $category->id]);
+    if ($category->has_manage_capability()) {
+        $data['manageurl'] = new moodle_url('/course/management.php', ['categoryid' => $category->id]);
+    }
+
     $PAGE->add_header_action($OUTPUT->render_from_template('my/dropdown', $data));
 }
 

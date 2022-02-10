@@ -3107,4 +3107,26 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
         }
         return true;
     }
+
+    /**
+     * Returns the core_course_category object for the first category that the current user can create the course.
+     *
+     * Only returns if it exists and is creatable to the current user
+     *
+     * @param core_course_category $parentcat Parent category to check.
+     * @return core_course_category|null
+     */
+    public static function get_nearest_creatable_subcategory(core_course_category $parentcat): ?core_course_category {
+        if ($parentcat->can_create_course()) {
+            return $parentcat;
+        }
+        $subcategoryids = $parentcat->get_all_children_ids();
+        foreach ($subcategoryids as $subcategoryid) {
+            $subcategory = static::get($subcategoryid);
+            if ($subcategory->can_create_course()) {
+                return $subcategory;
+            }
+        }
+        return null;
+    }
 }

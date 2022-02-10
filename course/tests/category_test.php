@@ -1102,4 +1102,68 @@ class core_course_category_testcase extends advanced_testcase {
         $this->assertCount(1, $courses);
         $this->assertArrayHasKey($othercourse->id, $courses);
     }
+
+    /**
+     * Test get_nearest_editable_subcategory() method.
+     *
+     * @covers \core_course_category::get_nearest_creatable_subcategory
+     */
+    public function test_get_nearest_editable_subcategory(): void {
+        global $DB;
+
+        $coursecreatorrole = $DB->get_record('role', ['shortname' => 'coursecreator']);
+
+        // Create categories.
+        $category1 = core_course_category::create(['name' => 'Cat1']);
+        $category2 = core_course_category::create(['name' => 'Cat2']);
+        $category3 = core_course_category::create(['name' => 'Cat3']);
+        // Cat4's parent is Cat3.
+        $category4 = core_course_category::create(['name' => 'Cat4', 'parent' => $category3->id]);
+        $category1context = $category1->get_context();
+        $category2context = $category2->get_context();
+        $category3context = $category3->get_context();
+        $category4context = $category4->get_context();
+
+        // Create user.
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+        // Login as user1.
+        $this->setUser($user1);
+
+        $coursecat = core_course_category::user_top();
+        // The get_nearest_editable_subcategory should return null (The user1 do not have permission on any categories).
+        $this->assertEmpty(core_course_category::get_nearest_creatable_subcategory($coursecat));
+
+        // Assign the user1 to 'Course creator' role for Cat1.
+        role_assign($coursecreatorrole->id, $user1->id, $category1context->id);
+
+        $coursecat = core_course_category::user_top();
+        // The get_nearest_editable_subcategory should not return null anymore.
+        $this->assertNotEmpty(core_course_category::get_nearest_creatable_subcategory($coursecat));
+        // The get_nearest_editable_subcategory should return Cat1.
+        $this->assertEquals($category1->id, core_course_category::get_nearest_creatable_subcategory($coursecat)->id);
+
+        // Assign the user1 to 'Course creator' role for Cat2.
+        role_assign($coursecreatorrole->id, $user1->id, $category2context->id);
+
+        $coursecat = core_course_category::user_top();
+        // The get_nearest_editable_subcategory should not return null anymore.
+        $this->assertNotEmpty(core_course_category::get_nearest_creatable_subcategory($coursecat));
+        // The get_nearest_editable_subcategory should still return Cat1 (First editable subcategory).
+        $this->assertEquals($category1->id, core_course_category::get_nearest_creatable_subcategory($coursecat)->id);
+
+        // Login as user2.
+        $this->setUser($user2);
+
+        // Assign the user2 to 'Course creator' role for Cat4.
+        role_assign($coursecreatorrole->id, $user2->id, $category4context->id);
+
+        $coursecat = core_course_category::user_top();
+        // The get_nearest_editable_subcategory should not return null.
+        $this->assertNotEmpty(core_course_category::get_nearest_creatable_subcategory($coursecat));
+        // The get_nearest_editable_subcategory should return Cat4.
+        $this->assertEquals($category4->id, core_course_category::get_nearest_creatable_subcategory($coursecat)->id);
+        // The get_nearest_editable_subcategory should not return Cat3.
+        $this->assertNotEquals($category3->id, core_course_category::get_nearest_creatable_subcategory($coursecat)->id);
+    }
 }
