@@ -476,18 +476,8 @@ class course_modinfo {
 
         // Retrieve modinfo from cache. If not present or cacherev mismatches, call rebuild and retrieve again.
         $coursemodinfo = $cachecoursemodinfo->get_versioned($course->id, $course->cacherev);
-        if (!$coursemodinfo) {
-            $lock = self::get_course_cache_lock($course->id);
-            try {
-                // Only actually do the build if it's still needed after getting the lock (not if
-                // somebody else, who might have been holding the lock, built it already).
-                $coursemodinfo = $cachecoursemodinfo->get_versioned($course->id, $course->cacherev);
-                if (!$coursemodinfo) {
-                    $coursemodinfo = self::inner_build_course_cache($course, $lock);
-                }
-            } finally {
-                $lock->release();
-            }
+        if ($coursemodinfo === false || ($course->cacherev != $coursemodinfo->cacherev)) {
+            $coursemodinfo = self::build_course_cache($course, true);
         }
 
         // Set initial values
@@ -605,7 +595,7 @@ class course_modinfo {
 
         if ($usecache) {
             $cachecoursemodinfo = \cache::make('core', 'coursemodinfo');
-            $coursemodinfo = $cachecoursemodinfo->get($course->id);
+            $coursemodinfo = $cachecoursemodinfo->get_versioned($course->id, $course->cacherev);
             if ($coursemodinfo !== false) {
                 $compressedsections = $coursemodinfo->sectioncache;
             }
@@ -727,20 +717,21 @@ class course_modinfo {
      * @param int $sectionid The section _id_ to purge
      */
     public static function purge_course_section_cache_by_id(int $courseid, int $sectionid): void {
+        $course = get_course($courseid);
         $cache = cache::make('core', 'coursemodinfo');
-        $cache->acquire_lock($courseid);
-        $coursemodinfo = $cache->get($courseid);
+        $cache->acquire_lock($course->id);
+        $coursemodinfo = $cache->get_versioned($course->id, $course->cacherev);
         if ($coursemodinfo !== false) {
             foreach ($coursemodinfo->sectioncache as $sectionno => $sectioncache) {
                 if ($sectioncache->id == $sectionid) {
                     $coursemodinfo->cacherev = -1;
                     unset($coursemodinfo->sectioncache[$sectionno]);
-                    $cache->set($courseid, $coursemodinfo);
+                    $cache->set_versioned($course->id, $course->cacherev, $coursemodinfo);
                     break;
                 }
             }
         }
-        $cache->release_lock($courseid);
+        $cache->release_lock($course->id);
     }
 
     /**
@@ -750,15 +741,16 @@ class course_modinfo {
      * @param int $sectionno The section number to purge
      */
     public static function purge_course_section_cache_by_number(int $courseid, int $sectionno): void {
+        $course = get_course($courseid);
         $cache = cache::make('core', 'coursemodinfo');
-        $cache->acquire_lock($courseid);
-        $coursemodinfo = $cache->get($courseid);
+        $cache->acquire_lock($course->id);
+        $coursemodinfo = $cache->get_versioned($course->id, $course->cacherev);
         if ($coursemodinfo !== false && array_key_exists($sectionno, $coursemodinfo->sectioncache)) {
             $coursemodinfo->cacherev = -1;
             unset($coursemodinfo->sectioncache[$sectionno]);
-            $cache->set($courseid, $coursemodinfo);
+            $cache->set_versioned($course->id, $course->cacherev, $coursemodinfo);
         }
-        $cache->release_lock($courseid);
+        $cache->release_lock($course->id);
     }
 
     /**
@@ -768,16 +760,18 @@ class course_modinfo {
      * @param int $cmid Course module id
      */
     public static function purge_course_module_cache(int $courseid, int $cmid): void {
+        $course = get_course($courseid);
         $cache = cache::make('core', 'coursemodinfo');
-        $cache->acquire_lock($courseid);
-        $coursemodinfo = $cache->get($courseid);
+        $cache->acquire_lock($course->id);
+        $coursemodinfo = $cache->get_versioned($course->id, $course->cacherev);
         $hascache = ($coursemodinfo !== false) && array_key_exists($cmid, $coursemodinfo->modinfo);
         if ($hascache) {
             $coursemodinfo->cacherev = -1;
             unset($coursemodinfo->modinfo[$cmid]);
-            $cache->set($courseid, $coursemodinfo);
+            $cache->set_versioned($course->id, $course->cacherev, $coursemodinfo);
+            $coursemodinfo = $cache->get_versioned($course->id, $course->cacherev);
         }
-        $cache->release_lock($courseid);
+        $cache->release_lock($course->id);
     }
 }
 

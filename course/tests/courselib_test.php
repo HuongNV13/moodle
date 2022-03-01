@@ -1058,7 +1058,7 @@ class courselib_test extends advanced_testcase {
         // Build course cache.
         get_fast_modinfo($course->id);
         // Get the course modinfo cache.
-        $coursemodinfo = $cache->get($course->id);
+        $coursemodinfo = $cache->get_versioned($course->id, $course->cacherev);
         // Get the section cache.
         $sectioncaches = $coursemodinfo->sectioncache;
 
@@ -1072,7 +1072,7 @@ class courselib_test extends advanced_testcase {
         // Move section.
         move_section_to($course, 2, 3);
         // Get the course modinfo cache.
-        $coursemodinfo = $cache->get($course->id);
+        $coursemodinfo = $cache->get_versioned($course->id, $course->cacherev);
         // Get the section cache.
         $sectioncaches = $coursemodinfo->sectioncache;
 
