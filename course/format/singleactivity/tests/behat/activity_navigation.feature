@@ -18,9 +18,9 @@ Feature: Activity navigation in a single activity course
       | teacher1  | C1      | editingteacher  |
     And the following "activities" exist:
       | activity   | name         | intro                       | course | idnumber  | section |
+      | forum      | Forum 1      | Test forum description      | C1     | forum1    | 0       |
       | assign     | Assignment 1 | Test assignment description | C1     | assign1   | 0       |
       | chat       | Chat 1       | Test chat description       | C1     | chat1     | 0       |
-      | forum      | Forum 1      | Test forum description      | C1     | forum1    | 0       |
 
   Scenario: Step through hidden activities in the course as a teacher.
     Given I log in as "teacher1"

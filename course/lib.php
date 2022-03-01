@@ -419,7 +419,7 @@ function get_array_of_activities(int $courseid, bool $usecache = false): array {
     if ($usecache) {
         // Get existing cache.
         $cachecoursemodinfo = cache::make('core', 'coursemodinfo');
-        $coursemodinfo = $cachecoursemodinfo->get($courseid);
+        $coursemodinfo = $cachecoursemodinfo->get_versioned($course->id, $course->cacherev);
         if ($coursemodinfo !== false) {
             $mods = $coursemodinfo->modinfo;
         }
