@@ -71,8 +71,8 @@ class completionlib_test extends advanced_testcase {
         $this->user = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($this->user->id, $this->course->id);
 
-        //$this->module1 = $this->getDataGenerator()->create_module('forum', array('course' => $this->course->id));
-        //$this->module2 = $this->getDataGenerator()->create_module('forum', array('course' => $this->course->id));
+        $this->module1 = $this->getDataGenerator()->create_module('forum', array('course' => $this->course->id));
+        $this->module2 = $this->getDataGenerator()->create_module('forum', array('course' => $this->course->id));
     }
 
     /**

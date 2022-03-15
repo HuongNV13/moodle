@@ -3688,3 +3688,18 @@ function print_grade_plugin_selector($plugin_info, $active_type, $active_plugin,
         return '';
     }
 }
+
+/**
+ * For a given course, returns an array of course activity objects
+ * Each item in the array contains he following properties:
+ *
+ * @deprecated since Moodle 4.0. Please use {@link course_modinfo::get_array_of_activities()} instead.
+ * @param int $courseid course id
+ * @param bool $usecache get activities from cache if modinfo exists when $usecache is true
+ * @return array list of activities
+ */
+function get_array_of_activities(int $courseid, bool $usecache = false): array {
+    debugging(__FUNCTION__ . '() is deprecated. ' . 'Please use course_modinfo::get_array_of_activities() instead.',
+        DEBUG_DEVELOPER);
+    return course_modinfo::get_array_of_activities(get_course($courseid), $usecache);
+}
