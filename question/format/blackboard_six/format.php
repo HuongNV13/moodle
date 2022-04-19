@@ -152,7 +152,7 @@ class qformat_blackboard_six extends qformat_blackboard_six_base {
                     }
                     if ($examfile->getAttribute('type') == 'assessment/x-bb-pool') {
                         if ($examfile->getAttribute('baseurl')) {
-                            $fileobj->filebase = $this->tempdir. '/' . $examfile->getAttribute('baseurl');
+                            $fileobj->filebase = $this->mangle_baseurl($this->tempdir . '/' . $examfile->getAttribute('baseurl'));
                         }
                         if ($content = $this->get_filecontent($examfile->getAttribute('file'))) {
                             $fileobj->filetype = self::FILETYPE_POOL;

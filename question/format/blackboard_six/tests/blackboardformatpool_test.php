@@ -333,4 +333,42 @@ class qformat_blackboard_six_pool_test extends question_testcase {
 
         $this->assert(new question_check_specified_fields_expectation($expectedq), $q);
     }
+
+    /**
+     * Test mangle_baseurl() method.
+     *
+     * @dataProvider baseurl_provider
+     * @covers \qformat_blackboard_six_base::mangle_baseurl
+     * @param string $baseurl Base url to test
+     * @param string $expected Expected
+     */
+    public function test_mangle_baseurl(string $baseurl, string $expected) {
+        $importer = new qformat_blackboard_six();
+
+        $method = new ReflectionMethod('qformat_blackboard_six', 'mangle_baseurl');
+        $method->setAccessible(true);
+        $result = $method->invoke($importer, $baseurl);
+        $this->assertSame($expected, $result);
+    }
+
+    /**
+     * Provide some tested base url and expected results.
+     *
+     * @return array Array of tested base url and expected results.
+     */
+    public function baseurl_provider(): array {
+        return [
+            // MS separator test.
+            ['c:\temp', 'c:/temp'],
+
+            // Leading slash test.
+            ['/tmp/', 'tmp/'],
+
+            // Path traversal test.
+            ['../../../../../etc/', 'etc/'],
+            ['../', ''],
+            ['.../...//', ''],
+            ['.', '']
+        ];
+    }
 }

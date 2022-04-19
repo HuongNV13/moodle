@@ -152,4 +152,25 @@ class qformat_blackboard_six_base extends qformat_based_on_xml {
     public function cleaned_text_field($text) {
         return $this->text_field($this->cleaninput($text));
     }
+
+    /**
+     * Normalize the base url
+     *
+     * @param string $baseurl Base url of the package
+     * @return string Normalised base url of the package
+     */
+    protected function mangle_baseurl(string $baseurl): string {
+        // Replace MS \ separators.
+        $mangledbaseurl = str_replace('\\', '/', $baseurl);
+        // Remove any number of ../ to prevent path traversal.
+        $mangledbaseurl = preg_replace('/\.\.+\//', '', $mangledbaseurl);
+        // Remove leading slash.
+        $mangledbaseurl = ltrim($mangledbaseurl, '/');
+
+        if ($mangledbaseurl === '.') {
+            $mangledbaseurl = '';
+        }
+
+        return $mangledbaseurl;
+    }
 }
