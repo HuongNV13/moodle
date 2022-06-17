@@ -249,7 +249,7 @@ class view {
                 'question_name_idnumber_tags_column',
                 'edit_menu_column',
                 'edit_action_column',
-                'copy_action_column',
+                'duplicate_action_column',
                 'tags_action_column',
                 'preview_action_column',
                 'history_action_column',
@@ -683,8 +683,10 @@ class view {
      *
      * @param int $questionid the question id.
      * @return \moodle_url the URL.
+     * @deprecated since Moodle 4.1
      */
     public function copy_question_moodle_url($questionid) {
+        debugging(__FUNCTION__ . '() is deprecated.', DEBUG_DEVELOPER);
         return new \moodle_url($this->editquestionurl, ['id' => $questionid, 'makecopy' => 1]);
     }
 
@@ -692,8 +694,10 @@ class view {
      * Get the URL for duplicating a given question.
      * @param int $questionid the question id.
      * @return string the URL, HTML-escaped.
+     * @deprecated since Moodle 4.1
      */
     public function copy_question_url($questionid) {
+        debugging(__FUNCTION__ . '() is deprecated.', DEBUG_DEVELOPER);
         return $this->copy_question_moodle_url($questionid)->out();
     }
 

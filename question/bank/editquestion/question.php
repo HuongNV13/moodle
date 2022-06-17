@@ -28,7 +28,6 @@ require_once($CFG->libdir . '/formslib.php');
 
 // Read URL parameters telling us which question to edit.
 $id = optional_param('id', 0, PARAM_INT); // Question id.
-$makecopy = optional_param('makecopy', 0, PARAM_BOOL);
 $qtype = optional_param('qtype', '', PARAM_COMPONENT);
 $categoryid = optional_param('category', 0, PARAM_INT);
 $cmid = optional_param('cmid', 0, PARAM_INT);
@@ -44,9 +43,6 @@ $scrollpos = optional_param('scrollpos', 0, PARAM_INT);
 $url = new moodle_url('/question/bank/editquestion/question.php');
 if ($id !== 0) {
     $url->param('id', $id);
-}
-if ($makecopy) {
-    $url->param('makecopy', $makecopy);
 }
 if ($qtype !== '') {
     $url->param('qtype', $qtype);
@@ -174,14 +170,6 @@ if ($id) {
     if (!$formeditable) {
         question_require_capability_on($question, 'view');
     }
-    $question->beingcopied = false;
-    if ($makecopy) {
-        // If we are duplicating a question, add some indication to the question name.
-        $question->name = get_string('questionnamecopy', 'question', $question->name);
-        $question->idnumber = isset($question->idnumber) ?
-            core_question_find_next_unused_idnumber($question->idnumber, $category->id) : '';
-        $question->beingcopied = true;
-    }
 
 } else { // Creating a new question.
     $question->formoptions->canedit = question_has_capability_on($question, 'edit');
@@ -211,7 +199,6 @@ if ($formeditable && $id) {
 
 $toform->appendqnumstring = $appendqnumstring;
 $toform->returnurl = $originalreturnurl;
-$toform->makecopy = $makecopy;
 $toform->idnumber = null;
 if (isset($question->id)) {
     $questionobject = question_bank::load_question($question->id);
@@ -219,9 +206,6 @@ if (isset($question->id)) {
     $toform->idnumber = $questionobject->idnumber;
 } else {
     $toform->status = \core_question\local\bank\question_version_status::QUESTION_STATUS_READY;
-}
-if ($makecopy) {
-    $toform->idnumber = core_question_find_next_unused_idnumber($toform->idnumber, $category->id);
 }
 if ($cm !== null) {
     $toform->cmid = $cm->id;
@@ -246,13 +230,6 @@ if ($mform->is_cancelled()) {
     }
 
 } else if ($fromform = $mform->get_data()) {
-    // If we are saving as a copy, break the connection to the old question.
-    if ($makecopy) {
-        $question->id = 0;
-        // Copies should not be hidden.
-        $question->status = \core_question\local\bank\question_version_status::QUESTION_STATUS_READY;
-    }
-
     // If is will be added directly to a module send the module name to be referenced.
     if ($appendqnumstring && $cm) {
         $fromform->modulename = 'mod_' . $cm->modname;
@@ -282,9 +259,6 @@ if ($mform->is_cancelled()) {
         question_require_capability_on($question, 'edit');
     } else {
         require_capability('moodle/question:add', context::instance_by_id($contextid));
-        if (!empty($fromform->makecopy) && !$question->formoptions->cansaveasnew) {
-            throw new moodle_exception('nopermissions', '', '', 'edit');
-        }
     }
 
     // If this is a new question, save defaults for user in user_preferences table.
@@ -313,7 +287,6 @@ if ($mform->is_cancelled()) {
     // If we are saving and continuing to edit the question.
     if (!empty($fromform->updatebutton)) {
         $url->param('id', $question->id);
-        $url->remove_params('makecopy');
         redirect($url);
     }
 

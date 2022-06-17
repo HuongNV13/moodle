@@ -152,6 +152,7 @@ $string['eventquestioncategoryupdated'] = 'Question category updated';
 $string['eventquestioncategoryviewed'] = 'Question category viewed';
 $string['eventquestioncreated'] = 'Question created';
 $string['eventquestiondeleted'] = 'Question deleted';
+$string['eventquestionduplicated'] = 'Question duplicated';
 $string['eventquestionmoved'] = 'Question moved';
 $string['eventquestionviewed'] = 'Question viewed';
 $string['eventquestionsexported'] = 'Questions exported';

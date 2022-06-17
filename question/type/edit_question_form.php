@@ -182,13 +182,8 @@ abstract class question_edit_form extends question_wizard_form {
             $currentgrp[0] = $mform->createElement('questioncategory', 'category',
                     get_string('categorycurrent', 'question'),
                     array('contexts' => array($this->categorycontext)));
-            // Validate if the question is being duplicated.
-            $beingcopied = false;
-            if (isset($this->question->beingcopied)) {
-                $beingcopied = $this->question->beingcopied;
-            }
             if (($this->question->formoptions->canedit ||
-                    $this->question->formoptions->cansaveasnew) && ($beingcopied)) {
+                    $this->question->formoptions->cansaveasnew)) {
                 // Not move only form.
                 $currentgrp[1] = $mform->createElement('checkbox', 'usecurrentcat', '',
                         get_string('categorycurrentuse', 'question'));
@@ -198,20 +193,9 @@ abstract class question_edit_form extends question_wizard_form {
             $currentgrp[0]->setPersistantFreeze(false);
             $mform->addGroup($currentgrp, 'currentgrp',
                     get_string('categorycurrent', 'question'), null, false);
-
-            if (($beingcopied)) {
-                $mform->addElement('questioncategory', 'categorymoveto',
-                    get_string('categorymoveto', 'question'),
-                    array('contexts' => array($this->categorycontext)));
-                if ($this->question->formoptions->canedit ||
-                    $this->question->formoptions->cansaveasnew) {
-                    // Not move only form.
-                    $mform->disabledIf('categorymoveto', 'usecurrentcat', 'checked');
-                }
-            }
         }
 
-        if (!empty($this->question->id) && !$this->question->beingcopied) {
+        if (!empty($this->question->id)) {
             // Add extra information from plugins when editing a question (e.g.: Authors, version control and usage).
             $functionname = 'edit_form_display';
             $questiondata = [];
@@ -323,8 +307,7 @@ abstract class question_edit_form extends question_wizard_form {
      * @return bool whether to show the preview link.
      */
     protected function can_preview() {
-        return empty($this->question->beingcopied) && !empty($this->question->id) &&
-                $this->question->formoptions->canedit;
+        return !empty($this->question->id) && $this->question->formoptions->canedit;
     }
 
     /**

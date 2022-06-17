@@ -24,33 +24,31 @@ Feature: A teacher can duplicate questions in the question bank
     And I am on "Course 1" course homepage
     And I navigate to "Question bank" in current page administration
 
+  @javascript
   Scenario: Duplicating a previously created question
-    When I choose "Duplicate" action for "Test question to be copied" in the question bank
-    And I set the following fields to these values:
-      | Question name | Duplicated question name                |
-      | Question text | Write a lot about duplicating questions |
-    And I press "id_submitbutton"
-    Then I should see "Duplicated question name"
+    Given I choose "Duplicate" action for "Test question to be copied" in the question bank
+    And I should see "Are you sure you want to duplicate the 'Test question to be copied' question?"
+    When I click on "Yes" "button" in the "Confirmation" "dialogue"
+    Then I should see "Test question to be copied (copy)"
     And I should see "Test question to be copied"
     And "Test question to be copied ID number qid" row "Created by" column of "categoryquestions" table should contain "Admin User"
 
-  Scenario: Duplicated questions automatically get a new name suggested
-    When I choose "Duplicate" action for "Test question to be copied" in the question bank
-    Then the field "Question name" matches value "Test question to be copied (copy)"
-
   @javascript
   Scenario: The duplicate operation can be cancelled
-    When I choose "Duplicate" action for "Test question to be copied" in the question bank
-    And I press "Cancel"
+    Given I choose "Duplicate" action for "Test question to be copied" in the question bank
+    And I should see "Are you sure you want to duplicate the 'Test question to be copied' question?"
+    When I click on "Cancel" "button" in the "Confirmation" "dialogue"
     Then I should see "Test question to be copied"
-    And the field "Select a category" matches value "&nbsp;&nbsp;&nbsp;Test questions (1)"
+    Then I should not see "Test question to be copied (copy)"
 
+  @javascript
   Scenario: Duplicating a question with an idnumber increments it
     Given the following "questions" exist:
       | questioncategory | qtype | name                   | questiontext                  | idnumber |
       | Test questions   | essay | Question with idnumber | Write about whatever you want | id101    |
     And I reload the page
     When I choose "Duplicate" action for "Question with idnumber" in the question bank
-    And I press "id_submitbutton"
+    And I should see "Are you sure you want to duplicate the 'Question with idnumber' question?"
+    When I click on "Yes" "button" in the "Confirmation" "dialogue"
     Then I should see "Question with idnumber (copy)"
-    Then I should see "id102" in the "Question with idnumber (copy)" "table_row"
+    And I should see "id102" in the "Question with idnumber (copy)" "table_row"

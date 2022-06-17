@@ -27,7 +27,7 @@ Feature: Use the qbank plugin manager page for editquestion
     Then I should not see "Status"
     And I click on ".dropdown-toggle" "css_element" in the "First question" "table_row"
     And I should not see "Edit question" in the "region-main" "region"
-    And I should not see "Duplicate" in the "region-main" "region"
+    And I should see "Duplicate" in the "region-main" "region"
     And I navigate to "Plugins > Question bank plugins > Manage question bank plugins" in site administration
     And I click on "Enable" "link" in the "Edit question" "table_row"
     And I am on the "Test quiz" "quiz activity" page
