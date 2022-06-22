@@ -250,6 +250,7 @@ class view {
                 'edit_menu_column',
                 'edit_action_column',
                 'copy_action_column',
+                'duplicate_action_column',
                 'tags_action_column',
                 'preview_action_column',
                 'history_action_column',

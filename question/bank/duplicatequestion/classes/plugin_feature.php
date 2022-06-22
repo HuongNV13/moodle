@@ -15,16 +15,29 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for qbank_duplicatequestion.
+ * Class columns is the entrypoint for the columns.
  *
  * @package qbank_duplicatequestion
  * @copyright 2022 Huong Nguyen <huongnv13@gmail.com>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace qbank_duplicatequestion;
 
-$plugin->component = 'qbank_duplicatequestion';
-$plugin->version = 2022061703;
-$plugin->requires = 2022041200;
-$plugin->maturity = MATURITY_STABLE;
+use core_question\local\bank\plugin_features_base;
+
+/**
+ * Class columns is the entrypoint for the columns.
+ *
+ * @package qbank_duplicatequestion
+ * @copyright 2022 Huong Nguyen <huongnv13@gmail.com>
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class plugin_feature extends plugin_features_base{
+
+    public function get_question_columns($qbank): array {
+        return [
+            new duplicate_action_column($qbank)
+        ];
+    }
+}

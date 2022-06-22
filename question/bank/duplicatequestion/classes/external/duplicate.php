@@ -32,6 +32,7 @@ use external_function_parameters;
 use external_single_structure;
 use external_value;
 use external_warnings;
+use moodle_url;
 
 require_once($CFG->dirroot . '/question/engine/bank.php');
 require_once($CFG->dirroot . '/question/format/xml/format.php');
@@ -57,27 +58,31 @@ class duplicate extends external_api {
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'questionid' => new external_value(PARAM_INT, 'The question id'),
-            'courseid' => new external_value(PARAM_INT, 'The course id'),
-            'quizid' => new external_value(PARAM_INT, 'The quiz id', VALUE_REQUIRED)
+            'contextid' => new external_value(PARAM_INT, 'The context id'),
+            'returnurl' => new external_value(PARAM_URL, 'The redirect url')
         ]);
     }
 
     /**
      * External function to delete the calendar subscription.
      *
-     * @param int $questionid Question id.
-     * @param int $courseid Course id.
-     * @param int $quizid Quiz id.
+     * @param int $questionid The question id that need to be duplicated.
+     * @param int $contextid The editing context id.
      * @return array
      * @since Moodle 4.1
      */
-    public static function execute(int $questionid, int $courseid, int $quizid): array {
+    public static function execute(int $questionid, int $contextid, $returnurl): array {
+        global $COURSE;
         // Parameter validation.
         $params = self::validate_parameters(self::execute_parameters(), [
             'questionid' => $questionid,
-            'courseid' => $courseid,
-            'quizid' => $quizid
+            'contextid' => $contextid,
+            'returnurl' => $returnurl,
         ]);
+
+        $editingcontext = \context::instance_by_id($params['contextid']);
+        self::validate_context($editingcontext);
+
         $status = false;
         $warnings = [];
 
@@ -86,8 +91,7 @@ class duplicate extends external_api {
         $tempdir = make_temp_directory('qbank_duplicatequestion/' . $uniquecode);
 
         // Load the necessary data.
-        $thiscontext = context_course::instance($courseid);
-        $contexts = new question_edit_contexts($thiscontext);
+        $contexts = new question_edit_contexts($editingcontext);
         $questiondata = \question_bank::load_question_data($questionid);
         $questiondata->name .= ' (copy)';
         // Check permissions.
@@ -96,7 +100,7 @@ class duplicate extends external_api {
         // Set up the export format.
         $qformat = new \qformat_xml();
         $qformat->setContexts($contexts->having_one_edit_tab_cap('export'));
-        $qformat->setCourse(get_course($courseid));
+        $qformat->setCourse($COURSE);
         $qformat->setQuestions([$questiondata]);
         $qformat->setCattofile(true);
         $qformat->setContexttofile(true);
@@ -119,9 +123,14 @@ class duplicate extends external_api {
         $iformat->importprocess();
         $iformat->importpostprocess();
         fulldelete($tempdir);
+        $status = true;
+        $newreturnurl = new moodle_url($params['returnurl']);
+        $newreturnurl->param('lastchanged', $iformat->questionids[0]);
 
         return [
             'status' => $status,
+            'createdquestionid' => $iformat->questionids[0],
+            'returnurl' => $newreturnurl->out(false),
             'warnings' => $warnings
         ];
     }
@@ -135,6 +144,8 @@ class duplicate extends external_api {
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'status' => new external_value(PARAM_BOOL, 'status: true if success'),
+            'createdquestionid' => new external_value(PARAM_INT, 'The duplicated question id'),
+            'returnurl' => new external_value(PARAM_URL, 'The duplicated question id'),
             'warnings' => new external_warnings()
         ]);
     }
