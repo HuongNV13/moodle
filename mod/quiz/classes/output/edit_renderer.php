@@ -25,6 +25,8 @@
 namespace mod_quiz\output;
 defined('MOODLE_INTERNAL') || die();
 
+use context_module;
+use core_question\local\bank\question_edit_contexts;
 use mod_quiz\question\bank\qbank_helper;
 use \mod_quiz\structure;
 use \html_writer;
@@ -120,6 +122,13 @@ class edit_renderer extends \plugin_renderer_base {
                 $pageurl->out_as_local_url(true),
                 $pageurl->param('cmid'),
                 \core\plugininfo\qbank::is_plugin_enabled(\qbank_managecategories\helper::PLUGINNAME),
+            ]);
+
+            $this->page->requires->js_call_amd('mod_quiz/duplicate', 'init', [
+                $thiscontext->id,
+                $pageurl->out(true),
+                $pageurl->param('cmid'),
+                $quizobj->get_quiz()->id
             ]);
 
             // Include the question chooser.
@@ -826,6 +835,7 @@ class edit_renderer extends \plugin_renderer_base {
         if ($structure->can_be_edited()) {
             $questionicons .= $this->question_remove_icon($structure, $slot, $pageurl);
         }
+        $questionicons .= $this->question_duplicate_icon($structure, $slot);
         $questionicons .= $this->marked_out_of_field($structure, $slot);
 
         return $questionicons;
@@ -843,6 +853,22 @@ class edit_renderer extends \plugin_renderer_base {
             $this->pix_icon('i/dragdrop', get_string('move'), 'moodle', array('class' => 'iconsmall', 'title' => '')),
             array('class' => 'editing_move', 'data-action' => 'move')
         );
+    }
+
+    public function question_duplicate_icon(structure $structure, int $slot) {
+        $question = $structure->get_question_in_slot($slot);
+        $url = new \moodle_url('#');
+        $strdelete = get_string('duplicate');
+
+        $image = $this->pix_icon('t/copy', $strdelete);
+
+        return $this->action_link($url, $image, null, [
+            'title' => $strdelete,
+            'class' => 'cm-edit-action editing_duplicate',
+            'data-action' => 'duplicatequestion',
+            'data-questionid' => $question->questionid,
+            'data-page' => $question->page,
+        ]);
     }
 
     /**

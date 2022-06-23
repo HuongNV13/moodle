@@ -199,4 +199,12 @@ $functions = array(
         'capabilities'  => 'mod/quiz:view',
         'ajax'          => true,
     ],
+
+    'mod_quiz_add_question_to_quiz' => [
+        'classname' => 'mod_quiz\external\add_question',
+        'description' => 'Add the specific question to the quiz.',
+        'type' => 'write',
+        'capabilities' => 'mod/quiz:view',
+        'ajax' => true,
+    ],
 );
