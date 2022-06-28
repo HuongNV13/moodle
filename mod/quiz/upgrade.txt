@@ -6,6 +6,8 @@ This files describes API changes in the quiz code.
   internal method of the quiz_overview plugin. But if you are incorrectly using it, be aware
   that the API changed slightly. It now returns an array listing any questions which could
   not be regraded.
+* External function mod_quiz_add_question_to_quiz was added to support adding the question to Quiz.
+* The Quiz editing page now has a new feature called Duplicate which allows users to Duplicate the question in the Quiz.
 
 
 === 4.0 ===

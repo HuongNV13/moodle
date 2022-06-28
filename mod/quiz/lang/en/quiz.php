@@ -346,6 +346,7 @@ $string['enabled'] = 'Enabled';
 $string['endtest'] = 'Finish attempt ...';
 $string['erroraccessingreport'] = 'You cannot access this report';
 $string['errorinquestion'] = 'Error in question';
+$string['errorinvalidquiz'] = 'Invalid Quiz Id';
 $string['errormissingquestion'] = 'Error: The system is missing the question with id {$a}';
 $string['errornotnumbers'] = 'Error - answers must be numeric';
 $string['errorunexpectedevent'] = 'Unexpected event code {$a->event} found for question {$a->questionid} in attempt {$a->attemptid}.';

@@ -946,6 +946,19 @@ class behat_mod_quiz extends behat_question_base {
     }
 
     /**
+     * Duplicate a question on the Edit quiz page by clicking on the Duplicate icon
+     *
+     * @param string $questionname the name of the question we are looking for.
+     * @When /^I duplicate "(?P<question_name>(?:[^"]|\\")*)" in the quiz by clicking the duplicate icon$/
+     */
+    public function i_duplicate_question_by_clicking_the_duplicate_icon($questionname) {
+        $slotxpath = "//li[contains(@class, ' slot ') and contains(., '" . $this->escape($questionname) . "')]";
+        $duplicatexpath = "//a[contains(@class, 'editing_duplicate')]";
+
+        $this->execute("behat_general::i_click_on", [$slotxpath . $duplicatexpath, "xpath_element"]);
+    }
+
+    /**
      * Return a list of the exact named selectors for the component.
      *
      * @return behat_component_named_selector[]

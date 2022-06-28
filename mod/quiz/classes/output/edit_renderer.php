@@ -122,6 +122,12 @@ class edit_renderer extends \plugin_renderer_base {
                 \core\plugininfo\qbank::is_plugin_enabled(\qbank_managecategories\helper::PLUGINNAME),
             ]);
 
+            $this->page->requires->js_call_amd('mod_quiz/duplicate_question', 'init', [
+                $thiscontext->id,
+                $pageurl->out(true),
+                $quizobj->get_quiz()->id
+            ]);
+
             // Include the question chooser.
             $output .= $this->question_chooser();
         }
@@ -824,6 +830,7 @@ class edit_renderer extends \plugin_renderer_base {
                     null, null, $qtype);
         }
         if ($structure->can_be_edited()) {
+            $questionicons .= $this->question_duplicate_icon($structure, $slot);
             $questionicons .= $this->question_remove_icon($structure, $slot, $pageurl);
         }
         $questionicons .= $this->marked_out_of_field($structure, $slot);
@@ -843,6 +850,31 @@ class edit_renderer extends \plugin_renderer_base {
             $this->pix_icon('i/dragdrop', get_string('move'), 'moodle', array('class' => 'iconsmall', 'title' => '')),
             array('class' => 'editing_move', 'data-action' => 'move')
         );
+    }
+
+    /**
+     * Render the question duplicate icon.
+     *
+     * @param structure $structure object containing the structure of the quiz.
+     * @param int $slot the first slot on the page we are outputting.
+     * @return string HTML fragment
+     */
+    public function question_duplicate_icon(structure $structure, int $slot): string {
+        $question = $structure->get_question_in_slot($slot);
+        $url = new \moodle_url('#');
+        $strdelete = get_string('duplicate');
+
+        $image = $this->pix_icon('t/copy', $strdelete);
+
+        return $this->action_link($url, $image, null, [
+            'title' => $strdelete,
+            'class' => 'cm-edit-action editing_duplicate',
+            'data-action' => 'duplicatequestion',
+            'data-questionid' => $question->qtype != 'random' ? $question->questionid : $question->slot,
+            'data-questionname' => $question->name,
+            'data-questiontype' => $question->qtype,
+            'data-page' => $question->page,
+        ]);
     }
 
     /**
