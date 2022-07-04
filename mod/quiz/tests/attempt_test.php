@@ -377,4 +377,74 @@ class mod_quiz_attempt_testcase extends advanced_testcase {
         $step = $quba->get_question_attempt(1)->get_step(0);
         $this->assertEquals($student1->id, $step->get_user_id());
     }
+
+    /**
+     * Test the get_number_of_unanswered_questions() method.
+     *
+     * @covers \quiz_attempt::get_number_of_unanswered_questions
+     */
+    public function test_get_number_of_unanswered_questions() {
+        $this->resetAfterTest();
+
+        // Create course.
+        $course = $this->getDataGenerator()->create_course();
+
+        // Create student and enrol.
+        $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
+
+        // Create quiz.
+        $quizgenerator = $this->getDataGenerator()->get_plugin_generator('mod_quiz');
+        $quiz = $quizgenerator->create_instance([
+            'course' => $course->id,
+            'grade' => 100.0,
+            'sumgrades' => 2,
+            'questionsperpage' => 1
+        ]);
+
+        // Create a couple of questions.
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+
+        $cat = $questiongenerator->create_question_category();
+        $saq = $questiongenerator->create_question('shortanswer', null, ['category' => $cat->id]);
+        $numq = $questiongenerator->create_question('numerical', null, ['category' => $cat->id]);
+
+        // Add them to the quiz.
+        quiz_add_quiz_question($saq->id, $quiz);
+        quiz_add_quiz_question($numq->id, $quiz);
+
+        $quizobj = quiz::create($quiz->id, $student->id);
+
+        // Start the attempt.
+        $quba = question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
+        $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
+
+        $timenow = time();
+        $attempt = quiz_create_attempt($quizobj, 1, false, $timenow, false, $student->id);
+
+        quiz_start_new_attempt($quizobj, $quba, $attempt, 1, $timenow);
+        quiz_attempt_save_started($quizobj, $quba, $attempt);
+
+        // Get the attempt object.
+        $attemptobj = quiz_attempt::create($attempt->id);
+
+        // Verify that there are 2 unanswered questions in this attempt.
+        $this->assertEquals(2, $attemptobj->get_number_of_unanswered_questions());
+
+        // Answer the first question.
+        $tosubmit = [
+            1 => ['answer' => 'frog']
+        ];
+
+        $attemptobj->process_submitted_actions($timenow, false, $tosubmit);
+        // Verify that there are 1 unanswered question in this attempt.
+        $this->assertEquals(1, $attemptobj->get_number_of_unanswered_questions());
+
+        // Answer the second question.
+        $tosubmit = [
+            2 => ['answer' => '3.14']
+        ];
+        $attemptobj->process_submitted_actions($timenow, false, $tosubmit);
+        // Verify that there is no unanswered question in this attempt.
+        $this->assertEquals(0, $attemptobj->get_number_of_unanswered_questions());
+    }
 }

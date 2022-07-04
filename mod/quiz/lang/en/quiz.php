@@ -988,6 +988,7 @@ $string['status'] = 'Status';
 $string['stoponerror'] = 'Stop on error';
 $string['submission_confirmation'] = 'Submission confirmation';
 $string['submission_confirmation_content'] = 'Are you ready to submit? You will no longer be able to change your answers for this attempt.';
+$string['submission_confirmation_unanswered'] = 'You have {$a} question(s) without a responses.';
 $string['submitallandfinish'] = 'Submit all and finish';
 $string['subneterror'] = 'Sorry, this quiz has been locked so that it is only accessible from certain locations.  Currently your computer is not one of those allowed to use this quiz.';
 $string['subnetnotice'] = 'This quiz has been locked so that it is only accessible from certain locations. Your computer is not on an allowed subnet. As teacher you are allowed to preview anyway.';
