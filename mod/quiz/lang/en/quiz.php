@@ -218,7 +218,6 @@ $string['configshufflewithin'] = 'If you enable this option, then the parts maki
 $string['configtimelimit'] = 'Default time limit for quizzes in minutes. 0 mean no time limit.';
 $string['configtimelimitsec'] = 'Default time limit for quizzes in seconds. 0 mean no time limit.';
 $string['configurerandomquestion'] = 'Configure question';
-$string['confirmclose'] = 'Once you submit, you will no longer be able to change your answers for this attempt.';
 $string['confirmremovequestion'] = 'Are you sure you want to remove this {$a} question?';
 $string['confirmremovesectionheading'] = 'Are you sure you want to remove the \'{$a}\' section heading?';
 $string['confirmserverdelete'] = 'Are you sure you want to remove the server <b>{$a}</b> from the list?';
@@ -987,6 +986,8 @@ $string['stateoverdue'] = 'Overdue';
 $string['stateoverduedetails'] = 'Must be submitted by {$a}';
 $string['status'] = 'Status';
 $string['stoponerror'] = 'Stop on error';
+$string['submission_confirmation'] = 'Submission confirmation';
+$string['submission_confirmation_content'] = 'Are you ready to submit? You will no longer be able to change your answers for this attempt.';
 $string['submitallandfinish'] = 'Submit all and finish';
 $string['subneterror'] = 'Sorry, this quiz has been locked so that it is only accessible from certain locations.  Currently your computer is not one of those allowed to use this quiz.';
 $string['subnetnotice'] = 'This quiz has been locked so that it is only accessible from certain locations. Your computer is not on an allowed subnet. As teacher you are allowed to preview anyway.';
@@ -1067,3 +1068,6 @@ $string['completionpass_help'] = 'If enabled, this activity is considered comple
 $string['completiondetail:passgrade'] = 'Receive a pass grade';
 $string['gradetopassnotset'] = 'This quiz does not yet have a grade to pass set. It may be set in the Grade section of the quiz settings.';
 $string['basicideasofquiz'] = 'The basic ideas of quiz-making';
+
+// Deprecated since Moodle 4.1.
+$string['confirmclose'] = 'Once you submit, you will no longer be able to change your answers for this attempt.';

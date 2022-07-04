@@ -43,10 +43,10 @@ const registerEventListeners = () => {
             e.preventDefault();
             const modalPromise = Modal.create({
                 type: Modal.types.SAVE_CANCEL,
-                title: getString('confirmation', 'admin'),
-                body: getString('confirmclose', 'quiz'),
+                title: getString('submission_confirmation', 'quiz'),
+                body: getString('submission_confirmation_content', 'quiz'),
                 buttons: {
-                    save: getString('submitallandfinish', 'quiz')
+                    save: getString('submit', 'core')
                 },
             }).then(modal => {
                 modal.show();
@@ -67,7 +67,8 @@ const registerEventListeners = () => {
  * Initialises.
  */
 export const init = () => {
+    Prefetch.prefetchStrings('core', ['submit']);
     Prefetch.prefetchStrings('core_admin', ['confirmation']);
-    Prefetch.prefetchStrings('quiz', ['confirmclose', 'submitallandfinish']);
+    Prefetch.prefetchStrings('quiz', ['submission_confirmation', 'submission_confirmation_content']);
     registerEventListeners();
 };

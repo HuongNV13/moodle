@@ -208,7 +208,7 @@ Feature: Regrading quiz attempts using the Grades report
     And I set the field "True" to "1"
     And I click on "Finish attempt ..." "button"
     And I press "Submit all and finish"
-    And I click on "Submit all and finish" "button" in the "Confirmation" "dialogue"
+    And I click on "Submit" "button" in the "Submission confirmation" "dialogue"
     And I am on the "Quiz for testing regrading" "quiz activity" page logged in as teacher
     And I navigate to "Question bank" in current page administration
     And I choose "Edit question" action for "TF" in the question bank
