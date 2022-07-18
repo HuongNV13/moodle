@@ -31,7 +31,7 @@ Feature: Atto edit HTML
     And I am on the "Essay 01 new" "core_question > edit" page logged in as teacher1
     And I click on "Show more buttons" "button" in the "Question text" "form_row"
     And I click on "HTML" "button" in the "Question text" "form_row"
-    And I press the ctrl + A key
+    And I press the shift + end key
     And I press the delete key
-    And I press "id_submitbutton"
+    When I press "id_submitbutton"
     Then I should see "You must supply a value here." in the "Question text" "form_row"
