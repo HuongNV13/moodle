@@ -179,7 +179,7 @@ Feature: Backpack badges
     And I should see "Badge issuer email address"
     And I should see "Badge issuer password"
     And I set the field "backpackemail" to "test@test.com"
-    And I set the field "password" to "123456"
+    And I set the field "Badge issuer password" to "123456"
     And I press "Save changes"
     And I click on "Edit" "link" in the "http://backpackweburl.cat" "table_row"
     And the field "Include authentication details with the backpack" matches value "1"

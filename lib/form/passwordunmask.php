@@ -87,6 +87,7 @@ class MoodleQuickForm_passwordunmask extends MoodleQuickForm_password {
     public function export_for_template(renderer_base $output) {
         $context = parent::export_for_template($output);
         $context['valuechars'] = array_fill(0, strlen($context['value']), 'x');
+        $context['orphanlabel'] = true;
 
         return $context;
     }

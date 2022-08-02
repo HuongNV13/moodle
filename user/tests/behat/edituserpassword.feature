@@ -8,11 +8,11 @@ Feature: Edit a users password
   Scenario: Verify the password field is enabled/disabled based on authentication selected, in user edit advanced page.
     Given I log in as "admin"
     When I navigate to "Users > Accounts > Add a new user" in site administration
-    Then the "New password" "field" should be enabled
+    Then the "id_newpassword" "field" should be enabled
     And I set the field "auth" to "Web services authentication"
-    And the "New password" "field" should be disabled
+    And the "id_newpassword" "field" should be disabled
     And I set the field "auth" to "Email-based self-registration"
-    And the "New password" "field" should be enabled
+    And the "id_newpassword" "field" should be enabled
     # We need to cancel/submit a form that has been modified.
     And I press "Create user"
 

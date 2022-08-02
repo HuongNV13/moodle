@@ -29,7 +29,8 @@
     }
 }}
 {{#collapseable}}
-    <legend class="d-flex align-items-center">
+    <legend class="sr-only">{{{header}}}</legend>
+    <div class="d-flex align-items-center mb-2">
         <div class="position-relative d-flex ftoggler align-items-center position-relative mr-1">
             <a data-toggle="collapse"
                 href="#{{id}}container"
@@ -52,7 +53,7 @@
             </h3>
         </div>
         {{{helpbutton}}}
-    </legend>
+    </div>
 {{/collapseable}}
 {{^collapseable}}
     <legend>{{{header}}}</legend>

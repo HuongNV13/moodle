@@ -4,6 +4,7 @@ Feature: Allowing multiple accounts to have the same email address
   As an admin
   I need to be able to set whether to allow multiple accounts with the same email or not
 
+  @javascript
   Scenario Outline: Create a user with the same email as an existing user
     Given the following config values are set as admin:
       | allowaccountssameemail | <allowsameemail> |
