@@ -37,6 +37,7 @@ Feature: Guest users can auto-enrol themself in courses where guest access is al
     When I follow "Test forum name"
     Then I should not see "Subscribe to this forum"
 
+  @javascript
   Scenario: Allow guest access with password
     Given I navigate to "Users > Enrolment methods" in current page administration
     And I click on "Edit" "link" in the "Guest access" "table_row"

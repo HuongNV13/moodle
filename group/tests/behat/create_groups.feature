@@ -122,6 +122,7 @@ Feature: Organize students into groups
     And I press "Save changes"
     And I should see "Not the greatest grouping, but it's ok!"
 
+  @javascript
   Scenario: Create groups with enrolment key
     Given the following "courses" exist:
       | fullname | shortname | category | groupmode |

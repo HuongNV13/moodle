@@ -562,6 +562,8 @@ class MoodleQuickForm_selectgroups extends HTML_QuickForm_element implements tem
         }
         $context['optiongroups'] = $optiongroups;
 
+        $context['staticlabel'] = $this->_flagFrozen;
+
         return $context;
     }
 }
