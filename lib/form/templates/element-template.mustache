@@ -46,7 +46,7 @@
     <div class="col-md-3 col-form-label d-flex pb-0 pr-md-0">
         {{# label}}{{$ label }}
             {{^element.staticlabel}}
-                <label class="d-inline word-break {{#element.hiddenlabel}}sr-only{{/element.hiddenlabel}}" for="{{element.id}}">
+                <label id="{{element.id}}_label" class="d-inline word-break {{#element.hiddenlabel}}sr-only{{/element.hiddenlabel}}" {{^element.orphanlabel}}for="{{element.id}}"{{/element.orphanlabel}}>
                     {{{label}}}
                 </label>
             {{/element.staticlabel}}
@@ -65,7 +65,7 @@
             {{{helpbutton}}}
         </div>
     </div>
-    <div class="col-md-9 form-inline align-items-start felement" data-fieldtype="{{element.type}}">
+    <div class="col-md-9 form-inline align-items-start felement w-auto" data-fieldtype="{{element.type}}">
         {{$ element }}
             <!-- Element goes here -->
         {{/ element }}

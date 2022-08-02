@@ -130,6 +130,7 @@ Feature: Lesson group override
     And I am on the "Test lesson name" "lesson activity" page
     And I should see "You are not allowed to retake this lesson."
 
+  @javascript
   Scenario: Allow a single group to have a different password
     Given I am on the "Test lesson name" "lesson activity editing" page logged in as teacher1
     And I set the following fields to these values:

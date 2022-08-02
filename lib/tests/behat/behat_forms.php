@@ -752,4 +752,22 @@ class behat_forms extends behat_base {
         $node = $this->get_node_in_container('xpath_element', $xpathtarget, 'form_row', $field);
         $this->ensure_node_is_visible($node);
     }
+
+    /**
+     * Finds a form element.
+     *
+     * @param string $locator Locator of the form element
+     * @return NodeElement|\NodeElement
+     */
+    public function find_field(string $locator): ?NodeElement {
+        try {
+            return parent::find_field($locator);
+        } catch (Behat\Mink\Exception\ElementNotFoundException $e) {
+            // Field not found. Try with the aria-label attribute.
+            $fieldxpath = "//*[self::input | self::textarea | self::select]" .
+                "[not(./@type = 'submit' or ./@type = 'image')]" .
+                "[@aria-label='" . $this->escape($locator) . "']";
+            return $this->find('xpath', $fieldxpath);
+        }
+    }
 }

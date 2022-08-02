@@ -41,6 +41,7 @@ Feature: Users can auto-enrol themself in courses where self enrolment is allowe
     Then I should see "Topic 1"
     And I should not see "Enrolment options"
 
+  @javascript
   Scenario: Self-enrolment enabled requiring an enrolment key
     Given I log in as "teacher1"
     When I add "Self enrolment" enrolment method in "Course 1" with:
@@ -61,6 +62,7 @@ Feature: Users can auto-enrol themself in courses where self enrolment is allowe
     When I am on "Course 1" course homepage
     Then I should see "You cannot enrol yourself in this course"
 
+  @javascript
   Scenario: Self-enrolment enabled requiring a group enrolment key
     Given I log in as "teacher1"
     When I add "Self enrolment" enrolment method in "Course 1" with:
