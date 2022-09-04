@@ -33,30 +33,30 @@
     {{$body}}
         <form class="tiny_media_form" id="{{elementid}}_tiny_media_form">
             <ul class="root nav nav-tabs mb-1" role="tablist">
-                <li data-medium-type="{{CSS.LINK}}" class="nav-item">
-                    <a class="nav-link active" href="#{{elementid}}_{{CSS.LINK}}" role="tab" data-toggle="tab">
+                <li data-medium-type="link" class="nav-item">
+                    <a class="nav-link {{# link }}active{{/ link }}" href="#{{elementid}}_link" role="tab" data-toggle="tab">
                         {{#str}} link, tiny_media {{/str}}
                     </a>
                 </li>
-                <li data-medium-type="{{CSS.VIDEO}}" class="nav-item">
-                    <a class="nav-link" href="#{{elementid}}_{{CSS.VIDEO}}" role="tab" data-toggle="tab">
+                <li data-medium-type="video" class="nav-item">
+                    <a class="nav-link {{# video }}active{{/ video }}" href="#{{elementid}}_video" role="tab" data-toggle="tab">
                         {{#str}} video, tiny_media {{/str}}
                     </a>
                 </li>
-                <li data-medium-type="{{CSS.AUDIO}}" class="nav-item">
-                    <a class="nav-link" href="#{{elementid}}_{{CSS.AUDIO}}" role="tab" data-toggle="tab">
+                <li data-medium-type="audio" class="nav-item">
+                    <a class="nav-link {{# audio }}active{{/ audio }}" href="#{{elementid}}_audio" role="tab" data-toggle="tab">
                         {{#str}} audio, tiny_media {{/str}}
                     </a>
                 </li>
             </ul>
             <div class="root tab-content">
-                <div data-medium-type="{{CSS.LINK}}" class="tab-pane active" id="{{elementid}}_{{CSS.LINK}}">
+                <div data-medium-type="link" class="tab-pane {{# link }}active{{/ link }}" id="{{elementid}}_link">
                     {{> tiny_media/embed_media_modal_link }}
                 </div>
-                <div data-medium-type="{{CSS.VIDEO}}" class="tab-pane" id="{{elementid}}_{{CSS.VIDEO}}">
+                <div data-medium-type="video" class="tab-pane {{# video }}active{{/ video }}" id="{{elementid}}_video">
                     {{> tiny_media/embed_media_modal_video}}
                 </div>
-                <div data-medium-type="{{CSS.AUDIO}}" class="tab-pane" id="{{elementid}}_{{CSS.AUDIO}}">
+                <div data-medium-type="audio" class="tab-pane {{# audio }}active{{/ audio }}" id="{{elementid}}_audio">
                     {{> tiny_media/embed_media_modal_audio}}
                 </div>
             </div>

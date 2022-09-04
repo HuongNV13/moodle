@@ -24,13 +24,13 @@
 
     }
 }}
-<div class="{{CSS.SOURCE}} {{id}}">
+<div class="tiny_media_source {{id}}">
     <div class="mb-1">
         <label for="url-input">
             {{#str}} entersource, tiny_media {{/str}}
         </label>
         <div class="input-group input-append w-100">
-            <input id="url-input" class="form-control {{CSS.URL_INPUT}}" type="url" size="32"/>
+            <input id="url-input" class="form-control tiny_media_url_entry" type="url" size="32"/>
             <span class="input-group-append">
                 <button class="btn btn-secondary openmediabrowser" type="button">{{#str}} browserepositories, tiny_media {{/str}}</button>
             </span>
@@ -38,4 +38,4 @@
     </div>
 </div>
 <label for="{{elementid}}_link_nameentry">{{#str}} entername, tiny_media {{/str}}</label>
-<input class="form-control fullwidth {{CSS.NAME_INPUT}}" type="text" id="{{elementid}}_link_nameentry" size="32" required="true"/>
+<input class="form-control fullwidth tiny_media_name_entry" type="text" id="{{elementid}}_link_nameentry" size="32" required="true"/>

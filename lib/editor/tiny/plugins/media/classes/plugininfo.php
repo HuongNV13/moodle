@@ -57,6 +57,9 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
         $permissions = [
             'image' => [
                 'filepicker' => true,
+            ],
+            'embed' => [
+                'filepicker' => true,
             ]
         ];
         return [
