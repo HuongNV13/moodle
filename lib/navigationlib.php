@@ -2970,6 +2970,15 @@ class global_navigation extends navigation_node {
             }
         }
 
+        // MoodleNet.
+        $this->page->requires->js_call_amd('tool_moodlenet/share', 'init');
+        $action = new action_link(new moodle_url(''), '', null, [
+            'data-action' => 'sharetomoodlenet',
+            'data-type' => 'course',
+        ]);
+        $coursenode->add(get_string('shareto', 'tool_moodlenet'),
+            $action, self::TYPE_SETTING, null, 'exportmoodlenet')->set_force_into_more_menu(true);
+
         return true;
     }
     /**
@@ -4879,6 +4888,14 @@ class settings_navigation extends navigation_node {
         if (function_exists($function)) {
             $function($this, $modulenode);
         }
+
+        // MoodleNet.
+        $action = new action_link(new moodle_url(''), '', null, [
+            'data-action' => 'sharetomoodlenet',
+            'data-type' => 'activity',
+        ]);
+        $modulenode->add(get_string('shareto', 'tool_moodlenet'),
+            $action, self::TYPE_SETTING, null, 'exportmoodlenet')->set_force_into_more_menu(true);
 
         // Remove the module node if there are no children.
         if ($modulenode->children->count() <= 0) {
