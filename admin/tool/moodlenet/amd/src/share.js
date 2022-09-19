@@ -25,9 +25,11 @@
 import Config from 'core/config';
 import {displayException, addNotification} from 'core/notification';
 import ModalFactory from 'core/modal_factory';
+import {get_string as getString} from 'core/str';
 import Prefetch from 'core/prefetch';
 import * as Templates from 'core/templates';
 import ShareModalActivity from "tool_moodlenet/share_modal_activity";
+import ShareModalCourse from "tool_moodlenet/share_modal_course";
 import * as MoodleNetSelectors from 'tool_moodlenet/selectors';
 import * as MoodleNetRepository from 'tool_moodlenet/repository';
 
@@ -67,6 +69,22 @@ const moodleNetDone = (status) => {
 };
 
 /**
+ * Handle activity chooser.
+ */
+const handleActivityChooser = () => {
+    const $modal = currentModal.getModal();
+    const modal = $modal[0];
+    const activityCount = modal.querySelector('.total-activities');
+    const activityCheckboxes = modal.querySelectorAll('[data-action="choose-activity"]');
+    const activityCheckeds = [].filter.call(activityCheckboxes, (el) => {
+        return el.checked;
+    });
+    getString('selected_activities_no', 'tool_moodlenet', activityCheckeds.length).then((str) => {
+        activityCount.innerHTML = str;
+    });
+};
+
+/**
  * Register events.
  */
 const registerEventListeners = () => {
@@ -74,6 +92,7 @@ const registerEventListeners = () => {
         const shareAction = e.target.closest(MoodleNetSelectors.action.share);
         const shareToSuccessAction = e.target.closest('[data-action="share-success"]');
         const shareToFailAction = e.target.closest('[data-action="share-fail"]');
+        const chooseActivityAction = e.target.closest('[data-action="choose-activity"]');
         if (shareAction) {
             e.preventDefault();
             const type = shareAction.getAttribute('data-type');
@@ -104,6 +123,33 @@ const registerEventListeners = () => {
                         });
                     }
                 }).catch(displayException);
+            } else if (type == 'course') {
+                const courseId = Config.courseId;
+                MoodleNetRepository.getCourseActivitiesInformation(courseId).then((data) => {
+                    if (data.status) {
+                        siteSupportUrl = data.supportpageurl;
+                        const modalPromise = ModalFactory.create({
+                            type: ShareModalCourse.TYPE,
+                            large: true,
+                            templateContext: {
+                                'coursename': data.name,
+                                'activities': data.activities,
+                                'server': data.server,
+                            }
+                        });
+
+                        return modalPromise.then(modal => {
+                            currentModal = modal;
+                            modal.show();
+                            return modal;
+                        }).catch(displayException);
+                    } else {
+                        return addNotification({
+                            message: data.warnings[0].message,
+                            type: 'error'
+                        });
+                    }
+                }).catch(displayException);
             }
         }
 
@@ -115,6 +161,9 @@ const registerEventListeners = () => {
             e.preventDefault();
             sendToMoodleNet(false);
         }
+        if (chooseActivityAction) {
+            handleActivityChooser();
+        }
     });
 };
 
@@ -122,8 +171,10 @@ const registerEventListeners = () => {
  * Initialises.
  */
 export const init = () => {
+    Prefetch.prefetchString('tool_moodlenet', 'selected_activities_no');
     Prefetch.prefetchTemplates([
         'tool_moodlenet/share_modal_activity',
+        'tool_moodlenet/share_modal_course',
         'tool_moodlenet/share_modal_content_done',
         'tool_moodlenet/share_modal_content_packaging',
     ]);

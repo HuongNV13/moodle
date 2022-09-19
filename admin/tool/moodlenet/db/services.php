@@ -47,4 +47,10 @@ $functions = [
         'type'        => 'read',
         'ajax'        => true,
     ],
+    'tool_moodlenet_get_course_activities_info' => [
+        'classname'   => 'tool_moodlenet\external\share\activities_info',
+        'description' => 'Get the all the activities information for sharing',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
 ];

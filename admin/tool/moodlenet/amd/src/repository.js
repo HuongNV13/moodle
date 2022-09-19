@@ -41,3 +41,19 @@ export const getActivityInformation = (cmId) => {
     return Ajax.call([request])[0];
 };
 
+/**
+ * Get the activities information by course id.
+ *
+ * @param {Number} courseId The course id
+ * @return {promise}
+ */
+export const getCourseActivitiesInformation = (courseId) => {
+    const request = {
+        methodname: 'tool_moodlenet_get_course_activities_info',
+        args: {
+            courseid: courseId
+        }
+    };
+
+    return Ajax.call([request])[0];
+};

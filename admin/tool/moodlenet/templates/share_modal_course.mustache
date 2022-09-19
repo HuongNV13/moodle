@@ -1,0 +1,77 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_moodlenet/share_modal
+
+    Modal to share activity to MoodleNet
+
+    Example context (json):
+    {
+
+    }
+}}
+<div class="modal moodle-has-zindex" data-region="modal-container" aria-hidden="true" role="dialog">
+    <div class="modal-dialog moodlenet-share-dialog" role="document" data-region="modal" aria-labelledby="{{uniqid}}-modal-title" tabindex="0">
+        <div class="modal-content">
+            <div class="modal-header no-border" data-region="header">
+                <div id="{{uniqid}}-modal-title" class="modal-title" data-region="title">
+                    <div class="d-flex moodlenet-share-moodlenetinfo">
+                        <span class="moodlenet-logo">{{#pix}} MoodleNet, tool_moodlenet, {{#str}} shareto, tool_moodlenet {{/str}} {{/pix}}</span>
+                        <span class="moodlenet-title">{{#str}} shareto, tool_moodlenet {{/str}}</span>
+                    </div>
+                </div>
+                <button type="button" class="close" data-action="hide" aria-label="{{#cleanstr}}closebuttontitle{{/cleanstr}}">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" data-region="body">
+                <div class="moodlenet-share-modal-content">
+                    <span class="d-block mb-2">Selected</span>
+                    <div class="moodlenet-share-activity-info">
+                        <span class="moodlenet-activity-type text-uppercase">Course</span>
+                        <span class="moodlenet-activity-name">{{coursename}}</span>
+                    </div>
+                    <hr class="moodlenet-share-activity-info-hr">
+                    <div class="moodlenet-share-activities ml-3">
+                        <span class="total-activities">{{#str}} selected_activities_no, tool_moodlenet, 0 {{/str}}</span>
+                        {{#activities}}
+                            <div class="moodlenet-share-activity-detail">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="activity-{{cmid}}" data-action="choose-activity">
+                                    <label class="form-check-label" for="activity-{{cmid}}">
+                                        <span class="moodlenet-activity-type text-uppercase font-weight-bold">{{type}}</span>
+                                        <span class="moodlenet-activity-name">{{name}}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        {{/activities}}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" data-region="footer">
+                <div class="moodlenet-share-to">
+                    {{#str}} sharing_to, tool_moodlenet {{/str}}<span class="font-weight-bold">{{server}}</span>
+                </div>
+                <div class="moodlenet-action-buttons">
+                    <button type="button" class="btn btn-secondary" data-action="cancel">{{#str}} cancel, moodle {{/str}}</button>
+                    <button type="button" class="btn btn-danger" data-action="share-fail">{{#str}} share, tool_moodlenet{{/str}}</button>
+                    <button type="button" class="btn btn-primary" data-action="share-success">{{#str}} share, tool_moodlenet{{/str}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

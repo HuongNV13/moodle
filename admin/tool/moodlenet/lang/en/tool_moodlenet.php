@@ -69,6 +69,7 @@ $string['profilevalidationerror'] = 'There was a problem trying to validate your
 $string['profilevalidationfail'] = 'Please enter a valid MoodleNet profile ID';
 $string['profilevalidationpass'] = 'Looks good!';
 $string['saveandgo'] = "Save and go";
+$string['selected_activities_no'] = '<b>Included</b> ({$a})';
 $string['share'] = "Share";
 $string['share_notice'] = "This is being shared with MoodleNet as a resource";
 $string['shareto'] = "Share to MoodleNet";
