@@ -1,4 +1,3 @@
-<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,16 +14,30 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version file for tool_moodlenet
+ * A javascript module to handle MoodleNet ajax actions.
  *
- * @package     tool_moodlenet
- * @copyright   2020 Jake Dallimore <jrhdallimore@gmail.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @module     tool_moodlenet/repository
+ * @copyright  2022 Huong Nguyen <huongnv13@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @since      4.1
  */
 
-defined('MOODLE_INTERNAL') || die();
+import Ajax from 'core/ajax';
 
-$plugin->component  = 'tool_moodlenet';
-$plugin->version    = 2022041901;
-$plugin->requires   = 2022041200;
-$plugin->maturity   = MATURITY_ALPHA;
+/**
+ * Get the activity information by course model id.
+ *
+ * @param {Number} cmId The course module id
+ * @return {promise}
+ */
+export const getActivityInformation = (cmId) => {
+    const request = {
+        methodname: 'tool_moodlenet_get_activity_info',
+        args: {
+            cmid: cmId
+        }
+    };
+
+    return Ajax.call([request])[0];
+};
+

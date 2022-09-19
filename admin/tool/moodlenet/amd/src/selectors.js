@@ -27,6 +27,7 @@ define([], function() {
             submit: '[data-action="submit"]',
             showMoodleNet: '[data-action="show-moodlenet"]',
             closeOption: '[data-action="close-chooser-option-summary"]',
+            share: '[data-action="sharetomoodlenet"]',
         },
         region: {
             clearIcon: '[data-region="clear-icon"]',

@@ -1,0 +1,70 @@
+.moodlenet-share-dialog .modal-header.no-border {
+    border-bottom: none;
+}
+
+.moodlenet-share-dialog .modal-header .moodlenet-share-moodlenetinfo .moodlenet-logo .icon {
+    width: auto;
+    height: 1.3rem;
+}
+
+.moodlenet-share-dialog .modal-header .moodlenet-share-moodlenetinfo .moodlenet-title {
+    font-size: 1.3rem;
+    padding-left: 0.5em;
+}
+
+.moodlenet-share-dialog .modal-body {
+    min-height: 400px;
+}
+
+.moodlenet-share-dialog .modal-body .moodlenet-share-activity-info .moodlenet-share-activity-info-hr {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.moodlenet-share-dialog .modal-footer .moodlenet-share-to {
+    margin-right: auto;
+}
+
+.moodlenet-share-activity-info {
+    background-color: #f5f9fc;
+    border-style: solid;
+    border-radius: 0.3rem;
+    border-color: #3584c9;
+    border-width: 1px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.moodlenet-share-activity-info .moodlenet-activity-type,
+.moodlenet-share-activity-info .moodlenet-activity-name {
+    display: block;
+}
+
+.moodlenet-share-notice {
+    background-color: #f8f9fa;
+    padding: 1rem;
+}
+
+.half-circle-status {
+    min-height: 12rem;
+    padding-bottom: 4%;
+}
+
+.half-circle-status.success {
+    background: radial-gradient(circle at top, rgba(25, 143, 81, 0.1) 12rem, transparent 12rem);
+}
+
+.half-circle-status.fail {
+    background: radial-gradient(circle at top, rgba(202, 49, 32, 0.1) 12rem, transparent 12rem);
+}
+
+.half-circle-status span {
+    display: block;
+    margin: auto;
+    max-width: 15vw;
+}
+
+.half-circle-status span.status-icon .icon {
+    font-size: 3rem;
+    width: auto;
+    margin: 0;
+}

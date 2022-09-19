@@ -41,4 +41,10 @@ $functions = [
         'ajax'        => true,
         'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
     ],
+    'tool_moodlenet_get_activity_info' => [
+        'classname'   => 'tool_moodlenet\external\share\activity_info',
+        'description' => 'Get the activity information for sharing',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
 ];
