@@ -2259,12 +2259,13 @@ function lti_get_tools_by_domain($domain, $state = null, $courseid = null) {
     $coursecategorylike2 = '%,' . $coursecategory . ',%';
     $coursecategorylike3 = '%,' . $coursecategory;
 
+    $coursecategories = $DB->sql_cast_to_char('coursecategories');
     $query = "SELECT *
                 FROM {lti_types}
                WHERE tooldomain = :tooldomain
                  AND (course = :siteid $coursefilter)
                  $statefilter
-                 AND (coursecategories IS NULL OR coursecategories = '' OR coursecategories = :coursecategory
+                 AND ($coursecategories IS NULL OR $coursecategories = '' OR $coursecategories = :coursecategory
                         OR $coursecategorysql1 OR $coursecategorysql2 OR $coursecategorysql3)";
 
     return $DB->get_records_sql($query,
@@ -2357,12 +2358,13 @@ function lti_get_lti_types_by_course($courseid, $coursevisible = null) {
     $coursecategorylike1 = $coursecategory . ',%';
     $coursecategorylike2 = '%,' . $coursecategory . ',%';
     $coursecategorylike3 = '%,' . $coursecategory;
+    $coursecategories = $DB->sql_cast_to_char('coursecategories');
     $query = "SELECT *
                 FROM {lti_types}
                WHERE coursevisible $coursevisiblesql
                  AND ($coursecond)
                  AND state = :active
-                 AND (coursecategories IS NULL OR coursecategories = '' OR coursecategories = :coursecategory
+                 AND ($coursecategories IS NULL OR coursecategories = '' OR $coursecategories = :coursecategory
                         OR $coursecategorysql1 OR $coursecategorysql2 OR $coursecategorysql3)
             ORDER BY name ASC";
 
