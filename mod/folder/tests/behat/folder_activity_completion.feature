@@ -56,16 +56,15 @@ Feature: View activity completion information in the folder activity
     And the manual completion button of "Music history" is displayed as "Done"
 
   @javascript
-  Scenario: Use manual completion
+  Scenario: The manual completion button will be shown on the course page for Inline on a course page display mode
     Given the following "activity" exists:
-      | activity       | folder        |
-      | course         | C2            |
-      | idnumber       | mh1           |
-      | name           | Music history |
-      | section        | 1             |
-      | completion     | 1             |
-      | id_display     | 1             |
-
+      | activity   | folder        |
+      | course     | C2            |
+      | idnumber   | mh2           |
+      | name       | Music history |
+      | section    | 1             |
+      | completion | 1             |
+      | display    | 1             |
     When I am on the "Course 2" course page logged in as student1
     Then the manual completion button for "Music history" should exist
     And the manual completion button of "Music history" is displayed as "Mark as done"
