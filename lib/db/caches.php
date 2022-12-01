@@ -207,6 +207,16 @@ $definitions = array(
             'changesincoursecat',
         ),
     ),
+    // Used to store data for course category permission to current user.
+    'coursecatpermissions' => [
+        'mode' => cache_store::MODE_SESSION,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'staticacceleration' => true,
+        'invalidationevents' => [
+            'changesincoursecat',
+        ],
+    ],
     // Used to store state of sections in course (collapsed or not).
     'coursesectionspreferences' => [
         'mode' => cache_store::MODE_REQUEST,

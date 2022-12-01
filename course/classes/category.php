@@ -3111,24 +3111,44 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
         if (empty($permissionstocheck)) {
             throw new coding_exception('Invalid permissionstocheck parameter');
         }
-        foreach ($permissionstocheck as $permission) {
+        $coursecatpermissionscachestore = cache::make('core', 'coursecatpermissions');
+        $data = [];
+        if ($coursecatpermissionscachestore->has($this->id)) {
+            // If the cache exist, get data from cache.
+            $data = $coursecatpermissionscachestore->get($this->id);
+        }
+        if (count(array_intersect_key(array_flip($permissionstocheck), $data)) !== count($permissionstocheck)) {
+            // If the cache does not exist or the cached data does not contain the data for given permissions, build the cache.
+            $data = $this->get_coursecat_permissions($permissionstocheck, $data);
+            // Update the cache with the new data.
+            $coursecatpermissionscachestore->set($this->id, $data);
+        }
+
+        // We just need to compare the given permissions in the cache, not the whole data.
+        return !in_array(false, array_intersect_key($data, array_flip($permissionstocheck)));
+    }
+
+    /**
+     * Get the course category permissions
+     *
+     * @param array $permissions The value can be create, manage or any specific capability.
+     * @param array $currentdata The current data to append
+     * @return array
+     */
+    private function get_coursecat_permissions(array $permissions, array $currentdata = []): array {
+        foreach ($permissions as $permission) {
+            // Check the permission.
             if ($permission == 'create') {
-                if (!$this->can_create_course()) {
-                    return false;
-                }
+                $currentdata[$permission] = $this->can_create_course();
             } else if ($permission == 'manage') {
-                if (!$this->has_manage_capability()) {
-                    return false;
-                }
+                $currentdata[$permission] = $this->has_manage_capability();
             } else {
                 // Specific capability.
-                if (!$this->is_uservisible() || !has_capability($permission, $this->get_context())) {
-                    return false;
-                }
+                $currentdata[$permission] = $this->is_uservisible() && has_capability($permission, $this->get_context());
             }
         }
 
-        return true;
+        return $currentdata;
     }
 
     /**
