@@ -1182,6 +1182,8 @@ class category_test extends \advanced_testcase {
         // user2 has both permission to create course and manage category.
         // Add the moodle/course:create capability back again for the manager role.
         assign_capability('moodle/course:create', CAP_ALLOW, $managerrole->id, $category3context->id);
+        // Purge the cache.
+        \cache_helper::purge_by_definition('core', 'coursecatpermissions');
         $this->setUser($user2);
         $coursecat = core_course_category::user_top();
         $this->assertNotEmpty(core_course_category::get_nearest_editable_subcategory($coursecat, ['create']));
