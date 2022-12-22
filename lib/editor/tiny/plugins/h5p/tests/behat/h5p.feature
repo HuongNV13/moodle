@@ -1,4 +1,4 @@
-@editor @editor_tiny @tiny_media @javascript @_file_upload
+@editor @editor_tiny @tiny_h5p @javascript @_file_upload
 Feature: Use the TinyMCE editor to upload an h5p package
     In order to work with h5p
     As a content creator
@@ -208,3 +208,19 @@ Feature: Use the TinyMCE editor to upload an h5p package
     Then I switch to "h5pcontent" iframe
     And I switch to "h5p-iframe" class iframe
     And I should see "reveal"
+
+  @javascript
+  Scenario: H5P placeholder will not be assessed by accessibility checker
+    Given I log in as "admin"
+    And I follow "Manage private files..."
+    And I upload "h5p/tests/fixtures/guess-the-answer.h5p" file to "Files" filemanager
+    And I click on "Save changes" "button"
+    And I am on the PageName1 "page activity editing" page
+    And I click on the "Configure H5P content" button for the "Page content" TinyMCE editor
+    And I click on "Browse repositories..." "button" in the "Insert H5P content" "dialogue"
+    And I click on "Private files" "link" in the ".fp-repo-area" "css_element"
+    And I click on "guess-the-answer.h5p" "link"
+    And I click on "Select this file" "button"
+    And I click on "Insert H5P content" "button" in the "Insert H5P content" "dialogue"
+    When I click on the "Tools > Accessibility checker" menu item for the "Page content" TinyMCE editor
+    Then I should see "Congratulations, no accessibility issues found!" in the "Accessibility checker" "dialogue"
