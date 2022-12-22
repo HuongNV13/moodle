@@ -1,0 +1,9 @@
+This file describes API changes in the accessibilitychecker Tiny plugin code.
+
+=== 4.2 ===
+
+* We created a list of ignored classes in plugininfo::get_plugin_configuration_for_context(), so all the elements have at least one of these classes will not be assessed
+  by the accessibility checker plugin.
+* New tiny_accessibilitychecker/options::getIgnoredClassesName() function has been created to get the list of ignored classes
+* New tiny_accessibilitychecker/options::addIgnoredClassName() function has been created to allow other plugins that want their elements not to be assessed by the accessibility
+  checker adding their ignored classes to the list.
