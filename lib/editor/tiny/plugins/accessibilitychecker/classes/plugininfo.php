@@ -53,7 +53,19 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
         $permissions = [
             'upload' => true,
         ];
+        // Some content (Example: placeholder elements) are only shown in the editor, and not to users. It is unrelated to the
+        // real display. So we should not assess those content. We created a list of ignored classes, so all the elements have
+        // at least one of these classes will not be assessed by the accessibility checker plugin. The default of this list will
+        // be empty.
+        // Other plugins that want their elements not to be assessed by the accessibility checker need to register their classes
+        // by calling tiny_accessibilitychecker/options::addExceptionalClassName.
+        $ignoredclasses = [];
+        if (defined('BEHAT_SITE_RUNNING') && BEHAT_SITE_RUNNING) {
+            // Add sample class for Behat test.
+            $ignoredclasses = ['behat-accessibilitychecker-placeholder'];
+        }
         return [
+            'ignoredclasses' => $ignoredclasses,
             'permissions' => $permissions,
             'storeinrepo' => true,
         ];
