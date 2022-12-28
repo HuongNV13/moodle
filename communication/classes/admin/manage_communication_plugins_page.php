@@ -26,6 +26,8 @@ namespace core_communication\admin;
 
 use admin_setting;
 use core_plugin_manager;
+use html_table;
+use html_writer;
 
 /**
  * Class manage_communication_plugins_page.
@@ -80,6 +82,17 @@ class manage_communication_plugins_page extends admin_setting {
             return get_string('nocommunicationplugin', 'core_communication');
         }
 
-        return 'ABC XYZ';
+        $table = new html_table();
+        $table->head = [
+            get_string('name'),
+            get_string('enable'),
+            get_string('settings'),
+            get_string('uninstallplugin', 'core_admin'),
+        ];
+        $table->align = ['left', 'center', 'center', 'center'];
+        $table->attributes['class'] = 'manageqbanktable generaltable admintable';
+        $table->data  = [];
+
+        return html_writer::table($table);
     }
 }
