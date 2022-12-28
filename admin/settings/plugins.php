@@ -765,6 +765,14 @@ if ($hassiteconfig) {
     }
 }
 
+// Communication plugins.
+if ($hassiteconfig) {
+    $ADMIN->add('modules', new admin_category('communicationsettings', new lang_string('communication', 'core_communication')));
+    $temp = new admin_settingpage('managecommunications', new lang_string('managecommunicationplugins', 'core_communication'));
+    $temp->add(new \core_communication\admin\manage_communication_plugins_page());
+    $ADMIN->add('communicationsettings', $temp);
+}
+
 // Content bank content types.
 if ($hassiteconfig) {
     $ADMIN->add('modules', new admin_category('contentbanksettings', new lang_string('contentbank')));
