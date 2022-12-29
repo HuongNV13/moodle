@@ -14,16 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace comm_matrix\privacy;
+
+use core_privacy\local\metadata\null_provider;
+
 /**
- * Strings for component 'communication', language 'en'
+ * Privacy Subsystem for comm_matrix implementing null_provider.
  *
- * @package    core_communication
+ * @package    comm_matrix
  * @copyright  2022 Huong Nguyen <huongnv13@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+class provider implements null_provider {
 
-$string['commnotfound'] = 'The \'{$a}\' communication plugin doesn\'t exist or is not recognised.';
-$string['communication'] = 'Communication';
-$string['managecommunicationplugins'] = 'Manage communication plugins';
-$string['nocommunicationplugin'] = 'No communication plugin found.';
-
+    public static function get_reason(): string {
+        return 'privacy:metadata';
+    }
+}

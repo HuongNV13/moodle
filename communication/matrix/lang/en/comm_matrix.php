@@ -15,15 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'communication', language 'en'
+ * Strings for component comm_matrix, language 'en'
  *
- * @package    core_communication
+ * @package    comm_matrix
  * @copyright  2022 Huong Nguyen <huongnv13@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['commnotfound'] = 'The \'{$a}\' communication plugin doesn\'t exist or is not recognised.';
-$string['communication'] = 'Communication';
-$string['managecommunicationplugins'] = 'Manage communication plugins';
-$string['nocommunicationplugin'] = 'No communication plugin found.';
-
+$string['pluginname'] = 'Moodle Matrix';
+$string['privacy:metadata'] = 'The Moodle Matrix communication plugin does not store any personal data.';

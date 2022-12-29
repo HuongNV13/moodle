@@ -27,7 +27,9 @@ namespace core_communication\admin;
 use admin_setting;
 use core_plugin_manager;
 use html_table;
+use html_table_row;
 use html_writer;
+use moodle_url;
 
 /**
  * Class manage_communication_plugins_page.
@@ -76,8 +78,10 @@ class manage_communication_plugins_page extends admin_setting {
      * @return string
      */
     public function output_html($data, $query = '') {
+        global $OUTPUT;
+
         $pluginmanager = core_plugin_manager::instance();
-        $plugins = $pluginmanager->get_plugins_of_type('communication');
+        $plugins = $pluginmanager->get_plugins_of_type('comm');
         if (empty($plugins)) {
             return get_string('nocommunicationplugin', 'core_communication');
         }
@@ -91,8 +95,45 @@ class manage_communication_plugins_page extends admin_setting {
         ];
         $table->align = ['left', 'center', 'center', 'center'];
         $table->attributes['class'] = 'manageqbanktable generaltable admintable';
-        $table->data  = [];
+        $table->data = [];
 
-        return html_writer::table($table);
+        foreach ($plugins as $plugin) {
+            $class = '';
+            $actionurl = new moodle_url('/admin/communication.php', ['sesskey' => sesskey(), 'name' => $plugin->name]);
+            if ($pluginmanager->get_plugin_info('comm_' . $plugin->name)->get_status() ===
+                core_plugin_manager::PLUGIN_STATUS_MISSING) {
+                $strtypename = $plugin->displayname . ' (' . get_string('missingfromdisk') . ')';
+            } else {
+                $strtypename = $plugin->displayname;
+            }
+
+            if ($plugin->is_enabled()) {
+                $hideshow = html_writer::link($actionurl->out(false, ['action' => 'disable']),
+                    $OUTPUT->pix_icon('t/hide', get_string('disable'), 'moodle', ['class' => 'iconsmall']));
+            } else {
+                $class = 'dimmed_text';
+                $hideshow = html_writer::link($actionurl->out(false, ['action' => 'enable']),
+                    $OUTPUT->pix_icon('t/show', get_string('enable'), 'moodle', ['class' => 'iconsmall']));
+            }
+
+            $settings = '';
+            if ($plugin->get_settings_url()) {
+                $settings = html_writer::link($plugin->get_settings_url(), get_string('settings'));
+            }
+
+            $uninstall = '';
+            if ($uninstallurl = core_plugin_manager::instance()->get_uninstall_url(
+                'comm_' . $plugin->name, 'manage')) {
+                $uninstall = \html_writer::link($uninstallurl, get_string('uninstallplugin', 'core_admin'));
+            }
+
+            $row = new html_table_row([$strtypename, $hideshow, $settings, $uninstall]);
+            if ($class) {
+                $row->attributes['class'] = $class;
+            }
+            $table->data[] = $row;
+        }
+
+        return highlight($query, html_writer::table($table));
     }
 }

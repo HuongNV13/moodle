@@ -15,41 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines classes used for plugin info.
+ * Version information for comm_matrix.
  *
- * @package    core
+ * @package    comm_matrix
  * @copyright  2022 Huong Nguyen <huongnv13@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core\plugininfo;
+defined('MOODLE_INTERNAL') || die();
 
-use moodle_url;
-
-/**
- * Class for communication plugins
- *
- * @package    core
- * @copyright  2022 Huong Nguyen <huongnv13@gmail.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class communication extends base {
-    /**
-     * Return URL used for management of plugins of this type.
-     *
-     * @return moodle_url
-     */
-    public static function get_manage_url(): moodle_url {
-        return new moodle_url('/admin/settings.php', ['section' => 'managecommunications']);
-    }
-
-    /**
-     * Get the name for the settings section.
-     *
-     * @return string
-     */
-    public function get_settings_section_name(): string {
-        return $this->type . '_' . $this->name;
-    }
-
-}
+$plugin->component = 'comm_matrix';
+$plugin->version   = 2022122800;
+$plugin->requires  = 2022111800;
+$plugin->maturity  = MATURITY_STABLE;

@@ -25,3 +25,45 @@
 
 require_once('../config.php');
 require_once($CFG->libdir . '/adminlib.php');
+
+$action = required_param('action', PARAM_ALPHANUMEXT);
+$name = required_param('name', PARAM_PLUGIN);
+
+$syscontext = context_system::instance();
+$PAGE->set_url('/admin/communication.php');
+$PAGE->set_context($syscontext);
+
+require_admin();
+require_sesskey();
+
+$return = new moodle_url('/admin/settings.php', ['section' => 'managecommunications']);
+
+$plugins = core_plugin_manager::instance()->get_plugins_of_type('comm');
+$sortorder = array_flip(array_keys($plugins));
+
+if (!isset($plugins[$name])) {
+    throw new moodle_exception('commnotfound', 'core_communication', $return, $name);
+}
+
+$plugintypename = $plugins[$name]->type . '_' . $plugins[$name]->name;
+
+switch ($action) {
+    case 'disable':
+        if ($plugins[$name]->is_enabled()) {
+            $class = \core_plugin_manager::resolve_plugininfo_class('comm');
+            $class::enable_plugin($name, false);
+        }
+        break;
+    case 'enable':
+        echo "<pre>";
+        var_dump($plugins[$name]);
+        var_dump($plugins[$name]->is_enabled());
+        exit();
+        if (!$plugins[$name]->is_enabled()) {
+            $class = \core_plugin_manager::resolve_plugininfo_class('comm');
+            $class::enable_plugin($name, true);
+        }
+        break;
+}
+
+redirect($return);
