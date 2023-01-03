@@ -24,6 +24,7 @@
 
 namespace core\plugininfo;
 
+use admin_settingpage;
 use core_plugin_manager;
 use moodle_url;
 
@@ -84,6 +85,67 @@ class comm extends base {
         }
 
         return $haschanged;
+    }
+
+    /**
+     * Finds all enabled plugins, the result may include missing plugins.
+     *
+     * @return array|null of enabled plugins $pluginname=>$pluginname, null means unknown
+     */
+    public static function get_enabled_plugins(): ?array {
+        $pluginmanager = core_plugin_manager::instance();
+        $plugins = $pluginmanager->get_installed_plugins('comm');
+
+        if (!$plugins) {
+            return [];
+        }
+
+        $plugins = array_keys($plugins);
+
+        // Filter to return only enabled plugins.
+        $enabled = [];
+        foreach ($plugins as $plugin) {
+            $disabled = get_config('comm_' . $plugin, 'disabled');
+            if (empty($disabled)) {
+                $enabled[$plugin] = $plugin;
+            }
+        }
+        return $enabled;
+    }
+
+    /**
+     * Loads plugin settings to the settings tree
+     *
+     * This function usually includes settings.php file in plugins folder.
+     * Alternatively it can create a link to some settings page (instance of admin_externalpage)
+     *
+     * @param \part_of_admin_tree $adminroot
+     * @param string $parentnodename
+     * @param bool $hassiteconfig whether the current user has moodle/site:config capability
+     */
+    public function load_settings(\part_of_admin_tree $adminroot, $parentnodename, $hassiteconfig) {
+        global $CFG, $USER, $DB, $OUTPUT, $PAGE; // In case settings.php wants to refer to them.
+        $ADMIN = $adminroot; // May be used in settings.php.
+        $plugininfo = $this;      // Also can be used inside settings.php.
+
+        if (!$this->is_installed_and_upgraded()) {
+            return;
+        }
+
+        if (!$hassiteconfig) {
+            return;
+        }
+
+        $section = $this->get_settings_section_name();
+        $settings = null;
+        if (file_exists($this->full_path('settings.php'))) {
+            $settings = new admin_settingpage($section, $this->displayname,
+                'moodle/site:config', $this->is_enabled() === false);
+            include($this->full_path('settings.php')); // This may also set $settings to null.
+        }
+        if ($settings) {
+            $ADMIN->add($parentnodename, $settings);
+        }
     }
 
 }

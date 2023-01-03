@@ -55,10 +55,6 @@ switch ($action) {
         }
         break;
     case 'enable':
-        echo "<pre>";
-        var_dump($plugins[$name]);
-        var_dump($plugins[$name]->is_enabled());
-        exit();
         if (!$plugins[$name]->is_enabled()) {
             $class = \core_plugin_manager::resolve_plugininfo_class('comm');
             $class::enable_plugin($name, true);

@@ -1828,6 +1828,8 @@ class core_plugin_manager {
                 'gregorian'
             ),
 
+            'comm' => [],
+
             'contenttype' => array(
                 'h5p'
             ),
