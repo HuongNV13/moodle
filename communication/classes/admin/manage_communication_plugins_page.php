@@ -1,0 +1,131 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+namespace core_communication\admin;
+
+use admin_setting;
+use core_plugin_manager;
+use html_table;
+use html_table_row;
+use html_writer;
+use moodle_url;
+
+/**
+ * Communication plugins manager. Allow enable/disable communication plugins and jump to settings
+ *
+ * @package    core_communication
+ * @copyright  2022 Huong Nguyen <huongnv13@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class manage_communication_plugins_page extends admin_setting {
+
+    /**
+     * Constructor
+     */
+    public function __construct() {
+        $this->nosave = true;
+        parent::__construct('managecommunications',
+            new \lang_string('managecommunicationplugins', 'core_communication'), '', '');
+    }
+
+    /**
+     * Returns current value of this setting
+     *
+     * @return mixed array or string depending on instance, NULL means not set yet
+     */
+    public function get_setting() {
+        return true;
+    }
+
+    /**
+     * Store new setting
+     *
+     * @param mixed $data string or array, must not be NULL
+     * @return string empty string if ok, string error message otherwise
+     */
+    public function write_setting($data): string {
+        // Do not write any setting.
+        return '';
+    }
+
+    /**
+     * Return part of form with setting
+     * This function should always be overwritten
+     *
+     * @param mixed $data array or string depending on setting
+     * @param string $query
+     * @return string
+     */
+    public function output_html($data, $query = ''): string {
+        global $OUTPUT;
+
+        $pluginmanager = core_plugin_manager::instance();
+        $plugins = $pluginmanager->get_plugins_of_type('comm');
+        if (empty($plugins)) {
+            return get_string('nocommunicationplugin', 'core_communication');
+        }
+
+        $table = new html_table();
+        $table->head = [
+            get_string('name'),
+            get_string('enable'),
+            get_string('settings'),
+            get_string('uninstallplugin', 'core_admin'),
+        ];
+        $table->align = ['left', 'center', 'center', 'center'];
+        $table->attributes['class'] = 'managecommtable generaltable admintable';
+        $table->data = [];
+
+        foreach ($plugins as $plugin) {
+            $class = '';
+            $actionurl = new moodle_url('/admin/communication.php', ['sesskey' => sesskey(), 'name' => $plugin->name]);
+            if ($pluginmanager->get_plugin_info('comm_' . $plugin->name)->get_status() ===
+                core_plugin_manager::PLUGIN_STATUS_MISSING) {
+                $strtypename = $plugin->displayname . ' (' . get_string('missingfromdisk') . ')';
+            } else {
+                $strtypename = $plugin->displayname;
+            }
+
+            if ($plugin->is_enabled()) {
+                $hideshow = html_writer::link($actionurl->out(false, ['action' => 'disable']),
+                    $OUTPUT->pix_icon('t/hide', get_string('disable'), 'moodle', ['class' => 'iconsmall']));
+            } else {
+                $class = 'dimmed_text';
+                $hideshow = html_writer::link($actionurl->out(false, ['action' => 'enable']),
+                    $OUTPUT->pix_icon('t/show', get_string('enable'), 'moodle', ['class' => 'iconsmall']));
+            }
+
+            $settings = '';
+            if ($plugin->get_settings_url()) {
+                $settings = html_writer::link($plugin->get_settings_url(), get_string('settings'));
+            }
+
+            $uninstall = '';
+            if ($uninstallurl = core_plugin_manager::instance()->get_uninstall_url(
+                'comm_' . $plugin->name, 'manage')) {
+                $uninstall = html_writer::link($uninstallurl, get_string('uninstallplugin', 'core_admin'));
+            }
+
+            $row = new html_table_row([$strtypename, $hideshow, $settings, $uninstall]);
+            if ($class) {
+                $row->attributes['class'] = $class;
+            }
+            $table->data[] = $row;
+        }
+
+        return highlight($query, html_writer::table($table));
+    }
+}

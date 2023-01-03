@@ -765,6 +765,19 @@ if ($hassiteconfig) {
     }
 }
 
+// Communication plugins.
+if ($hassiteconfig && !empty($CFG->enablecommunicationsubsystem)) {
+    $ADMIN->add('modules', new admin_category('communicationsettings', new lang_string('communication', 'core_communication')));
+    $temp = new admin_settingpage('managecommunications', new lang_string('managecommunicationplugins', 'core_communication'));
+    $temp->add(new \core_communication\admin\manage_communication_plugins_page());
+    $ADMIN->add('communicationsettings', $temp);
+    $plugins = core_plugin_manager::instance()->get_plugins_of_type('comm');
+    foreach ($plugins as $plugin) {
+        /** @var \core\plugininfo\comm $plugin */
+        $plugin->load_settings($ADMIN, 'communicationsettings', $hassiteconfig);
+    }
+}
+
 // Content bank content types.
 if ($hassiteconfig) {
     $ADMIN->add('modules', new admin_category('contentbanksettings', new lang_string('contentbank')));
