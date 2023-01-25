@@ -463,7 +463,9 @@ class restore_ui_stage_destination extends restore_ui_independent_stage {
             'filepath' => $this->filepath,
             'contextid' => $this->contextid,
             'stage' => restore_ui::STAGE_DESTINATION));
-        $this->coursesearch = new restore_course_search(array('url' => $url), context::instance_by_id($contextid)->instanceid);
+        // The context level can be course or module. We need to make sure that we always use the course context.
+        $this->coursesearch = new restore_course_search(array('url' => $url),
+            context::instance_by_id($contextid)->get_course_context()->instanceid);
         $this->categorysearch = new restore_category_search(array('url' => $url));
     }
 
