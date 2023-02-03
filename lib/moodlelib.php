@@ -10359,7 +10359,7 @@ function check_consecutive_identical_characters($password, $maxchars) {
 
     $previouschar = '';
     $consecutivecount = 1;
-    foreach (str_split($password) as $char) {
+    foreach (mb_str_split$password) as $char) {
         if ($char != $previouschar) {
             $consecutivecount = 1;
         } else {

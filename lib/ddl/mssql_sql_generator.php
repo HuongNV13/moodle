@@ -599,7 +599,7 @@ class mssql_sql_generator extends sql_generator {
     public function getNameForObject($tablename, $fields, $suffix='') {
         if ($this->temptables->is_temptable($tablename)) { // Is temp table, inject random field names
             $random = strtolower(random_string(12)); // 12cc to be split in 4 parts
-            $fields = $fields . ', ' . implode(', ', str_split($random, 3));
+            $fields = $fields . ', ' . implode(', ', mb_str_split$random, 3));
         }
         return parent::getNameForObject($tablename, $fields, $suffix); // Delegate to parent (common) algorithm
     }
