@@ -13,3 +13,8 @@ Instructions
 4.  Download the latest release.
 5.  Unzip it in lib as php-jwt.
 6.  Update entry for this library in lib/thirdpartylibs.xml.
+
+Local modifications:
+- lib/php-jwt/src/JWT.php has been minimally modified for php82 compatibility
+  The fix applied is already upstream, see https://github.com/firebase/php-jwt/pull/485.
+  See MDL-76410 for more details.
