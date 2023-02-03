@@ -60,7 +60,7 @@ class Delimiter
 
     protected function countDelimiterValues(string $line, array $delimiterKeys): void
     {
-        $splitString = str_split($line, 1);
+        $splitString = mb_str_split$line, 1);
         if (is_array($splitString)) {
             $distribution = array_count_values($splitString);
             $countLine = array_intersect_key($distribution, $delimiterKeys);

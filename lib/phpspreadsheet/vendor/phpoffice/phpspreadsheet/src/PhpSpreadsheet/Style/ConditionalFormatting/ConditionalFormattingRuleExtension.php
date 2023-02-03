@@ -38,7 +38,7 @@ class ConditionalFormattingRuleExtension
 
     private function generateUuid()
     {
-        $chars = str_split('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx');
+        $chars = mb_str_split'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx');
 
         foreach ($chars as $i => $char) {
             if ($char === 'x') {

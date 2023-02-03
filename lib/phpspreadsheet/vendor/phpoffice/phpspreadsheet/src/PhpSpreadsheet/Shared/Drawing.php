@@ -183,7 +183,7 @@ class Drawing
         $height = 0;
         if (substr($header, 0, 4) == '424d') {
             //    Cut it in parts of 2 bytes
-            $header_parts = str_split($header, 2);
+            $header_parts = mb_str_split$header, 2);
 
             //    Get the width        4 bytes
             $width = hexdec($header_parts[19] . $header_parts[18]);

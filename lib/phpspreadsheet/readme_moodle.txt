@@ -84,3 +84,16 @@ located in lib/phpspreadsheet/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet
          return realpath(dirname($temp));
      }
   This hack is needed because it can not be guaranteed that sysGetTempDir() works everywhere.
+
+Local modifications:
+- Below files have been modified for php82 compatibility:
+    + lib/phpspreadsheet/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Calculation/Engineering/ConvertHex.php
+    + lib/phpspreadsheet/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Calculation/Engineering/ConvertOctal.php
+    + lib/phpspreadsheet/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Calculation/MathTrig/Arabic.php
+    + lib/phpspreadsheet/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Csv/Delimiter.php
+    + lib/phpspreadsheet/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Security/XmlScanner.php
+    + lib/phpspreadsheet/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Shared/Drawing.php
+    + lib/phpspreadsheet/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Style/ConditionalFormatting/ConditionalFormattingRuleExtension.php
+    + lib/phpspreadsheet/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Style/NumberFormat/DateFormatter.php
+  The fix applied is already upstream, see https://github.com/horde/Imap_Client/pull/24 and
+  https://github.com/PHPOffice/PhpSpreadsheet/pull/3341. See MDL-76410 for more details.
