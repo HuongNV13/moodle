@@ -91,7 +91,7 @@ class behat_form_autocomplete extends behat_form_text {
         $this->wait_for_pending_js();
 
         // Type in the new value.
-        behat_base::type_keys($this->session, str_split($value));
+        behat_base::type_keys($this->session, mb_str_split($value));
         $this->wait_for_pending_js();
 
         // If the autocomplete found suggestions, then it will have:

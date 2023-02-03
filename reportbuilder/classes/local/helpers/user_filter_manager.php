@@ -59,7 +59,7 @@ class user_filter_manager {
     public static function set(int $reportid, array $values, int $userid = null): bool {
         $jsonvalues = json_encode($values);
 
-        $jsonchunks = str_split($jsonvalues, static::PREFERENCE_CHUNK_SIZE);
+        $jsonchunks = mb_str_split($jsonvalues, static::PREFERENCE_CHUNK_SIZE);
         foreach ($jsonchunks as $index => $jsonchunk) {
             $userpreference = static::user_preference_name($reportid, $index);
             set_user_preference($userpreference, $jsonchunk, $userid);

@@ -131,7 +131,7 @@ OET;
                 if (empty($matches[$i])) {
                     continue;
                 }
-                $part = str_split($matches[$i], strlen($matches[$i]) - 1);
+                $part = mb_str_split($matches[$i], strlen($matches[$i]) - 1);
                 switch ($part[1]) {
                     case 'h':
                         $seconds += 3600 * $part[0];

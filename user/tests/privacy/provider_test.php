@@ -491,7 +491,7 @@ class provider_test extends provider_testcase {
         if ($length > 0) {
 
             $response = '';
-            $source = str_split($source, 1);
+            $source = mb_str_split($source, 1);
 
             for ($i = 1; $i <= $length; $i++) {
                 $num = mt_rand(1, count($source));

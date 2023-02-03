@@ -239,7 +239,7 @@ class brickfield_accessibility_color_test extends brickfield_accessibility_test 
      */
     public function get_rgb(string $color): ?array {
         $color = $this->convert_color($color);
-        $c = str_split($color, 2);
+        $c = mb_str_split($color, 2);
         if (count($c) != 3) {
             return null;
         }

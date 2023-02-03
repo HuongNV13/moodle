@@ -1797,7 +1797,7 @@ EOF;
                 default:
                     return $key;
             }
-        }, str_split($keys));
+        }, mb_str_split($keys));
         behat_base::type_keys($this->getSession(), $keylist);
     }
 

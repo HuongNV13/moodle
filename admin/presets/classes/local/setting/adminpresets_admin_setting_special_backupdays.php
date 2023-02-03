@@ -40,7 +40,7 @@ class adminpresets_admin_setting_special_backupdays extends adminpresets_setting
 
         $selecteddays = [];
 
-        $week = str_split($this->value);
+        $week = mb_str_split($this->value);
         foreach ($week as $key => $day) {
             if ($day) {
                 $index = $days[$key];

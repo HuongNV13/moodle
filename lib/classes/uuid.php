@@ -74,7 +74,7 @@ class uuid {
             $data = random_bytes(16);
             $data[6] = chr((ord($data[6]) & 0x0f) | 0x40); // Set version to 0100.
             $data[8] = chr((ord($data[8]) & 0x3f) | 0x80); // Set bits 6-7 to 10.
-            $uuid = vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+            $uuid = vsprintf('%s%s-%s-%s-%s-%s%s%s', mb_str_split(bin2hex($data), 4));
         } catch (Exception $e) {
             // Could not generate a random string. Is this OS secure?
             $uuid = false;
