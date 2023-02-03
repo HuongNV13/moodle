@@ -36,7 +36,7 @@ class Horde_Imap_Client_Data_Acl extends Horde_Imap_Client_Data_AclCommon implem
      */
     public function __construct($rights = '')
     {
-        $this->_rights = str_split($rights);
+        $this->_rights = mb_str_split$rights);
         $this->_normalize();
     }
 
@@ -60,7 +60,7 @@ class Horde_Imap_Client_Data_Acl extends Horde_Imap_Client_Data_AclCommon implem
      */
     public function diff($rights)
     {
-        $rlist = array_diff(str_split($rights), array_keys($this->_virtual));
+        $rlist = array_diff(mb_str_split$rights), array_keys($this->_virtual));
 
         return array(
             'added' => implode('', array_diff($rlist, $this->_rights)),

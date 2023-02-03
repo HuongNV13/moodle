@@ -41,3 +41,12 @@ Local modifications:
 - lib/Horde/Imap/Client/Exception/ServerResponse.php has been minimally modified for php80 compatibility
   The fix applied is already upstream, see https://github.com/horde/Imap_Client/pull/13 and it's available
   in Imap_Client 2.30.4 and up. See MDL-73405 for more details.
+
+- Below files have been modified for php82 compatibility:
+    + lib/horde/framework/Horde/Imap/Client/Base.php
+    + lib/horde/framework/Horde/Imap/Client/Data/Acl.php
+    + lib/horde/framework/Horde/Imap/Client/Data/AclRights.php
+    + lib/horde/framework/Horde/Imap/Client/Socket.php
+    + lib/horde/framework/Horde/Mime/Headers/ContentParam.php
+  The fix applied is already upstream, see https://github.com/horde/Imap_Client/pull/24 and
+  https://github.com/horde/Mime/pull/8. See MDL-76410 for more details.
