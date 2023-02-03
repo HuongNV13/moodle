@@ -493,7 +493,7 @@ class ParserState
             if ($sString === '') {
                 return [];
             } else {
-                return str_split($sString);
+                return mb_str_split$sString);
             }
         }
     }
