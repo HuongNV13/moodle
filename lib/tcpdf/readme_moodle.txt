@@ -15,6 +15,18 @@ Important
 A new version of the libray is being developed @ https://github.com/tecnickcom/tc-lib-pdf . Check periodically when it's ready
 and if it's a drop-in replacement for the legacy tcpdf one.
 
+2023/02/03
+----------
+Fix PHP 8.2 str_split (MDL-76410)
+by Huong Nguyen <huongnv13@gmail.com>
+
+Below files have been modified for php82 compatibility:
+    + lib/tcpdf/include/barcodes/qrcode.php
+    + lib/tcpdf/include/tcpdf_fonts.php
+    + lib/tcpdf/tcpdf_barcodes_1d.php
+    + lib/tcpdf/tcpdf_barcodes_2d.php
+The fix applied is already upstream, see https://github.com/tecnickcom/TCPDF/pull/588.
+
 2022/09/27
 ----------
 Upgrade to tcpdf TCPDF 6.5.0 (MDL-75468)
