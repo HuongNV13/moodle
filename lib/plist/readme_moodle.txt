@@ -18,3 +18,7 @@ Removed:
 Added:
  * readme_moodle.txt
 
+Local modifications:
+- lib/plist/classes/CFPropertyList/CFBinaryPropertyList.php has been minimally modified for php82 compatibility
+  The fix applied is already upstream, see https://github.com/TECLIB/CFPropertyList/pull/73.
+  See MDL-76410 for more details.
