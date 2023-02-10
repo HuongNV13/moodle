@@ -36,6 +36,15 @@ $courseid = optional_param('courseid', 0, PARAM_INT);
 
 if ($returnurl) {
     $returnurl = new moodle_url($returnurl);
+    $qtagids = $returnurl->get_param('qtagids');
+    // The moodle_url param does not support an array as a value.
+    // We need to convert the qtagids to a suitable format.
+    if ($qtagids && is_array($qtagids)) {
+        $returnurl->remove_params(['qtagids']);
+        foreach ($qtagids as $index => $qtagid) {
+            $returnurl->param("qtagids[{$index}]", $qtagid);
+        }
+    }
 }
 
 \core_question\local\bank\helper::require_plugin_enabled('qbank_deletequestion');
