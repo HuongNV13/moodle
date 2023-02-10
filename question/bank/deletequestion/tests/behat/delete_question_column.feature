@@ -16,6 +16,7 @@ Feature: Use the qbank plugin manager page for deletequestion
       | questioncategory | qtype     | name                  | questiontext              |
       | Test questions   | truefalse | First question        | Answer the first question |
       | Test questions   | truefalse | First question second | Answer the first question |
+      | Test questions   | truefalse | Third question        | Answer the third question |
 
   Scenario: Enable/disable delete question column from the base view
     Given I log in as "admin"
@@ -54,3 +55,20 @@ Feature: Use the qbank plugin manager page for deletequestion
     And I click on "Delete" "button" in the "Confirm" "dialogue"
     Then I should not see "First question"
     And I should not see "First question second"
+
+  @javascript
+  Scenario: I should not see the deleted questions in the tag filtered view
+    Given I am on the "Third question" "core_question > edit" page logged in as "admin"
+    And I set the following fields to these values:
+      | Tags | foo |
+    And I click on "Save changes" "button"
+    And I am on the "Test quiz" "mod_quiz > question bank" page
+    And I open the autocomplete suggestions list
+    And I click on "foo" item in the autocomplete list
+    And "foo" "autocomplete_selection" should exist
+    And I click on "Third question" "checkbox"
+    And I click on "With selected" "button"
+    And I click on question bulk action "deleteselected"
+    When I click on "Delete" "button" in the "Confirm" "dialogue"
+    Then I should not see "Third question"
+    And "foo" "autocomplete_selection" should exist
