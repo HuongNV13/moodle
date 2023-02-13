@@ -1575,7 +1575,8 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
      *     - tagid - id of tag
      *     - onlywithcompletion - set to true if we only need courses with completion enabled
      * @param array $options display options, same as in get_courses() except 'recursive' is ignored -
-     *                       search is always category-independent
+     *                       search is always category-independent and 'limittoenrolled' only returns
+     *                       courses the user is enrolled to
      * @param array $requiredcapabilities List of capabilities required to see return course.
      * @return core_course_list_element[]
      */
@@ -1584,12 +1585,16 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
         $offset = !empty($options['offset']) ? $options['offset'] : 0;
         $limit = !empty($options['limit']) ? $options['limit'] : null;
         $sortfields = !empty($options['sort']) ? $options['sort'] : array('sortorder' => 1);
+        $limittoenrolled = !empty($options['limittoenrolled']);
 
         $coursecatcache = cache::make('core', 'coursecat');
         $cachekey = 's-'. serialize(
-            $search + array('sort' => $sortfields) + array('requiredcapabilities' => $requiredcapabilities)
+            $search +
+            ['sort' => $sortfields] +
+            ['requiredcapabilities' => $requiredcapabilities] +
+            ['limittoenrolled' => $limittoenrolled]
         );
-        $cntcachekey = 'scnt-'. serialize($search);
+        $cntcachekey = 'scnt-'. serialize($search) . serialize($requiredcapabilities) . $limittoenrolled;
 
         $ids = $coursecatcache->get($cachekey);
         if ($ids !== false) {
@@ -1630,6 +1635,15 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
             $search['search'] = '';
         }
 
+        $courseidsearch = '';
+        $courseidparams = [];
+
+        if ($limittoenrolled) {
+            $enrolled = enrol_get_my_courses(['id']);
+            list($sql, $courseidparams) = $DB->get_in_or_equal(array_keys($enrolled), SQL_PARAMS_NAMED, 'courseid', true, 0);
+            $courseidsearch = "c.id " . $sql;
+        }
+
         if (empty($search['blocklist']) && empty($search['modulelist']) && empty($search['tagid'])) {
             // Search courses that have specified words in their names/summaries.
             $searchterms = preg_split('|\s+|', trim($search['search']), 0, PREG_SPLIT_NO_EMPTY);
@@ -1637,6 +1651,10 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
             if (!empty($search['onlywithcompletion'])) {
                 $searchcond = ['c.enablecompletion = :p1'];
                 $searchcondparams = ['p1' => 1];
+            }
+            if (!empty($courseidsearch)) {
+                $searchcond[] = $courseidsearch;
+                $searchcondparams = array_merge($searchcondparams, $courseidparams);
             }
             $courselist = get_courses_search($searchterms, 'c.sortorder ASC', 0, 9999999, $totalcount,
                 $requiredcapabilities, $searchcond, $searchcondparams);
@@ -1684,6 +1702,11 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
                 debugging('No criteria is specified while searching courses', DEBUG_DEVELOPER);
                 return array();
             }
+            if (!empty($courseidsearch)) {
+                $where .= ' AND ' . $courseidsearch;
+                $params = array_merge($params, $courseidparams);
+            }
+
             $courselist = self::get_course_records($where, $params, $options, true);
             if (!empty($requiredcapabilities)) {
                 foreach ($courselist as $key => $course) {
@@ -1728,14 +1751,16 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
      * perform extra DB queries.
      *
      * @param array $search search criteria, see method search_courses() for more details
-     * @param array $options display options. They do not affect the result but
-     *     the 'sort' property is used in cache key for storing list of course ids
+     * @param array $options display options. 'limittoenrolled' only counts courses the user is
+     *                       enrolled to. Other options do not affect the result but the 'sort'
+     *                       property is used in cache key for storing list of course ids
      * @param array $requiredcapabilities List of capabilities required to see return course.
      * @return int
      */
     public static function search_courses_count($search, $options = array(), $requiredcapabilities = array()) {
         $coursecatcache = cache::make('core', 'coursecat');
-        $cntcachekey = 'scnt-'. serialize($search) . serialize($requiredcapabilities);
+        $limittoenrolled = !empty($options['limittoenrolled']);
+        $cntcachekey = 'scnt-'. serialize($search) . serialize($requiredcapabilities) . $limittoenrolled;
         if (($cnt = $coursecatcache->get($cntcachekey)) === false) {
             // Cached value not found. Retrieve ALL courses and return their count.
             unset($options['offset']);
