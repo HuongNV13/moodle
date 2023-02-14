@@ -59,7 +59,8 @@ class behat_form_passwordunmask extends behat_form_text {
         $wrapper->click();
         $this->wait_for_pending_js();
 
-        behat_base::type_keys($this->session, str_split($value));
+        $keys = $value === '' ? [''] : str_split($value);
+        behat_base::type_keys($this->session, $keys);
         $this->wait_for_pending_js();
 
         // Press enter key after setting password to save.

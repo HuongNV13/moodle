@@ -66,8 +66,9 @@ class behat_form_inplaceeditable extends behat_form_text {
         self::type_keys($this->session, [behat_keys::BACKSPACE]);
 
         // Type in the new value, followed by ENTER to save the value.
+        $keys = $value === '' ? [''] : str_split($value);
         self::type_keys($this->session, array_merge(
-            str_split($value),
+            $keys,
             [behat_keys::ENTER]
         ));
     }

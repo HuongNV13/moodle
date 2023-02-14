@@ -80,7 +80,8 @@ class behat_qtype_ddwtos extends behat_base {
         $node = $this->get_selected_node('xpath_element', $this->drop_xpath($spacenumber));
         $this->ensure_node_is_visible($node);
         $node->focus();
-        foreach (str_split($keys) as $key) {
+        $keys = $keys === '' ? [''] : str_split($keys);
+        foreach ($keys as $key) {
             behat_base::type_keys($this->getSession(), [$key]);
             $this->wait_for_pending_js();
         }

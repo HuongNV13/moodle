@@ -2190,7 +2190,8 @@ function lti_map_keyname($key, $tolower = true) {
     if ($tolower) {
         $newkey = '';
         $key = core_text::strtolower(trim($key));
-        foreach (str_split($key) as $ch) {
+        $keys = $key === '' ? [''] : str_split($key);
+        foreach ($keys as $ch) {
             if ( ($ch >= 'a' && $ch <= 'z') || ($ch >= '0' && $ch <= '9') ) {
                 $newkey .= $ch;
             } else {
