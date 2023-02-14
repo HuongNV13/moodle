@@ -1347,6 +1347,11 @@ function get_real_size($size = 0) {
         return 0;
     }
 
+    if (version_compare(PHP_VERSION, '8.2.0') >= 0) {
+        // Use the new ini_parse_quantity() in PHP 8.2.
+        return ini_parse_quantity($size);
+    }
+
     static $binaryprefixes = array(
         'K' => 1024 ** 1,
         'k' => 1024 ** 1,
