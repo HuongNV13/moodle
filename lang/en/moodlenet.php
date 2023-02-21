@@ -23,4 +23,5 @@
  */
 
 $string['configmoodlenetoauthservice'] = 'Select the OAuth 2 service that is configured to talk to the MoodleNet server. If the service doesn\'t exist yet, you will need to <a href="{$a}">create</a> it.';
+$string['eventresourceexported'] = 'Resource exported';
 $string['moodlenetoutboundsettings'] = 'MoodleNet outbound settings';
