@@ -2971,6 +2971,12 @@ $functions = array(
         'type' => 'write',
         'ajax' => true,
     ],
+    'core_moodlenet_get_share_info_activity' => [
+        'classname'   => 'core\external\moodlenet_get_share_info_activity',
+        'description' => 'Get share info activity',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
 );
 
 $services = array(
