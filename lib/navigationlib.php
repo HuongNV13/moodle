@@ -4880,6 +4880,16 @@ class settings_navigation extends navigation_node {
             $function($this, $modulenode);
         }
 
+        // Send to MoodleNet.
+        $this->page->requires->js_call_amd('core/moodlenet/send_activity', 'init');
+        $action = new action_link(new moodle_url(''), '', null, [
+            'data-action' => 'sendtomoodlenet',
+            'data-type' => 'activity',
+            'data-sharetype' => 'resource',
+        ]);
+        $modulenode->add(get_string('share_to_moodlenet', 'core_moodlenet'),
+            $action, self::TYPE_SETTING, null, 'exportmoodlenet')->set_force_into_more_menu(true);
+
         // Remove the module node if there are no children.
         if ($modulenode->children->count() <= 0) {
             $modulenode->remove();
