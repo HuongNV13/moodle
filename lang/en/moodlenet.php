@@ -25,3 +25,17 @@
 $string['configmoodlenetoauthservice'] = 'Select the OAuth 2 service that is configured to talk to the MoodleNet server. If the service doesn\'t exist yet, you will need to <a href="{$a}">create</a> it.';
 $string['eventresourceexported'] = 'Resource exported';
 $string['moodlenetoutboundsettings'] = 'MoodleNet outbound settings';
+$string['go_to_moodlenet'] = 'Go to Moodlenet';
+$string['share'] = 'Share';
+$string['share_notice'] = 'You are sharing this to MoodleNet as a {$a}';
+$string['share_fail_title'] = 'Something went wrong';
+$string['share_fail_text'] = 'Unable to share to MoodleNet<br>please try again later or contact site support.';
+$string['share_fail_text_with_site_support'] = 'Unable to share to MoodleNet<br>please try again later or <a href="{$a}">contact site support</a>.';
+$string['share_success_title'] = 'Saved to MoodleNet drafts';
+$string['share_success_text'] = "Almost done! Head over to MoodleNet <br> to finish sharing your content.<br> Or do it later from your <b>Drafts</b> in MoodleNet.";
+$string['share_to_moodlenet'] = 'Share to MoodleNet';
+$string['share_type_resource'] = 'resource';
+$string['sharing_status'] = 'Sharing to MoodleNet';
+$string['sharing_large_file'] = "Large files can take some time.";
+$string['sharing_to'] = 'Sharing to: ';
+$string['packaging'] = 'Packaging your file and sending to MoodleNet...';
