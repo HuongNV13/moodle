@@ -95,6 +95,7 @@ class api {
             case 'google':
             case 'facebook':
             case 'microsoft':
+            case 'moodlenet':
                 $classname = self::get_service_classname($type);
                 $issuer = $classname::init();
                 if ($baseurl) {
