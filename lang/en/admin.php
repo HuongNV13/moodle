@@ -295,6 +295,7 @@ $string['configmessagingdefaultpressenter'] = 'Whether \'Use enter to send\' is 
 $string['configmessagingdeletereadnotificationsdelay'] = 'Read notifications can be deleted to save space. How long after a notification is read can it be deleted?';
 $string['configmessagingdeleteallnotificationsdelay'] = 'Read and unread notifications can be deleted to save space. How long after a notification is created can it be deleted?';
 $string['configmessagingallusers'] = 'If enabled, users can view the list of all users on the site when selecting someone to message, and their message preferences include the option to accept messages from anyone on the site. If disabled, users can only view the list of users in their courses, and they have just two options in message preferences - to accept messages from their contacts only, or their contacts and anyone in their courses.';
+$string['configmoodlenetoauthservice'] = 'Select the OAuth 2 service that is configured to talk to the MoodleNet server. If the service doesn\'t exist yet, you will need to <a href="{$a}">create</a> it.';
 $string['configminpassworddigits'] = 'Passwords must have at least these many digits.';
 $string['configminpasswordlength'] = 'Passwords must be at least these many characters long.';
 $string['configminpasswordlower'] = 'Passwords must have at least these many lower case letters.';
