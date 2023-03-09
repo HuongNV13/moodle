@@ -2977,6 +2977,12 @@ $functions = array(
         'type'        => 'read',
         'ajax'        => true,
     ],
+    'core_moodlenet_send_activity' => [
+        'classname'   => 'core\external\moodlenet_send_activity',
+        'description' => 'Send activity to MoodleNet',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
 );
 
 $services = array(
