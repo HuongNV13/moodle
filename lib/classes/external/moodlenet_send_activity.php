@@ -81,7 +81,7 @@ class moodlenet_send_activity extends external_api {
         $resourceurl = '';
         $warnings = [];
 
-        // TODO: Check the experimental flag in MDL-75319.
+        // TODO: Check the experimental flag and the issuerid is equal to to the MN instance in the admin setting in MDL-75319.
 
         if (!in_array($shareformat, [self::SHARE_FORMAT_ACTIVITY, self::SHARE_FORMAT_URL])) {
             return self::return_errors($shareformat, 'errorinvalidformat', get_string('nopermissions', 'error'));
@@ -106,8 +106,8 @@ class moodlenet_send_activity extends external_api {
         // Get the HTTP Client.
         $client = new http_client();
 
-        // TODO: Call to \core\moodlenet\activity_sender::share_activity().
-        // var_dump($issuerid, $courseid, $cmid, $USER->id, $client, $oauthclient, $shareformat);
+        // TODO: Call to \core\moodlenet\activity_sender::share_activity($issuer, $courseid, $cmid, $USER->id, $client, $oauthclient, $shareformat).
+        // var_dump($issuer, $courseid, $cmid, $USER->id, $client, $oauthclient, $shareformat);
 
         return [
             'status' => $status,
