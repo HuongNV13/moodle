@@ -31,29 +31,23 @@ if ($hassiteconfig) {
         }
 
         // Outbound settings page.
-        $settings = new admin_settingpage('moodlenetoutbound', 'MoodleNet outbound settings');
+        $settings = new admin_settingpage('moodlenetoutbound', new lang_string('moodlenetoutboundsettings', 'core_moodlenet'));
         $ADMIN->add('moodlenet', $settings);
 
         // Get all the issuers.
         $issuers = \core\oauth2\api::get_all_issuers();
-        $enabledissuers = [];
-        $disabled = false;
-        foreach ($issuers as $issuer) {
-            // Get the enabled issuer with the service type is MoodleNet only.
-            if ($issuer->get('servicetype') == 'moodlenet' && $issuer->get('enabled')) {
-                $enabledissuers[] = $issuer;
-            }
-        }
-
         $oauth2services = [
             '' => new lang_string('none', 'admin'),
         ];
-
-        if (count($enabledissuers) > 0) {
-            unset($CFG->forced_plugin_settings['moodlenet']);
-            foreach ($enabledissuers as $issuer) {
+        foreach ($issuers as $issuer) {
+            // Get the enabled issuer with the service type is MoodleNet only.
+            if ($issuer->get('servicetype') == 'moodlenet' && $issuer->get('enabled')) {
                 $oauth2services[$issuer->get('id')] = s($issuer->get('name'));
             }
+        }
+
+        if (count($oauth2services) > 1) {
+            unset($CFG->forced_plugin_settings['moodlenet']);
         } else {
             $CFG->forced_plugin_settings['moodlenet']['oauthservice'] = '';
         }
@@ -61,7 +55,7 @@ if ($hassiteconfig) {
         $url = new \moodle_url('/admin/tool/oauth2/issuers.php');
 
         $settings->add(new admin_setting_configselect('moodlenet/oauthservice', new lang_string('issuer', 'auth_oauth2'),
-            new lang_string('configmoodlenetoauthservice', 'admin', $url->out()), '', $oauth2services));
+            new lang_string('configmoodlenetoauthservice', 'core_moodlenet', $url->out()), '', $oauth2services));
 
     }
 }

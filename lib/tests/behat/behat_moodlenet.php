@@ -46,7 +46,7 @@ class behat_moodlenet extends behat_base {
     /**
      * Change the service base url to the TEST_MOODLENET_MOCK_SERVER url.
      *
-     * @Given /^I change the MoodleNet field "(?P<field_string>(?:[^"]|\\")*)" to Mock server$/
+     * @Given /^I change the MoodleNet field "(?P<field_string>(?:[^"]|\\")*)" to mock server$/
      * @param string $field Field name
      */
     public function change_service_base_url_to_mock_url(string $field): void {

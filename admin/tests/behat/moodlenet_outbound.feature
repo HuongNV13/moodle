@@ -45,7 +45,7 @@ Feature: MoodleNet outbound configuration
     And I navigate to "Server > OAuth 2 services" in site administration
     And I press "MoodleNet"
     And I should see "Create new service: MoodleNet"
-    And I change the MoodleNet field "Service base URL" to Mock server
+    And I change the MoodleNet field "Service base URL" to mock server
     And I press "Save changes"
     And I navigate to "General > MoodleNet > MoodleNet outbound settings" in site administration
     And the "OAuth 2 service" "field" should be enabled
