@@ -26,7 +26,7 @@ require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
 /**
  * Packager to prepare appropriate backup of an activity to share to MoodleNet.
  *
- * @copyright 2023 Raquel Ortega <raquel.ortega@moodle.com>
+ * @copyright 2023 Jake Dallimore <jrhdallimore@gmail.com>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class activity_packager {
@@ -56,7 +56,7 @@ class activity_packager {
 
         // Check backup/restore support.
         if (!plugin_supports('mod', $cminfo->modname , FEATURE_BACKUP_MOODLE2)) {
-            throw new \coding_exception("Cannot backup module $cminfo->modname. This module doesn't support the backup feature.");
+            throw new \coding_exception("Cannot backup module {$cminfo->modname}. This module doesn't support the backup feature.");
         }
 
         $this->cminfo = $cminfo;
@@ -81,7 +81,7 @@ class activity_packager {
 
         $alltasksettings = $this->get_all_task_settings();
 
-        //Override and set to 0 all the root settings that are not required in Moodle Net
+        // Override relevant settings to remove user data when packaging to share to MoodleNet.
         $this->override_task_setting($alltasksettings, 'setting_root_anonymize', 1);
         $this->override_task_setting($alltasksettings, 'setting_root_users', 0);
         $this->override_task_setting($alltasksettings, 'setting_root_role_assignments', 0);
@@ -165,7 +165,7 @@ class activity_packager {
         // Create the location we want to copy this file to.
         $fr = array(
             'contextid' => \context_course::instance($this->cminfo->course)->id,
-            'component' => 'tool_moodlenet',
+            'component' => 'core',
             'filearea' => 'moodlenet_activity',
             'itemid' => $this->cminfo->id,
             'timemodified' => time()
