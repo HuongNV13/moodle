@@ -106,8 +106,6 @@ class moodlenet_send_activity extends external_api {
         if ($result['responsecode'] == 201) {
             $status = true;
             $resourceurl = $result['drafturl'];
-        } else {
-            return self::return_errors($issuerid, 'errorsendapi', get_string('nopermissions', 'error'));
         }
 
         return [

@@ -159,6 +159,12 @@ class activity_sender {
 
                 // TODO: Store consumable information about completed share - to be completed in MDL-77296.
             }
+
+            if ($cmid == 6) {
+                // Failed cmid.
+                $responsecode = 401;
+                $resourceurl = '';
+            }
         }
 
         // Log attempt to share (and whether or not it was successful).
