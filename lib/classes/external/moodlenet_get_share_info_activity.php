@@ -91,6 +91,7 @@ class moodlenet_get_share_info_activity extends external_api {
             'type' => $activitytype,
             'server' => get_config('tool_moodlenet', 'defaultmoodlenetname'),
             'supportpageurl' => $supporturl,
+            'issuerid' => get_config('moodlenet', 'oauthservice'),
             'warnings' => $warnings
         ];
     }
@@ -107,6 +108,7 @@ class moodlenet_get_share_info_activity extends external_api {
             'type' => new external_value(PARAM_TEXT, 'Activity type'),
             'server' => new external_value(PARAM_TEXT, 'MoodleNet server'),
             'supportpageurl' => new external_value(PARAM_URL, 'Support page URL'),
+            'issuerid' => new external_value(PARAM_INT, 'MoodleNet issuer id'),
             'status' => new external_value(PARAM_BOOL, 'status: true if success'),
             'warnings' => new external_warnings()
         ]);

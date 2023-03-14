@@ -24,6 +24,7 @@ use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
 use core_external\external_warnings;
+use moodle_url;
 
 /**
  * The external API to send activity to MoodleNet.
@@ -33,10 +34,6 @@ use core_external\external_warnings;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class moodlenet_send_activity extends external_api {
-
-    // TODO: Move these constants to MoodleNet core API.
-    const SHARE_FORMAT_ACTIVITY = 1;
-    const SHARE_FORMAT_URL = 2;
 
     /**
      * Describes the parameters for sending the activity.
@@ -63,7 +60,7 @@ class moodlenet_send_activity extends external_api {
      * @return array
      */
     public static function execute(int $issuerid, int $courseid, int $cmid, int $shareformat): array {
-        global $USER;
+        global $USER, $CFG;
 
         [
             'issuerid' => $issuerid,
@@ -83,7 +80,7 @@ class moodlenet_send_activity extends external_api {
 
         // TODO: Check the experimental flag and the issuerid is equal to to the MN instance in the admin setting in MDL-75319.
 
-        if (!in_array($shareformat, [self::SHARE_FORMAT_ACTIVITY, self::SHARE_FORMAT_URL])) {
+        if (!in_array($shareformat, [\core\moodlenet\activity_sender::SHARE_FORMAT_BACKUP])) {
             return self::return_errors($shareformat, 'errorinvalidformat', get_string('nopermissions', 'error'));
         }
 
@@ -94,20 +91,24 @@ class moodlenet_send_activity extends external_api {
         // Get the issuer.
         $issuer = api::get_issuer($issuerid);
         // Validate the issuer and check if it is enabled or not.
-        if (!$issuer || $issuer->get('enabled')) {
+        if (!$issuer || !$issuer->get('enabled')) {
             return self::return_errors($issuerid, 'errorissuernotenabled', get_string('nopermissions', 'error'));
         }
 
         // Get the OAuth Client.
-        if (!$oauthclient = api::get_system_oauth_client($issuer)) {
+        if (!$oauthclient = api::get_user_oauth_client($issuer, new moodle_url($CFG->wwwroot))) {
             return self::return_errors($issuerid, 'erroroauthclient', get_string('nopermissions', 'error'));
         }
 
         // Get the HTTP Client.
         $client = new http_client();
-
-        // TODO: Call to \core\moodlenet\activity_sender::share_activity($issuer, $courseid, $cmid, $USER->id, $client, $oauthclient, $shareformat).
-        // var_dump($issuer, $courseid, $cmid, $USER->id, $client, $oauthclient, $shareformat);
+        $result = \core\moodlenet\activity_sender::share_activity($courseid, $cmid, $USER->id, $client, $oauthclient, $shareformat);
+        if ($result['responsecode'] == 201) {
+            $status = true;
+            $resourceurl = $result['drafturl'];
+        } else {
+            return self::return_errors($issuerid, 'errorsendapi', get_string('nopermissions', 'error'));
+        }
 
         return [
             'status' => $status,
@@ -125,7 +126,7 @@ class moodlenet_send_activity extends external_api {
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'status' => new external_value(PARAM_BOOL, 'status: true if success'),
-            'resourceurl' => new external_value(PARAM_URL, 'Resource URL from MoodleNet'),
+            'resourceurl' => new external_value(PARAM_RAW, 'Resource URL from MoodleNet'),
             'warnings' => new external_warnings()
         ]);
     }
@@ -136,6 +137,8 @@ class moodlenet_send_activity extends external_api {
             'warningcode' => $warningcode,
             'message' => $message
         ];
+        var_dump($warningcode);
+        exit();
 
         return [
             'status' => false,
