@@ -2983,6 +2983,12 @@ $functions = array(
         'type'        => 'read',
         'ajax'        => true,
     ],
+    'core_moodlenet_authorize' => [
+        'classname'   => 'core\external\moodlenet_authorize',
+        'description' => 'authorize MoodleNet',
+        'type'        => 'write',
+        'ajax'        => true,
+    ],
 );
 
 $services = array(

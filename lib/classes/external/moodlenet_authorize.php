@@ -16,8 +16,6 @@
 
 namespace core\external;
 
-use context_course;
-use core\http_client;
 use core\oauth2\api;
 use core_external\external_api;
 use core_external\external_function_parameters;
@@ -27,66 +25,39 @@ use core_external\external_warnings;
 use moodle_url;
 
 /**
- * The external API to send activity to MoodleNet.
+ * The external API authorize with MoodleNet.
  *
  * @package    core
  * @copyright  2023 Huong Nguyen <huongnv13@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class moodlenet_send_activity extends external_api {
+class moodlenet_authorize extends external_api {
 
     /**
-     * Describes the parameters for sending the activity.
+     * Returns description of parameters.
      *
      * @return external_function_parameters
      * @since Moodle 4.2
      */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'issuerid' => new external_value(PARAM_INT, 'Client id', VALUE_REQUIRED),
-            'courseid' => new external_value(PARAM_INT, 'Course id', VALUE_REQUIRED),
-            'cmid' => new external_value(PARAM_INT, 'Course module id', VALUE_REQUIRED),
-            'shareformat' => new external_value(PARAM_INT, 'Share format', VALUE_REQUIRED),
+            'issuerid' => new external_value(PARAM_INT, 'Issuer id', VALUE_REQUIRED),
         ]);
     }
 
     /**
-     * External function to send the activity to MoodleNet.
+     * External function to authorize with MoodleNet.
      *
-     * @param int $issuerid Issuer ID
-     * @param int $courseid Course ID
-     * @param int $cmid Course module ID
-     * @param int $shareformat Share format
+     * @param int $issuerid Issuer Id.
      * @return array
+     * @since Moodle 4.2
      */
-    public static function execute(int $issuerid, int $courseid, int $cmid, int $shareformat): array {
-        global $USER, $CFG;
-
+    public static function execute(int $issuerid): array {
         [
-            'issuerid' => $issuerid,
-            'courseid' => $courseid,
-            'cmid' => $cmid,
-            'shareformat' => $shareformat,
+            'issuerid' => $issuerid
         ] = self::validate_parameters(self::execute_parameters(), [
-            'issuerid' => $issuerid,
-            'courseid' => $courseid,
-            'cmid' => $cmid,
-            'shareformat' => $shareformat,
+            'issuerid' => $issuerid
         ]);
-
-        $status = false;
-        $resourceurl = '';
-        $warnings = [];
-
-        // TODO: Check the experimental flag and the issuerid is equal to to the MN instance in the admin setting in MDL-75319.
-
-        if (!in_array($shareformat, [\core\moodlenet\activity_sender::SHARE_FORMAT_BACKUP])) {
-            return self::return_errors($shareformat, 'errorinvalidformat', get_string('nopermissions', 'error'));
-        }
-
-        if (!has_capability('moodle/moodlenet:sendactivity', context_course::instance($courseid))) {
-            return self::return_errors($cmid, 'errorsendingactivity', get_string('nopermissions', 'error'));
-        }
 
         // Get the issuer.
         $issuer = api::get_issuer($issuerid);
@@ -95,22 +66,34 @@ class moodlenet_send_activity extends external_api {
             return self::return_errors($issuerid, 'errorissuernotenabled', get_string('nopermissions', 'error'));
         }
 
+        $returnurl = new moodle_url('/lib/classes/moodlenet/callback.php');
+        $returnurl->param('issuerid', $issuerid);
+        $returnurl->param('callback', 'yes');
+        $returnurl->param('sesskey', sesskey());
+
         // Get the OAuth Client.
-        if (!$oauthclient = api::get_user_oauth_client($issuer, new moodle_url($CFG->wwwroot))) {
+        if (!$oauthclient = api::get_user_oauth_client($issuer, $returnurl, 'scope1 scope2 scope3', true)) {
             return self::return_errors($issuerid, 'erroroauthclient', get_string('nopermissions', 'error'));
         }
 
-        // Get the HTTP Client.
-        $client = new http_client();
-        $result = \core\moodlenet\activity_sender::share_activity($courseid, $cmid, $USER->id, $client, $oauthclient, $shareformat);
-        if ($result['responsecode'] == 201) {
+        $status = false;
+        $warnings = [];
+        $token = '';
+        $refreshtoken = '';
+        $loginurl = '';
+
+        if (!$oauthclient->is_logged_in()) {
+            $loginurl = $oauthclient->get_login_url()->out(false);
+        } else {
             $status = true;
-            $resourceurl = $result['drafturl'];
         }
+
 
         return [
             'status' => $status,
-            'resourceurl' => $resourceurl,
+            'token' => $token,
+            'refreshtoken' => $refreshtoken,
+            'loginurl' => $loginurl,
             'warnings' => $warnings
         ];
     }
@@ -119,12 +102,14 @@ class moodlenet_send_activity extends external_api {
      * Describes the data returned from the external function.
      *
      * @return external_single_structure
-     * @since Moodle 4.2
+     * @since Moodle 4.1
      */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
+            'token' => new external_value(PARAM_RAW, 'Token'),
+            'refreshtoken' => new external_value(PARAM_RAW, 'Refresh Token'),
+            'loginurl' => new external_value(PARAM_RAW, 'Login url'),
             'status' => new external_value(PARAM_BOOL, 'status: true if success'),
-            'resourceurl' => new external_value(PARAM_RAW, 'Resource URL from MoodleNet'),
             'warnings' => new external_warnings()
         ]);
     }
@@ -138,7 +123,9 @@ class moodlenet_send_activity extends external_api {
 
         return [
             'status' => false,
-            'resourceurl' => '',
+            'token' => '',
+            'refreshtoken' => '',
+            'loginurl' => '',
             'warnings' => $warnings
         ];
     }
