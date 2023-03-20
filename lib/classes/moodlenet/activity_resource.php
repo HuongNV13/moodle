@@ -21,7 +21,7 @@ use cm_info;
 /**
  * Class to store information about a single activity which is being shared to become a MoodleNet resource.
  *
- * @package    core\moodlenet
+ * @package    core
  * @copyright  2023 Michael Hawkins <michaelh@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -39,13 +39,13 @@ class activity_resource {
     /** @var string Activity description. */
     protected $activitydescription;
 
-   /**
-    * Constructor.
-    *
-    * @param int $courseid Course ID where the activity/resource is located.
-    * @param int $cmid Course module ID of the activity to be shared.
-    * @return void
-    */
+    /**
+     * Constructor.
+     *
+     * @param int $courseid Course ID where the activity/resource is located.
+     * @param int $cmid Course module ID of the activity to be shared.
+     * @return void
+     */
     public function __construct(int $courseid, int $cmid) {
         global $DB;
 
