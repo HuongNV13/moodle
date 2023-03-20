@@ -25,11 +25,10 @@ use Exception;
 /**
  * API for sharing Moodle LMS activities to MoodleNet instances.
  *
- * @package    core\moodlenet
- * @copyright  2023 Michael Hawkins <michaelh@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   core
+ * @copyright 2023 Michael Hawkins <michaelh@moodle.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 class activity_sender {
     /**
      * @var int Backup share format - the content is being shared as a Moodle backup file.
@@ -98,7 +97,7 @@ class activity_sender {
 
                 // Avoid sending a file larger than the defined limit.
                 if ($filedata['storedfile']->get_filesize() > self::MAX_FILESIZE) {
-                    // "Payload too large" HTTP code.
+                    // The "Payload too large" HTTP code.
                     $responsecode = 413;
                     self::log_event($coursecontext, $cmid, $resourceurl, $responsecode);
                     $filedata['storedfile']->delete();
@@ -113,7 +112,7 @@ class activity_sender {
                     $requestdata = self::prepare_file_share_request_data($accesstoken, $filedata, $resourceinfo);
                     $response = $httpclient->request('POST', $apiurl, $requestdata);
                     $responsecode = $response->getStatusCode();
-                } catch(Exception $e) {
+                } catch (Exception $e) {
                     // Something went wrong - set a known fail response.
                     $responsecode = 401;
                 };
@@ -143,6 +142,7 @@ class activity_sender {
     /**
      * Check whether the specified issuer is configured as a MoodleNet instance that can be shared to.
      *
+     * @param \core\oauth2\issuer The OAuth 2 issuer being validated.
      * @return bool true if the issuer is enabled and available to share to.
      */
     public static function is_valid_instance(issuer $issuer): bool {
@@ -206,7 +206,8 @@ class activity_sender {
                     'name' => 'filecontents',
                     'contents' => $filedata['filecontents'],
                     'headers' => [
-                        'Content-Disposition' => 'form-data; name=".resource"; filename="'. $filedata['storedfile']->get_filename() . '"',
+                        'Content-Disposition' => 'form-data; name=".resource"; filename="' .
+                            $filedata['storedfile']->get_filename() . '"',
                         'Content-Type' => $filedata['storedfile']->get_mimetype(),
                         'Content-Transfer-Encoding' => 'binary',
                     ],
@@ -218,10 +219,10 @@ class activity_sender {
     /**
      * Log an event to the admin logs for an outbound share attempt.
      *
-     * @param \context $coursecontext
-     * @param integer $cmid
-     * @param string $resourceurl
-     * @param integer $responsecode
+     * @param \context $coursecontext The course context being shared from.
+     * @param integer $cmid The CMID of the activity being shared.
+     * @param string $resourceurl The URL of the draft resource if it was created.
+     * @param integer $responsecode The HTTP response code describing the outcome of the attempt.
      * @return void
      */
     protected static function log_event(\context $coursecontext, int $cmid, string $resourceurl, int $responsecode): void {
