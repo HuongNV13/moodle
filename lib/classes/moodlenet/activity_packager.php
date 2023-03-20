@@ -26,8 +26,9 @@ require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
 /**
  * Packager to prepare appropriate backup of an activity to share to MoodleNet.
  *
+ * @package   core
  * @copyright 2023 Raquel Ortega <raquel.ortega@moodle.com>
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class activity_packager {
 
