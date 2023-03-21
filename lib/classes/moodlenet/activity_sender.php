@@ -59,7 +59,6 @@ class activity_sender {
      */
     public static function share_activity(int $courseid, int $cmid, int $userid,
             http_client $httpclient, client $oauthclient, int $shareformat = self::SHARE_FORMAT_BACKUP): array {
-        global $CFG;
 
         // This may take a long time if a lot of data is being shared.
         \core_php_time_limit::raise();
@@ -72,10 +71,9 @@ class activity_sender {
 
         // Check user can share to the requested MoodleNet instance.
         $coursecontext = \context_course::instance($courseid);
-        $userhascap = has_capability('moodle/moodlenet:sendactivity', $coursecontext, $userid) &&
-            has_capability('moodle/backup:backupactivity', $coursecontext, $userid);
+        $usercanshare = self::can_user_share($coursecontext, $userid);
 
-        if ($userhascap && $CFG->enablesharingtomoodlenet && self::is_valid_instance($issuer) && $oauthclient->is_logged_in()) {
+        if ($usercanshare && self::is_valid_instance($issuer) && $oauthclient->is_logged_in()) {
             $accesstoken = $oauthclient->get_accesstoken()->token;
         } else {
             $responsecode = 404;
@@ -146,10 +144,25 @@ class activity_sender {
      * @return bool true if the issuer is enabled and available to share to.
      */
     public static function is_valid_instance(issuer $issuer): bool {
+        global $CFG;
+
         $issuerid = $issuer->get('id');
         $allowedissuer = get_config('moodlenet', 'oauthservice');
 
-        return ($issuerid == $allowedissuer && $issuer->get('enabled') && $issuer->get('servicetype') == 'moodlenet');
+        return ($CFG->enablesharingtomoodlenet && $issuerid == $allowedissuer && $issuer->get('enabled') &&
+            $issuer->get('servicetype') == 'moodlenet');
+    }
+
+    /**
+     * Check whether a user has the capabilities required to share activities from a given course to MoodleNet.
+     *
+     * @param \context_course $coursecontext Course context where the activity would be shared from.
+     * @param integer $userid The user ID being checked.
+     * @return boolean
+     */
+    public static function can_user_share(\context_course $coursecontext, int $userid): bool {
+        return (has_capability('moodle/moodlenet:sendactivity', $coursecontext, $userid) &&
+            has_capability('moodle/backup:backupactivity', $coursecontext, $userid));
     }
 
     /**
