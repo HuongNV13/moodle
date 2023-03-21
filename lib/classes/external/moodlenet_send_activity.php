@@ -44,9 +44,9 @@ class moodlenet_send_activity extends external_api {
      */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'issuerid' => new external_value(PARAM_INT, 'Client id', VALUE_REQUIRED),
-            'courseid' => new external_value(PARAM_INT, 'Course id', VALUE_REQUIRED),
-            'cmid' => new external_value(PARAM_INT, 'Course module id', VALUE_REQUIRED),
+            'issuerid' => new external_value(PARAM_INT, 'OAuth 2 issuer ID', VALUE_REQUIRED),
+            'courseid' => new external_value(PARAM_INT, 'Course ID', VALUE_REQUIRED),
+            'cmid' => new external_value(PARAM_INT, 'Course module ID', VALUE_REQUIRED),
             'shareformat' => new external_value(PARAM_INT, 'Share format', VALUE_REQUIRED),
         ]);
     }
@@ -54,10 +54,10 @@ class moodlenet_send_activity extends external_api {
     /**
      * External function to send the activity to MoodleNet.
      *
-     * @param int $issuerid Issuer ID
-     * @param int $courseid Course ID
-     * @param int $cmid Course module ID
-     * @param int $shareformat Share format
+     * @param int $issuerid The MoodleNet OAuth 2 issuer ID
+     * @param int $courseid The course ID that contains the activity which being shared
+     * @param int $cmid The course module ID of the activity that being shared
+     * @param int $shareformat The share format being used, as defined by \core\moodlenet\activity_sender
      * @return array
      * @since Moodle 4.2
      */
@@ -82,7 +82,8 @@ class moodlenet_send_activity extends external_api {
 
         // Check the experimental flag.
         if (empty($CFG->enablesharingtomoodlenet)) {
-            return self::return_errors($cmid, 'errorsettingnotenabled', get_string('nopermissions', 'error'));
+            return self::return_errors($cmid, 'errorsettingnotenabled',
+                get_string('nopermissions', 'error', get_string('moodlenet:share_to_moodlenet', 'moodle')));
         }
 
         // Check format.
@@ -95,7 +96,8 @@ class moodlenet_send_activity extends external_api {
         $userhascap = has_capability('moodle/moodlenet:sendactivity', $coursecontext, $USER->id) &&
             has_capability('moodle/backup:backupactivity', $coursecontext, $USER->id);
         if (!$userhascap) {
-            return self::return_errors($cmid, 'errorpermission', get_string('nopermissions', 'error'));
+            return self::return_errors($cmid, 'errorpermission',
+                get_string('nopermissions', 'error', get_string('moodlenet:share_to_moodlenet', 'moodle')));
         }
 
         // Get the issuer.
@@ -106,7 +108,7 @@ class moodlenet_send_activity extends external_api {
         }
 
         // Get the OAuth Client.
-        if (!$oauthclient = api::get_user_oauth_client($issuer, new moodle_url($CFG->wwwroot))) {
+        if (!$oauthclient = api::get_user_oauth_client($issuer, new moodle_url($CFG->wwwroot), activity_sender::API_SCOPE_CREATE)) {
             return self::return_errors($issuerid, 'erroroauthclient', get_string('invalidparameter', 'debug'));
         }
 
@@ -119,13 +121,13 @@ class moodlenet_send_activity extends external_api {
             $status = true;
             $resourceurl = $result['drafturl'];
         } else {
-            return self::return_errors($result['responsecode'], 'errorsendingactivity', get_string('nopermissions', 'error'));
+            return self::return_errors($result['responsecode'], 'errorsendingactivity', get_string('error', 'error'));
         }
 
         return [
             'status' => $status,
             'resourceurl' => $resourceurl,
-            'warnings' => $warnings
+            'warnings' => $warnings,
         ];
     }
 
@@ -137,9 +139,9 @@ class moodlenet_send_activity extends external_api {
      */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
-            'status' => new external_value(PARAM_BOOL, 'status: true if success'),
-            'resourceurl' => new external_value(PARAM_RAW, 'Resource URL from MoodleNet'),
-            'warnings' => new external_warnings()
+            'status' => new external_value(PARAM_BOOL, 'Status: true if success'),
+            'resourceurl' => new external_value(PARAM_URL, 'Resource URL from MoodleNet'),
+            'warnings' => new external_warnings(),
         ]);
     }
 
@@ -155,13 +157,13 @@ class moodlenet_send_activity extends external_api {
         $warnings[] = [
             'item' => $itemid,
             'warningcode' => $warningcode,
-            'message' => $message
+            'message' => $message,
         ];
 
         return [
             'status' => false,
             'resourceurl' => '',
-            'warnings' => $warnings
+            'warnings' => $warnings,
         ];
     }
 }

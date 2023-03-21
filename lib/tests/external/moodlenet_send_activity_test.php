@@ -49,13 +49,13 @@ class moodlenet_send_activity_test extends externallib_advanced_testcase {
         $this->setAdminUser();
 
         // Generate data.
-        $course = $this->getDataGenerator()->create_course();
-        $generator = $this->getDataGenerator()->get_plugin_generator('mod_assign');
-        $moduleinstance = $generator->create_instance(['course' => $course->id]);
-        $user = $this->getDataGenerator()->create_user();
-        $this->getDataGenerator()->enrol_user($user->id, $course->id, 'student');
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+        $moduleinstance = $generator->create_module('assign', ['course' => $course->id]);
+        $user = $generator->create_user();
+        $generator->enrol_user($user->id, $course->id, 'student');
         $issuer = api::create_standard_issuer('moodlenet', TEST_MOODLENET_MOCK_SERVER);
-        $issuer->set('enabled', false);
+        $issuer->set('enabled', 0);
 
         // Test with the experimental flag off.
         $result = moodlenet_send_activity::execute($issuer->get('id'), $course->id, $moduleinstance->cmid, 0);
@@ -87,7 +87,7 @@ class moodlenet_send_activity_test extends externallib_advanced_testcase {
         $this->assertEquals('errorissuernotenabled', $result['warnings'][0]['warningcode']);
 
         // Test with the issuer is enabled but not set in the MN Outbound setting.
-        $issuer->set('enabled', true);
+        $issuer->set('enabled', 1);
         $result = moodlenet_send_activity::execute($issuer->get('id'), $course->id, $moduleinstance->cmid, 0);
         $this->assertFalse($result['status']);
         $this->assertNotEmpty($result['warnings']);

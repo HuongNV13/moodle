@@ -42,6 +42,11 @@ class activity_sender {
     protected const API_CREATE_URI = '/.pkg/@moodlenet/ed-resource/basic/v1/create';
 
     /**
+     * @var string MoodleNet scope for creating resources.
+     */
+    public const API_SCOPE_CREATE = '@moodlenet/ed-resource:write.own';
+
+    /**
      * @var int Maximum upload file size (1.07 GB).
      */
     public const MAX_FILESIZE = 1070000000;
