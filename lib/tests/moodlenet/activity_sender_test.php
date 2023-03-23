@@ -16,663 +16,293 @@
 
 namespace core\moodlenet;
 
-// use core\http_client;
-// use GuzzleHttp\Exception\ClientException;
-// use GuzzleHttp\Handler\MockHandler;
-// use GuzzleHttp\HandlerStack;
-// use GuzzleHttp\Middleware;
-// use GuzzleHttp\Psr7\Response;
-// use Psr\Http\Message\ResponseInterface;
+use context_course;
+use core\http_client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
+use ReflectionMethod;
+use stdClass;
+use testing_data_generator;
 
 /**
  * Unit tests for {@see activity_sender}.
  *
- * @coversDefaultClass \core\moodlenet\activity_sender
+ * @coversDefaultClass activity_sender
  * @package core
  * @copyright 2023 Huong Nguyen <huongnv13@gmail.com>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class moodlenet_activity_sender_test extends \advanced_testcase {
 
-    ////////Everything below here is pasted in from another test as a reference////////////
+    /** @var testing_data_generator Data generator. */
+    private testing_data_generator $generator;
+    /** @var stdClass Course object. */
+    private stdClass $course;
+    /** @var stdClass Activity object, */
+    private stdClass $moduleinstance;
+    /** @var context_course Course context instance. */
+    private context_course $coursecontext;
 
     /**
-     * Test reading the config for an auth server.
+     * Set up function for tests.
+     */
+    protected function setUp(): void {
+        parent::setUp();
+
+        $this->resetAfterTest();
+        $this->generator = $this->getDataGenerator();
+        $this->course = $this->generator->create_course();
+        $this->moduleinstance = $this->generator->create_module('assign', ['course' => $this->course->id]);
+        $this->coursecontext = context_course::instance($this->course->id);
+    }
+
+    /**
+     * Test share_activity() method.
      *
-     * @covers ::read_configuration
-     * @dataProvider config_provider
-     * @param string $issuerurl the auth server issuer URL.
-     * @param ResponseInterface $httpresponse a stub HTTP response.
-     * @param null|string $altwellknownsuffix an alternate value for the well known suffix to use in the reader.
-     * @param array $expected test expectations.
+     * @dataProvider share_activity_provider
+     * @covers ::share_activity
+     * @covers ::log_event
      * @return void
      */
-//     public function test_read_configuration(string $issuerurl, ResponseInterface $httpresponse, ?string $altwellknownsuffix = null,
-//             array $expected = []) {
+    public function test_share_activity(ResponseInterface $httpresponse, array $expected) {
+        global $CFG, $USER;
+        $this->setAdminUser();
 
-//                 $generator = $this->getDataGenerator();
+        // Enable the experimental flag.
+        $CFG->enablesharingtomoodlenet = true;
 
-//         $mock = new MockHandler([$httpresponse]);
-//         $handlerstack = HandlerStack::create($mock);
-//         if (!empty($expected['request'])) {
-//             // Request history tracking to allow asserting that request was sent as expected below (to the stub client).
-//             $container = [];
-//             $history = Middleware::history($container);
-//             $handlerstack->push($history);
-//         }
+        // Create dummy issuer.
+        $issuer = new \core\oauth2\issuer(0);
+        $issuer->set('enabled', 1);
+        $issuer->set('servicetype', 'moodlenet');
+        $issuer->set('baseurl', 'https://moodlenet.example.com');
 
-//         $args = [
-//             new http_client(['handler' => $handlerstack]),
-//         ];
-//         if (!is_null($altwellknownsuffix)) {
-//             $args[] = $altwellknownsuffix;
-//         }
+        // Set OAuth 2 service in the outbound setting to the dummy issuer.
+        set_config('oauthservice', $issuer->get('id'), 'moodlenet');
 
-//         if (!empty($expected['exception'])) {
-//             $this->expectException($expected['exception']);
-//         }
-//         $configreader = new auth_server_config_reader(...$args);
-//         $config = $configreader->read_configuration(new \moodle_url($issuerurl));
+        // Generate access token for the mock.
+        $accesstoken = new stdClass();
+        $accesstoken->token = random_string(64);
 
-//         if (!empty($expected['request'])) {
-//             // Verify the request goes to the correct URL (i.e. the well known suffix is correctly positioned).
-//             $this->assertEquals($expected['request']['url'], $container[0]['request']->getUri());
-//         }
+        // Create mock builder for OAuth2 client.
+        $mockbuilder = $this->getMockBuilder('core\oauth2\client');
+        $mockbuilder->onlyMethods(['get_issuer', 'is_logged_in', 'get_accesstoken']);
+        $mockbuilder->setConstructorArgs([$issuer, "", ""]);
 
-//         $this->assertEquals($expected['metadata'], (array) $config);
-//     }
-// $generator = $this->getDataGenerator();
-//     /**
-//      * Provider for testing read_configuration().
-//      *
-//      * @return array test data.
-//      */
-//     public function config_provider(): array {
-//         return [
-//             'Valid, good issuer URL, good config' => [
-//                 'issuer_url' => 'https://app.example.com',
-//                 'http_response' => new Response(
-//                     200,
-//                     ['Content-Type' => 'application/json'],
-//                     json_encode([
-//                         "issuer" => "https://app.example.com",
-//                         "authorization_endpoint" => "https://app.example.com/authorize",
-//                         "token_endpoint" => "https://app.example.com/token",
-//                         "token_endpoint_auth_methods_supported" => [
-//                             "client_secret_basic",
-//                             "private_key_jwt"
-//                         ],
-//                         "token_endpoint_auth_signing_alg_values_supported" => [
-//                             "RS256",
-//                             "ES256"
-//                         ],
-//                         "userinfo_endpoint" => "https://app.example.com/userinfo",
-//                         "jwks_uri" => "https://app.example.com/jwks.json",
-//                         "registration_endpoint" => "https://app.example.com/register",
-//                         "scopes_supported" => [
-//                             "openid",
-//                             "profile",
-//                             "email",
-//                         ],
-//                         "response_types_supported" => [
-//                             "code",
-//                             "code token"
-//                         ],
-//                         "service_documentation" => "http://app.example.com/service_documentation.html",
-//                         "ui_locales_supported" => [
-//                             "en-US",
-//                             "en-GB",
-//                             "fr-FR",
-//                         ]
-//                     ])
-//                 ),
-//                 'well_known_suffix' => null,
-//                 'expected' => [
-//                     'request' => [
-//                         'url' => 'https://app.example.com/.well-known/oauth-authorization-server'
-//                     ],
-//                     'metadata' => [
-//                         "issuer" => "https://app.example.com",
-//                         "authorization_endpoint" => "https://app.example.com/authorize",
-//                         "token_endpoint" => "https://app.example.com/token",
-//                         "token_endpoint_auth_methods_supported" => [
-//                             "client_secret_basic",
-//                             "private_key_jwt"
-//                         ],
-//                         "token_endpoint_auth_signing_alg_values_supported" => [
-//                             "RS256",
-//                             "ES256"
-//                         ],
-//                         "userinfo_endpoint" => "https://app.example.com/userinfo",
-//                         "jwks_uri" => "https://app.example.com/jwks.json",
-//                         "registration_endpoint" => "https://app.example.com/register",
-//                         "scopes_supported" => [
-//                             "openid",
-//                             "profile",
-//                             "email",
-//                         ],
-//                         "response_types_supported" => [
-//                             "code",
-//                             "code token"
-//                         ],
-//                         "service_documentation" => "http://app.example.com/service_documentation.html",
-//                         "ui_locales_supported" => [
-//                             "en-US",
-//                             "en-GB",
-//                             "fr-FR",
-//                         ]
-//                     ]
-//                 ]
-//             ],
-//             'Valid, issuer URL with path component confirming well known suffix placement' => [
-//                 'issuer_url' => 'https://app.example.com/some/path',
-//                 'http_response' => new Response(
-//                     200,
-//                     ['Content-Type' => 'application/json'],
-//                     json_encode([
-//                         "issuer" => "https://app.example.com",
-//                         "authorization_endpoint" => "https://app.example.com/authorize",
-//                         "token_endpoint" => "https://app.example.com/token",
-//                         "token_endpoint_auth_methods_supported" => [
-//                             "client_secret_basic",
-//                             "private_key_jwt"
-//                         ],
-//                         "token_endpoint_auth_signing_alg_values_supported" => [
-//                             "RS256",
-//                             "ES256"
-//                         ],
-//                         "userinfo_endpoint" => "https://app.example.com/userinfo",
-//                         "jwks_uri" => "https://app.example.com/jwks.json",
-//                         "registration_endpoint" => "https://app.example.com/register",
-//                         "scopes_supported" => [
-//                             "openid",
-//                             "profile",
-//                             "email",
-//                         ],
-//                         "response_types_supported" => [
-//                             "code",
-//                             "code token"
-//                         ],
-//                         "service_documentation" => "http://app.example.com/service_documentation.html",
-//                         "ui_locales_supported" => [
-//                             "en-US",
-//                             "en-GB",
-//                             "fr-FR",
-//                         ]
-//                     ])
-//                 ),
-//                 'well_known_suffix' => null,
-//                 'expected' => [
-//                     'request' => [
-//                         'url' => 'https://app.example.com/.well-known/oauth-authorization-server/some/path'
-//                     ],
-//                     'metadata' => [
-//                         "issuer" => "https://app.example.com",
-//                         "authorization_endpoint" => "https://app.example.com/authorize",
-//                         "token_endpoint" => "https://app.example.com/token",
-//                         "token_endpoint_auth_methods_supported" => [
-//                             "client_secret_basic",
-//                             "private_key_jwt"
-//                         ],
-//                         "token_endpoint_auth_signing_alg_values_supported" => [
-//                             "RS256",
-//                             "ES256"
-//                         ],
-//                         "userinfo_endpoint" => "https://app.example.com/userinfo",
-//                         "jwks_uri" => "https://app.example.com/jwks.json",
-//                         "registration_endpoint" => "https://app.example.com/register",
-//                         "scopes_supported" => [
-//                             "openid",
-//                             "profile",
-//                             "email",
-//                         ],
-//                         "response_types_supported" => [
-//                             "code",
-//                             "code token"
-//                         ],
-//                         "service_documentation" => "http://app.example.com/service_documentation.html",
-//                         "ui_locales_supported" => [
-//                             "en-US",
-//                             "en-GB",
-//                             "fr-FR",
-//                         ]
-//                     ]
-//                 ]
-//             ],
-//             'Valid, single trailing / path only' => [
-//                 'issuer_url' => 'https://app.example.com/',
-//                 'http_response' => new Response(
-//                     200,
-//                     ['Content-Type' => 'application/json'],
-//                     json_encode([
-//                         "issuer" => "https://app.example.com",
-//                         "authorization_endpoint" => "https://app.example.com/authorize",
-//                         "token_endpoint" => "https://app.example.com/token",
-//                         "token_endpoint_auth_methods_supported" => [
-//                             "client_secret_basic",
-//                             "private_key_jwt"
-//                         ],
-//                         "token_endpoint_auth_signing_alg_values_supported" => [
-//                             "RS256",
-//                             "ES256"
-//                         ],
-//                         "userinfo_endpoint" => "https://app.example.com/userinfo",
-//                         "jwks_uri" => "https://app.example.com/jwks.json",
-//                         "registration_endpoint" => "https://app.example.com/register",
-//                         "scopes_supported" => [
-//                             "openid",
-//                             "profile",
-//                             "email",
-//                         ],
-//                         "response_types_supported" => [
-//                             "code",
-//                             "code token"
-//                         ],
-//                         "service_documentation" => "http://app.example.com/service_documentation.html",
-//                         "ui_locales_supported" => [
-//                             "en-US",
-//                             "en-GB",
-//                             "fr-FR",
-//                         ]
-//                     ])
-//                 ),
-//                 'well_known_suffix' => null,
-//                 'expected' => [
-//                     'request' => [
-//                         'url' => 'https://app.example.com/.well-known/oauth-authorization-server'
-//                     ],
-//                     'metadata' => [
-//                         "issuer" => "https://app.example.com",
-//                         "authorization_endpoint" => "https://app.example.com/authorize",
-//                         "token_endpoint" => "https://app.example.com/token",
-//                         "token_endpoint_auth_methods_supported" => [
-//                             "client_secret_basic",
-//                             "private_key_jwt"
-//                         ],
-//                         "token_endpoint_auth_signing_alg_values_supported" => [
-//                             "RS256",
-//                             "ES256"
-//                         ],
-//                         "userinfo_endpoint" => "https://app.example.com/userinfo",
-//                         "jwks_uri" => "https://app.example.com/jwks.json",
-//                         "registration_endpoint" => "https://app.example.com/register",
-//                         "scopes_supported" => [
-//                             "openid",
-//                             "profile",
-//                             "email",
-//                         ],
-//                         "response_types_supported" => [
-//                             "code",
-//                             "code token"
-//                         ],
-//                         "service_documentation" => "http://app.example.com/service_documentation.html",
-//                         "ui_locales_supported" => [
-//                             "en-US",
-//                             "en-GB",
-//                             "fr-FR",
-//                         ]
-//                     ]
-//                 ]
-//             ],
-//             'Invalid, non HTTPS issuer URL' => [
-//                 'issuer_url' => 'http://app.example.com',
-//                 'http_response' => new Response(
-//                     200,
-//                     ['Content-Type' => 'application/json'],
-//                     json_encode([
-//                         "issuer" => "https://app.example.com",
-//                         "authorization_endpoint" => "https://app.example.com/authorize",
-//                         "token_endpoint" => "https://app.example.com/token",
-//                         "token_endpoint_auth_methods_supported" => [
-//                             "client_secret_basic",
-//                             "private_key_jwt"
-//                         ],
-//                         "token_endpoint_auth_signing_alg_values_supported" => [
-//                             "RS256",
-//                             "ES256"
-//                         ],
-//                         "userinfo_endpoint" => "https://app.example.com/userinfo",
-//                         "jwks_uri" => "https://app.example.com/jwks.json",
-//                         "registration_endpoint" => "https://app.example.com/register",
-//                         "scopes_supported" => [
-//                             "openid",
-//                             "profile",
-//                             "email",
-//                         ],
-//                         "response_types_supported" => [
-//                             "code",
-//                             "code token"
-//                         ],
-//                         "service_documentation" => "http://app.example.com/service_documentation.html",
-//                         "ui_locales_supported" => [
-//                             "en-US",
-//                             "en-GB",
-//                             "fr-FR",
-//                         ]
-//                     ])
-//                 ),
-//                 'well_known_suffix' => null,
-//                 'expected' => [
-//                     'exception' => \moodle_exception::class
-//                 ]
-//             ],
-//             'Invalid, query string in issuer URL' => [
-//                 'issuer_url' => 'https://app.example.com?test=cat',
-//                 'http_response' => new Response(
-//                     200,
-//                     ['Content-Type' => 'application/json'],
-//                     json_encode([
-//                         "issuer" => "https://app.example.com",
-//                         "authorization_endpoint" => "https://app.example.com/authorize",
-//                         "token_endpoint" => "https://app.example.com/token",
-//                         "token_endpoint_auth_methods_supported" => [
-//                             "client_secret_basic",
-//                             "private_key_jwt"
-//                         ],
-//                         "token_endpoint_auth_signing_alg_values_supported" => [
-//                             "RS256",
-//                             "ES256"
-//                         ],
-//                         "userinfo_endpoint" => "https://app.example.com/userinfo",
-//                         "jwks_uri" => "https://app.example.com/jwks.json",
-//                         "registration_endpoint" => "https://app.example.com/register",
-//                         "scopes_supported" => [
-//                             "openid",
-//                             "profile",
-//                             "email",
-//                         ],
-//                         "response_types_supported" => [
-//                             "code",
-//                             "code token"
-//                         ],
-//                         "service_documentation" => "http://app.example.com/service_documentation.html",
-//                         "ui_locales_supported" => [
-//                             "en-US",
-//                             "en-GB",
-//                             "fr-FR",
-//                         ]
-//                     ])
-//                 ),
-//                 'well_known_suffix' => null,
-//                 'expected' => [
-//                     'exception' => \moodle_exception::class
-//                 ]
-//             ],
-//             'Invalid, fragment in issuer URL' => [
-//                 'issuer_url' => 'https://app.example.com/#cat',
-//                 'http_response' => new Response(
-//                     200,
-//                     ['Content-Type' => 'application/json'],
-//                     json_encode([
-//                         "issuer" => "https://app.example.com",
-//                         "authorization_endpoint" => "https://app.example.com/authorize",
-//                         "token_endpoint" => "https://app.example.com/token",
-//                         "token_endpoint_auth_methods_supported" => [
-//                             "client_secret_basic",
-//                             "private_key_jwt"
-//                         ],
-//                         "token_endpoint_auth_signing_alg_values_supported" => [
-//                             "RS256",
-//                             "ES256"
-//                         ],
-//                         "userinfo_endpoint" => "https://app.example.com/userinfo",
-//                         "jwks_uri" => "https://app.example.com/jwks.json",
-//                         "registration_endpoint" => "https://app.example.com/register",
-//                         "scopes_supported" => [
-//                             "openid",
-//                             "profile",
-//                             "email",
-//                         ],
-//                         "response_types_supported" => [
-//                             "code",
-//                             "code token"
-//                         ],
-//                         "service_documentation" => "http://app.example.com/service_documentation.html",
-//                         "ui_locales_supported" => [
-//                             "en-US",
-//                             "en-GB",
-//                             "fr-FR",
-//                         ]
-//                     ])
-//                 ),
-//                 'well_known_suffix' => null,
-//                 'expected' => [
-//                     'exception' => \moodle_exception::class
-//                 ]
-//             ],
-//             'Valid, port in issuer URL' => [
-//                 'issuer_url' => 'https://app.example.com:8080/some/path',
-//                 'http_response' => new Response(
-//                     200,
-//                     ['Content-Type' => 'application/json'],
-//                     json_encode([
-//                         "issuer" => "https://app.example.com",
-//                         "authorization_endpoint" => "https://app.example.com/authorize",
-//                         "token_endpoint" => "https://app.example.com/token",
-//                         "token_endpoint_auth_methods_supported" => [
-//                             "client_secret_basic",
-//                             "private_key_jwt"
-//                         ],
-//                         "token_endpoint_auth_signing_alg_values_supported" => [
-//                             "RS256",
-//                             "ES256"
-//                         ],
-//                         "userinfo_endpoint" => "https://app.example.com/userinfo",
-//                         "jwks_uri" => "https://app.example.com/jwks.json",
-//                         "registration_endpoint" => "https://app.example.com/register",
-//                         "scopes_supported" => [
-//                             "openid",
-//                             "profile",
-//                             "email",
-//                         ],
-//                         "response_types_supported" => [
-//                             "code",
-//                             "code token"
-//                         ],
-//                         "service_documentation" => "http://app.example.com/service_documentation.html",
-//                         "ui_locales_supported" => [
-//                             "en-US",
-//                             "en-GB",
-//                             "fr-FR",
-//                         ]
-//                     ])
-//                 ),
-//                 'well_known_suffix' => null,
-//                 'expected' => [
-//                     'request' => [
-//                         'url' => 'https://app.example.com:8080/.well-known/oauth-authorization-server/some/path'
-//                     ],
-//                     'metadata' => [
-//                         "issuer" => "https://app.example.com",
-//                         "authorization_endpoint" => "https://app.example.com/authorize",
-//                         "token_endpoint" => "https://app.example.com/token",
-//                         "token_endpoint_auth_methods_supported" => [
-//                             "client_secret_basic",
-//                             "private_key_jwt"
-//                         ],
-//                         "token_endpoint_auth_signing_alg_values_supported" => [
-//                             "RS256",
-//                             "ES256"
-//                         ],
-//                         "userinfo_endpoint" => "https://app.example.com/userinfo",
-//                         "jwks_uri" => "https://app.example.com/jwks.json",
-//                         "registration_endpoint" => "https://app.example.com/register",
-//                         "scopes_supported" => [
-//                             "openid",
-//                             "profile",
-//                             "email",
-//                         ],
-//                         "response_types_supported" => [
-//                             "code",
-//                             "code token"
-//                         ],
-//                         "service_documentation" => "http://app.example.com/service_documentation.html",
-//                         "ui_locales_supported" => [
-//                             "en-US",
-//                             "en-GB",
-//                             "fr-FR",
-//                         ]
-//                     ]
-//                 ]
-//             ],
-//             'Valid, alternate well known suffix, no path' => [
-//                 'issuer_url' => 'https://app.example.com',
-//                 'http_response' => new Response(
-//                     200,
-//                     ['Content-Type' => 'application/json'],
-//                     json_encode([
-//                         "issuer" => "https://app.example.com",
-//                         "authorization_endpoint" => "https://app.example.com/authorize",
-//                         "token_endpoint" => "https://app.example.com/token",
-//                         "token_endpoint_auth_methods_supported" => [
-//                             "client_secret_basic",
-//                             "private_key_jwt"
-//                         ],
-//                         "token_endpoint_auth_signing_alg_values_supported" => [
-//                             "RS256",
-//                             "ES256"
-//                         ],
-//                         "userinfo_endpoint" => "https://app.example.com/userinfo",
-//                         "jwks_uri" => "https://app.example.com/jwks.json",
-//                         "registration_endpoint" => "https://app.example.com/register",
-//                         "scopes_supported" => [
-//                             "openid",
-//                             "profile",
-//                             "email",
-//                         ],
-//                         "response_types_supported" => [
-//                             "code",
-//                             "code token"
-//                         ],
-//                         "service_documentation" => "http://app.example.com/service_documentation.html",
-//                         "ui_locales_supported" => [
-//                             "en-US",
-//                             "en-GB",
-//                             "fr-FR",
-//                         ]
-//                     ])
-//                 ),
-//                 'well_known_suffix' => 'openid-configuration', // An application using the openid well known, which is valid.
-//                 'expected' => [
-//                     'request' => [
-//                         'url' => 'https://app.example.com/.well-known/openid-configuration'
-//                     ],
-//                     'metadata' => [
-//                         "issuer" => "https://app.example.com",
-//                         "authorization_endpoint" => "https://app.example.com/authorize",
-//                         "token_endpoint" => "https://app.example.com/token",
-//                         "token_endpoint_auth_methods_supported" => [
-//                             "client_secret_basic",
-//                             "private_key_jwt"
-//                         ],
-//                         "token_endpoint_auth_signing_alg_values_supported" => [
-//                             "RS256",
-//                             "ES256"
-//                         ],
-//                         "userinfo_endpoint" => "https://app.example.com/userinfo",
-//                         "jwks_uri" => "https://app.example.com/jwks.json",
-//                         "registration_endpoint" => "https://app.example.com/register",
-//                         "scopes_supported" => [
-//                             "openid",
-//                             "profile",
-//                             "email",
-//                         ],
-//                         "response_types_supported" => [
-//                             "code",
-//                             "code token"
-//                         ],
-//                         "service_documentation" => "http://app.example.com/service_documentation.html",
-//                         "ui_locales_supported" => [
-//                             "en-US",
-//                             "en-GB",
-//                             "fr-FR",
-//                         ]
-//                     ]
-//                 ]
-//             ],
-//             'Valid, alternate well known suffix, with path' => [
-//                 'issuer_url' => 'https://app.example.com/some/path/',
-//                 'http_response' => new Response(
-//                     200,
-//                     ['Content-Type' => 'application/json'],
-//                     json_encode([
-//                         "issuer" => "https://app.example.com",
-//                         "authorization_endpoint" => "https://app.example.com/authorize",
-//                         "token_endpoint" => "https://app.example.com/token",
-//                         "token_endpoint_auth_methods_supported" => [
-//                             "client_secret_basic",
-//                             "private_key_jwt"
-//                         ],
-//                         "token_endpoint_auth_signing_alg_values_supported" => [
-//                             "RS256",
-//                             "ES256"
-//                         ],
-//                         "userinfo_endpoint" => "https://app.example.com/userinfo",
-//                         "jwks_uri" => "https://app.example.com/jwks.json",
-//                         "registration_endpoint" => "https://app.example.com/register",
-//                         "scopes_supported" => [
-//                             "openid",
-//                             "profile",
-//                             "email",
-//                         ],
-//                         "response_types_supported" => [
-//                             "code",
-//                             "code token"
-//                         ],
-//                         "service_documentation" => "http://app.example.com/service_documentation.html",
-//                         "ui_locales_supported" => [
-//                             "en-US",
-//                             "en-GB",
-//                             "fr-FR",
-//                         ]
-//                     ])
-//                 ),
-//                 'well_known_suffix' => 'openid-configuration', // An application using the openid well known, which is valid.
-//                 'expected' => [
-//                     'request' => [
-//                         'url' => 'https://app.example.com/.well-known/openid-configuration/some/path/'
-//                     ],
-//                     'metadata' => [
-//                         "issuer" => "https://app.example.com",
-//                         "authorization_endpoint" => "https://app.example.com/authorize",
-//                         "token_endpoint" => "https://app.example.com/token",
-//                         "token_endpoint_auth_methods_supported" => [
-//                             "client_secret_basic",
-//                             "private_key_jwt"
-//                         ],
-//                         "token_endpoint_auth_signing_alg_values_supported" => [
-//                             "RS256",
-//                             "ES256"
-//                         ],
-//                         "userinfo_endpoint" => "https://app.example.com/userinfo",
-//                         "jwks_uri" => "https://app.example.com/jwks.json",
-//                         "registration_endpoint" => "https://app.example.com/register",
-//                         "scopes_supported" => [
-//                             "openid",
-//                             "profile",
-//                             "email",
-//                         ],
-//                         "response_types_supported" => [
-//                             "code",
-//                             "code token"
-//                         ],
-//                         "service_documentation" => "http://app.example.com/service_documentation.html",
-//                         "ui_locales_supported" => [
-//                             "en-US",
-//                             "en-GB",
-//                             "fr-FR",
-//                         ]
-//                     ]
-//                 ]
-//             ],
-//             'Invalid, bad response' => [
-//                 'issuer_url' => 'https://app.example.com',
-//                 'http_response' => new Response(404),
-//                 'well_known_suffix' => null,
-//                 'expected' => [
-//                     'exception' => ClientException::class
-//                 ]
-//             ]
-//         ];
-//     }
+        // Get the OAuth2 client mock and set the return value for necessary methods.
+        $mockOauthClient = $mockbuilder->getMock();
+        $mockOauthClient->method('get_issuer')->will($this->returnValue($issuer));
+        $mockOauthClient->method('is_logged_in')->will($this->returnValue(true));
+        $mockOauthClient->method('get_accesstoken')->will($this->returnValue($accesstoken));
+
+        // Create Guzzle mock.
+        $mockGuzzleHandler = new MockHandler([$httpresponse]);
+        $handlerstack = HandlerStack::create($mockGuzzleHandler);
+        $httpclient = new http_client(['handler' => $handlerstack]);
+
+        // Create events sink.
+        $sink = $this->redirectEvents();
+
+        // Call the API.
+        $result = activity_sender::share_activity($this->course->id, $this->moduleinstance->cmid, $USER->id, $httpclient,
+            $mockOauthClient,
+            activity_sender::SHARE_FORMAT_BACKUP);
+
+        // Verify the result.
+        $this->assertEquals($expected['response_code'], $result['responsecode']);
+        $this->assertEquals($expected['resource_url'], $result['drafturl']);
+
+        // Verify the events.
+        $events = $sink->get_events();
+        $event = reset($events);
+        $this->assertInstanceOf('\core\event\moodlenet_resource_exported', $event);
+        $this->assertEquals($USER->id, $event->userid);
+
+        if ($result['responsecode'] == 201) {
+            $description = "The user with id '{$USER->id}' successfully shared activities to MoodleNet with the " .
+                "following course module ids, from context with id '{$this->coursecontext->id}': '{$this->moduleinstance->cmid}'.";
+        } else {
+            $description = "The user with id '{$USER->id}' failed to share activities to MoodleNet with the " .
+                "following course module ids, from context with id '{$this->coursecontext->id}': '{$this->moduleinstance->cmid}'.";
+        }
+        $this->assertEquals($description, $event->get_description());
+    }
+
+    /**
+     * Provider for test share_activity().
+     *
+     * @return array Test data.
+     */
+    public function share_activity_provider(): array {
+        return [
+            'Success' => [
+                'http_response' => new Response(
+                    201,
+                    ['Content-Type' => 'application/json'],
+                    json_encode([
+                        'homepage' => 'https://moodlenet.example.com/drafts/view/activity_backup_1.mbz',
+                    ]),
+                ),
+                'expected' => [
+                    'response_code' => 201,
+                    'resource_url' => 'https://moodlenet.example.com/drafts/view/activity_backup_1.mbz',
+                ],
+            ],
+            'Fail with 200 status code' => [
+                'http_response' => new Response(
+                    200,
+                    ['Content-Type' => 'application/json'],
+                    json_encode([
+                        'homepage' => 'https://moodlenet.example.com/drafts/view/activity_backup_2.mbz',
+                    ]),
+                ),
+                'expected' => [
+                    'response_code' => 200,
+                    'resource_url' => '#',
+                ],
+            ],
+            'Fail with 401 status code' => [
+                'http_response' => new Response(
+                    401,
+                    ['Content-Type' => 'application/json'],
+                    json_encode([
+                        'homepage' => 'https://moodlenet.example.com/drafts/view/activity_backup_3.mbz',
+                    ]),
+                ),
+                'expected' => [
+                    'response_code' => 401,
+                    'resource_url' => '#',
+                ],
+            ],
+            'Fail with 404 status code' => [
+                'http_response' => new Response(
+                    404,
+                    ['Content-Type' => 'application/json'],
+                    json_encode([
+                        'homepage' => '',
+                    ]),
+                ),
+                'expected' => [
+                    'response_code' => 401,
+                    'resource_url' => '#',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Test is_valid_instance method.
+     *
+     * @covers ::is_valid_instance
+     * @return void
+     */
+    public function test_is_valid_instance() {
+        global $CFG;
+        $this->setAdminUser();
+
+        // Create dummy issuer.
+        $issuer = new \core\oauth2\issuer(0);
+        $issuer->set('enabled', 0);
+        $issuer->set('servicetype', 'google');
+
+        // Can not share if the experimental flag it set to false.
+        $CFG->enablesharingtomoodlenet = false;
+        $this->assertFalse(activity_sender::is_valid_instance($issuer));
+
+        // Enable the experimental flag.
+        $CFG->enablesharingtomoodlenet = true;
+
+        // Can not share if the OAuth 2 service in the outbound setting is not matched the given one.
+        set_config('oauthservice', random_int(1, 30), 'moodlenet');
+        $this->assertFalse(activity_sender::is_valid_instance($issuer));
+
+        // Can not share if the OAuth 2 service in the outbound setting is not enabled.
+        set_config('oauthservice', $issuer->get('id'), 'moodlenet');
+        $this->assertFalse(activity_sender::is_valid_instance($issuer));
+
+        // Can not share if the OAuth 2 service type is not moodlenet.
+        $issuer->set('enabled', 1);
+        $this->assertFalse(activity_sender::is_valid_instance($issuer));
+
+        // All good now.
+        $issuer->set('servicetype', 'moodlenet');
+        $this->assertTrue(activity_sender::is_valid_instance($issuer));
+    }
+
+    /**
+     * Test can_user_share method.
+     *
+     * @covers ::can_user_share
+     * @return void
+     */
+    public function test_can_user_share() {
+        global $DB;
+
+        // Generate data.
+        $student1 = $this->generator->create_user();
+        $teacher1 = $this->generator->create_user();
+        $teacher2 = $this->generator->create_user();
+        $manager1 = $this->generator->create_user();
+
+        // Enrol users.
+        $this->generator->enrol_user($student1->id, $this->course->id, 'student');
+        $this->generator->enrol_user($teacher1->id, $this->course->id, 'teacher');
+        $this->generator->enrol_user($teacher2->id, $this->course->id, 'editingteacher');
+        $this->generator->enrol_user($manager1->id, $this->course->id, 'manager');
+
+        // Get roles.
+        $teacherrole = $DB->get_record('role', ['shortname' => 'teacher'], 'id', MUST_EXIST);
+        $editingteacherrole = $DB->get_record('role', ['shortname' => 'editingteacher'], 'id', MUST_EXIST);
+
+        // Test with default settings.
+        // Student and Teacher cannot share the activity.
+        $this->assertFalse(activity_sender::can_user_share($this->coursecontext, $student1->id));
+        $this->assertFalse(activity_sender::can_user_share($this->coursecontext, $teacher1->id));
+        // Editing-teacher and Manager can share the activity.
+        $this->assertTrue(activity_sender::can_user_share($this->coursecontext, $teacher2->id));
+        $this->assertTrue(activity_sender::can_user_share($this->coursecontext, $manager1->id));
+
+        // Teacher who has the capabilities can share the activity.
+        assign_capability('moodle/moodlenet:sendactivity', CAP_ALLOW, $teacherrole->id, $this->coursecontext);
+        assign_capability('moodle/backup:backupactivity', CAP_ALLOW, $teacherrole->id, $this->coursecontext);
+        $this->assertTrue(activity_sender::can_user_share($this->coursecontext, $teacher1->id));
+
+        // Editing-teacher who does not have the capabilities can not share the activity.
+        assign_capability('moodle/moodlenet:sendactivity', CAP_PROHIBIT, $editingteacherrole->id, $this->coursecontext);
+        $this->assertFalse(activity_sender::can_user_share($this->coursecontext, $teacher2->id));
+    }
+
+    /**
+     * Test prepare_share_contents method.
+     *
+     * @covers ::prepare_share_contents
+     * @return void
+     */
+    public function test_prepare_share_contents() {
+        $this->setAdminUser();
+
+        // Get activity resource.
+        $resourceinfo = new activity_resource($this->course->id, $this->moduleinstance->cmid);
+
+        // Set get_file method accessibility.
+        $method = new ReflectionMethod(activity_sender::class, 'prepare_share_contents');
+        $method->setAccessible(true);
+
+        // Test with invalid share format.
+        $package = $method->invoke(new activity_sender(), $resourceinfo, random_int(1, 30));
+        $this->assertEmpty($package);
+
+        // Test with valid share format.
+        $package = $method->invoke(new activity_sender(), $resourceinfo, activity_sender::SHARE_FORMAT_BACKUP);
+        $this->assertNotEmpty($package);
+        // Confirm there are backup file contents returned.
+        $this->assertTrue(array_key_exists('filecontents', $package));
+        $this->assertNotEmpty($package['filecontents']);
+
+        // Confirm the expected stored_file object is returned.
+        $this->assertTrue(array_key_exists('storedfile', $package));
+        $this->assertInstanceOf(\stored_file::class, $package['storedfile']);
+    }
 }
