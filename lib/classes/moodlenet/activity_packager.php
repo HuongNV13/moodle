@@ -21,6 +21,8 @@ use backup_controller;
 use backup_root_task;
 use cm_info;
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
 
 /**

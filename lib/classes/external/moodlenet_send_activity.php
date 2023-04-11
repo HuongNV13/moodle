@@ -85,7 +85,7 @@ class moodlenet_send_activity extends external_api {
         $usercanshare = utilities::can_user_share($coursecontext, $USER->id);
         if (!$usercanshare) {
             return self::return_errors($cmid, 'errorpermission',
-                get_string('nopermissions', 'error', get_string('moodlenet:share_to_moodlenet', 'moodle')));
+                get_string('nopermissions', 'error', get_string('moodlenet:sharetomoodlenet', 'moodle')));
         }
 
         // Check format.
@@ -105,6 +105,11 @@ class moodlenet_send_activity extends external_api {
             return self::return_errors($issuerid, 'erroroauthclient', get_string('invalidparameter', 'debug'));
         }
 
+        // Check login state.
+        if (!$oauthclient->is_logged_in()) {
+            return self::return_errors($issuerid, 'erroroauthclient', get_string('moodlenet:issuerisnotauthorized', 'moodle'));
+        }
+
         // Get the HTTP Client.
         $client = new http_client();
 
@@ -113,12 +118,12 @@ class moodlenet_send_activity extends external_api {
 
         try {
             $result = $activitysender->share_activity();
-            if ($result['responsecode'] == 201) {
-                $status = true;
-                $resourceurl = $result['drafturl'];
-            } else {
-                return self::return_errors($result['responsecode'], 'errorsendingactivity', get_string('error', 'error'));
+            if (empty($result['drafturl'])) {
+                return self::return_errors($result['responsecode'], 'errorsendingactivity',
+                    get_string('moodlenet:cannotconnecttoserver', 'moodle'));
             }
+            $status = true;
+            $resourceurl = $result['drafturl'];
         } catch(\moodle_exception $e) {
             return self::return_errors(0, 'errorsendingactivity', $e->getMessage());
         }

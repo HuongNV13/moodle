@@ -77,6 +77,7 @@ class activity_sender {
         global $DB;
 
         $accesstoken = '';
+        $resourceurl = '';
         $issuer = $this->oauthclient->get_issuer();
 
         // Check user can share to the requested MoodleNet instance.
@@ -121,6 +122,8 @@ class activity_sender {
                 // (It has either been sent, or failed - retries not currently supported).
                 $filedata['storedfile']->delete();
             }
+        } else {
+            $responsecode = 401;
         }
 
         // Log every attempt to share (and whether or not it was successful).
