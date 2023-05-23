@@ -4242,10 +4242,18 @@ function guest_user() {
  * @param string $password  User's password
  * @param bool $ignorelockout useful when guessing is prevented by other mechanism such as captcha or SSO
  * @param int $failurereason login failure reason, can be used in renderers (it may disclose if account exists)
- * @param mixed logintoken If this is set to a string it is validated against the login token for the session.
+ * @param string|bool $logintoken If this is set to a string it is validated against the login token for the session.
+ * @param string|null $loginrecaptcha If this is set to a string it is validated against Google reCaptcha.
  * @return stdClass|false A {@link $USER} object or false if error
  */
-function authenticate_user_login($username, $password, $ignorelockout=false, &$failurereason=null, $logintoken=false) {
+function authenticate_user_login(
+    $username,
+    $password,
+    $ignorelockout = false,
+    &$failurereason = null,
+    $logintoken = false,
+    ?string $loginrecaptcha = null,
+) {
     global $CFG, $DB, $PAGE;
     require_once("$CFG->libdir/authlib.php");
 
@@ -4282,6 +4290,24 @@ function authenticate_user_login($username, $password, $ignorelockout=false, &$f
 
         error_log('[client '.getremoteaddr()."]  $CFG->wwwroot  Invalid Login Token:  $username  ".$_SERVER['HTTP_USER_AGENT']);
         return false;
+    }
+
+    // Login reCaptcha.
+    if (login_captcha_enabled()) {
+        require_once($CFG->libdir . '/recaptchalib_v2.php');
+        $response = recaptcha_check_response(RECAPTCHA_VERIFY_URL, $CFG->recaptchaprivatekey, getremoteaddr(), $loginrecaptcha);
+        if (!$response['isvalid']) {
+            $failurereason = AUTH_LOGIN_FAILED_RECAPTCHA;
+            // Trigger login failed event (specifying the ID of the found user, if available).
+            \core\event\user_login_failed::create([
+                'userid' => ($user->id ?? 0),
+                'other' => [
+                    'username' => $username,
+                    'reason' => $failurereason,
+                ],
+            ])->trigger();
+            return false;
+        }
     }
 
     $authsenabled = get_enabled_auth_plugins();

@@ -79,6 +79,9 @@ define('AUTH_LOGIN_LOCKOUT', 4);
 /** Can not login becauser user is not authorised. */
 define('AUTH_LOGIN_UNAUTHORISED', 5);
 
+/** Can not login, failed reCaptcha challenge. */
+define('AUTH_LOGIN_FAILED_RECAPTCHA', 6);
+
 /**
  * Abstract authentication plugin.
  *
@@ -1035,6 +1038,15 @@ function signup_captcha_enabled() {
     global $CFG;
     $authplugin = get_auth_plugin($CFG->registerauth);
     return !empty($CFG->recaptchapublickey) && !empty($CFG->recaptchaprivatekey) && $authplugin->is_captcha_enabled();
+}
+
+/**
+ * Returns whether the captcha element is enabled for the login form, and the admin settings fulfil its requirements.
+ * @return bool
+ */
+function login_captcha_enabled(): bool {
+    global $CFG;
+    return !empty($CFG->recaptchapublickey) && !empty($CFG->recaptchaprivatekey) && $CFG->auth_recaptcha == true;
 }
 
 /**

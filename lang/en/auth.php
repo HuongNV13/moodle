@@ -46,6 +46,8 @@ $string['auth_notconfigured'] = 'The authentication method {$a} is not configure
 $string['auth_outofnewemailupdateattempts'] = 'You have run out of allowed attempts to update your email address. Your update request has been cancelled.';
 $string['auth_passwordisexpired'] = 'Your password has expired. Please change it now.';
 $string['auth_passwordwillexpire'] = 'Your password will expire in {$a} days. Do you want to change your password now?';
+$string['auth_recaptcha'] = 'Enable reCAPTCHA element';
+$string['auth_recaptcha_desc'] = 'Add a visual/audio confirmation form element to the login page. This reduces the risk of unwarranted login attempts. See <a target="_blank" href="https://www.google.com/recaptcha">Google reCAPTCHA</a> for more details. ';
 $string['auth_remove_delete'] = 'Full delete internal';
 $string['auth_remove_keep'] = 'Keep internal';
 $string['auth_remove_suspend'] = 'Suspend internal';
