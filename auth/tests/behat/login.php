@@ -49,7 +49,7 @@ if (isloggedin()) {
 $password = $username;
 
 $failurereason = null;
-$user = authenticate_user_login($username, $password, true, $failurereason, false);
+$user = authenticate_user_login($username, $password, true, $failurereason, false, false);
 if ($failurereason) {
     switch($failurereason) {
         case AUTH_LOGIN_NOUSER:

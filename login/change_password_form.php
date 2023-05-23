@@ -100,7 +100,7 @@ class login_change_password_form extends moodleform {
         $errors = array_merge($errors, core_login_validate_extend_change_password_form($data, $USER));
 
         // ignore submitted username
-        if (!$user = authenticate_user_login($USER->username, $data['password'], true, $reason, false)) {
+        if (!$user = authenticate_user_login($USER->username, $data['password'], true, $reason, false, false)) {
             $errors['password'] = get_string('invalidlogin');
             return $errors;
         }
