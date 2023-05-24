@@ -49,6 +49,10 @@ class token_form extends \moodleform {
 
         $mform->addElement('header', 'token', get_string('token', 'webservice'));
 
+        $mform->addElement('text', 'name', get_string('tokenname', 'webservice'));
+        $mform->setType('name', PARAM_TEXT);
+        $mform->addElement('static', 'tokennamehint', '', get_string('tokennamehint', 'webservice'));
+
         // User selector.
         $attributes = [
             'multiple' => false,
@@ -90,6 +94,7 @@ class token_form extends \moodleform {
 
         $mform->addElement('date_selector', 'validuntil',
                 get_string('validuntil', 'webservice'), array('optional' => true));
+        $mform->setDefault('validuntil', time() + 3600 * 24 * 90); // Enable the date selector.
         $mform->setType('validuntil', PARAM_INT);
 
         $mform->addElement('hidden', 'action');

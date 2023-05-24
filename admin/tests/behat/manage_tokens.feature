@@ -19,19 +19,33 @@ Feature: Manage external services tokens
     And I am on site homepage
     And I navigate to "Server > Web services > Manage tokens" in site administration
     And I press "Create token"
+    And I set the field "Name" to "Webservice1"
     And I set the field "User" to "Firstname1 Lastname1"
     And I set the field "Service" to "Moodle mobile web service"
     And I set the field "IP restriction" to "127.0.0.1"
     When I press "Save changes"
-    Then I should see "Moodle mobile web service" in the "Firstname1 Lastname1" "table_row"
-    And I should see "127.0.0.1" in the "Firstname1 Lastname1" "table_row"
-    And I click on "Delete" "link" in the "Firstname1 Lastname1" "table_row"
+    Then I should see "Firstname1 Lastname1" in the "Webservice1" "table_row"
+    And I should see "127.0.0.1" in the "Webservice1" "table_row"
+
+    # Displaying the newly created token.
+    Then "#copytoclipboardtoken" "css_element" should exist
+
+    # Copy to clipboard the new token.
+    And I click on "Copy to clipboard" "button"
+    And ".toast-message" "css_element" should exist
+
+    # New token can only read once.
+    And I reload the page
+    And "#copytoclipboardtoken" "css_element" should not exist
+
+    # Delete token.
+    And I click on "Delete" "link" in the "Webservice1" "table_row"
     And I should see "Do you really want to delete this web service token for Firstname1 Lastname1 on the service Moodle mobile web service?"
     And I press "Delete"
-    And "Firstname1 Lastname1" "table_row" should not exist
+    And "Webservice1" "table_row" should not exist
 
   @javascript @skip_chrome_zerosize
-  Scenario: Tokens can be filtered by user and by service
+  Scenario: Tokens can be filtered by name (case-insensitive), by user and by service
     Given the following "core_webservice > Service" exists:
       | name      | Site information              |
       | shortname | siteinfo                      |
@@ -40,15 +54,30 @@ Feature: Manage external services tokens
       | service   | siteinfo                      |
       | functions | core_webservice_get_site_info |
     And the following "core_webservice > Tokens" exist:
-      | user      | service                       |
-      | user2     | siteinfo                      |
-      | user3     | moodle_mobile_app             |
-      | user4     | siteinfo                      |
+      | user      | service                       | name           |
+      | user2     | siteinfo                      | WEBservice1    |
+      | user3     | moodle_mobile_app             | webservicE3     |
+      | user4     | siteinfo                      | New service2   |
     When I log in as "admin"
     And I navigate to "Server > Web services > Manage tokens" in site administration
 
     # All created tokens are shown by default.
+    # Reloading the page three times as a read process to make it available in the table.
     And "Firstname1 Lastname1" "table_row" should not exist
+    And I should see "Site information" in the "Firstname2 Lastname2" "table_row"
+    And I should see "Moodle mobile web service" in the "Firstname3 Lastname3" "table_row"
+    And I should see "Site information" in the "Firstname4 Lastname4" "table_row"
+
+    # Filter tokens by by name (case-insensitive).
+    And I click on "Tokens filter" "link"
+    And I set the field "Name" to "webservice"
+    And I press "Show only matching tokens"
+    And I should see "Site information" in the "Firstname2 Lastname2" "table_row"
+    And I should see "Moodle mobile web service" in the "Firstname3 Lastname3" "table_row"
+    And "Firstname4 Lastname4" "table_row" should not exist
+
+    # Reset the filter.
+    And I press "Show all tokens"
     And I should see "Site information" in the "Firstname2 Lastname2" "table_row"
     And I should see "Moodle mobile web service" in the "Firstname3 Lastname3" "table_row"
     And I should see "Site information" in the "Firstname4 Lastname4" "table_row"
