@@ -53,4 +53,16 @@ class utilities {
         return (has_capability('moodle/moodlenet:shareactivity', $coursecontext, $userid) &&
             has_capability('moodle/backup:backupactivity', $coursecontext, $userid));
     }
+
+    /**
+     * Check whether a user has the capabilities required to share courses to MoodleNet.
+     *
+     * @param \core\context\course $coursecontext Course context
+     * @param int $userid The user ID being checked
+     * @return bool
+     */
+    public static function can_user_share_course_to_moodlenet(\core\context\course $coursecontext, int $userid): bool {
+        return (has_capability('moodle/moodlenet:sharecourse', $coursecontext, $userid) &&
+            has_capability('moodle/backup:backupcourse', $coursecontext, $userid));
+    }
 }
