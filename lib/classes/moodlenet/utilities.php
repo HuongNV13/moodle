@@ -49,8 +49,37 @@ class utilities {
      * @param int $userid The user ID being checked.
      * @return boolean
      */
-    public static function can_user_share(\core\context\course $coursecontext, int $userid): bool {
-        return (has_capability('moodle/moodlenet:shareactivity', $coursecontext, $userid) &&
-            has_capability('moodle/backup:backupactivity', $coursecontext, $userid));
+    public static function can_user_share(\core\context\course $coursecontext, int $userid, string $type = 'activity'): bool {
+        if ($type === 'course') {
+            return (has_capability('moodle/moodlenet:sharecourse', $coursecontext, $userid) &&
+                has_capability('moodle/backup:backupcourse', $coursecontext, $userid));
+        }
+
+        if ($type === 'activity') {
+            return (has_capability('moodle/moodlenet:shareactivity', $coursecontext, $userid) &&
+                has_capability('moodle/backup:backupactivity', $coursecontext, $userid));
+        }
+
+        throw new \coding_exception('Invalid resource type');
+    }
+
+    /**
+     * Get the support url.
+     *
+     * @return string
+     */
+    public static function get_support_url(): string {
+        global $CFG;
+        $supporturl = '';
+
+        if ($CFG->supportavailability && $CFG->supportavailability !== CONTACT_SUPPORT_DISABLED) {
+            if (!empty($CFG->supportpage)) {
+                $supporturl = $CFG->supportpage;
+            } else {
+                $supporturl = $CFG->wwwroot . '/user/contactsitesupport.php';
+            }
+        }
+
+        return $supporturl;
     }
 }
