@@ -54,10 +54,19 @@ class moodlenet_resource_exported extends \core\event\base {
      */
     public function get_description() {
         $outcome = $this->other['success'] ? 'successfully shared' : 'failed to share';
-        $cmids = implode("', '", $this->other['cmids']);
 
-        $description = "The user with id '{$this->userid}' {$outcome} activities to MoodleNet with the " .
-            "following course module ids, from context with id '{$this->data['contextid']}': '{$cmids}'.";
+        if (!empty($this->other['cmids'])) {
+            $cmids = implode("', '", $this->other['cmids']);
+            $description = "The user with id '{$this->userid}' {$outcome} activities to MoodleNet with the " .
+                "following course module ids, from context with id '{$this->data['contextid']}': '{$cmids}'.";
+        } else if (!empty($this->other['courseids'])) {
+            $courseids = implode("', '", $this->other['courseids']);
+            $description = "The user with id '{$this->userid}' {$outcome} courses to MoodleNet with the " .
+                "following course module ids, from context with id '{$this->data['contextid']}': '{$courseids}'.";
+        } else {
+            $description = "The user with id '{$this->userid}' {$outcome} courses to MoodleNet with the " .
+                "following course module ids, from context with id '{$this->data['contextid']}'.";
+        }
 
         return rtrim($description, ", '");
     }
