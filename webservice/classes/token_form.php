@@ -26,6 +26,8 @@
 namespace core_webservice;
 
 use core_user;
+use DateInterval;
+use DateTime;
 
 /**
  * Form to create and edit a web service token.
@@ -94,7 +96,10 @@ class token_form extends \moodleform {
 
         $mform->addElement('date_selector', 'validuntil',
                 get_string('validuntil', 'webservice'), array('optional' => true));
-        $mform->setDefault('validuntil', time() + 3600 * 24 * 90); // Enable the date selector.
+        // Expires in 30 days.
+        $expires = new DateTime();
+        $expires->add(new DateInterval("P30D"));
+        $mform->setDefault('validuntil', $expires->getTimestamp());
         $mform->setType('validuntil', PARAM_INT);
 
         $mform->addElement('hidden', 'action');

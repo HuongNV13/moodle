@@ -27,16 +27,14 @@ Feature: Manage external services tokens
     Then I should see "Firstname1 Lastname1" in the "Webservice1" "table_row"
     And I should see "127.0.0.1" in the "Webservice1" "table_row"
 
-    # Displaying the newly created token.
-    Then "#copytoclipboardtoken" "css_element" should exist
-
-    # Copy to clipboard the new token.
-    And I click on "Copy to clipboard" "button"
-    And ".toast-message" "css_element" should exist
+    # Verify the message and the "Copy to clipboard" button.
+    And I should see "Make sure to copy your webservice token now. You won't be able to see it again!"
+    And "Copy to clipboard" "button" should exist
 
     # New token can only read once.
     And I reload the page
-    And "#copytoclipboardtoken" "css_element" should not exist
+    And I should not see "Make sure to copy your webservice token now. You won't be able to see it again!"
+    And "Copy to clipboard" "button" should not exist
 
     # Delete token.
     And I click on "Delete" "link" in the "Webservice1" "table_row"
@@ -62,7 +60,6 @@ Feature: Manage external services tokens
     And I navigate to "Server > Web services > Manage tokens" in site administration
 
     # All created tokens are shown by default.
-    # Reloading the page three times as a read process to make it available in the table.
     And "Firstname1 Lastname1" "table_row" should not exist
     And I should see "Site information" in the "Firstname2 Lastname2" "table_row"
     And I should see "Moodle mobile web service" in the "Firstname3 Lastname3" "table_row"
