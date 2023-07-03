@@ -4621,7 +4621,7 @@ class settings_navigation extends navigation_node {
 
         // Share course to moodlenet.
         $this->page->requires->js_call_amd('core/moodlenet/send_resource', 'init');
-        $usercanshare = utilities::can_user_share_course_to_moodlenet($this->context->get_course_context(), $USER->id);
+        $usercanshare = utilities::can_user_share($this->context->get_course_context(), $USER->id, 'course');
         $issuerid = get_config('moodlenet', 'oauthservice');
         try {
             $issuer = \core\oauth2\api::get_issuer($issuerid);
@@ -4635,10 +4635,7 @@ class settings_navigation extends navigation_node {
                 $coursenode->add(get_string('moodlenet:sharetomoodlenet', 'moodle'),
                     $action, self::TYPE_SETTING, null, 'exportcoursetomoodlenet')->set_force_into_more_menu(true);
             }
-        } catch (dml_missing_record_exception $e) {
-            debugging("Invalid MoodleNet OAuth 2 service set in site administration: 'moodlenet | oauthservice'. " .
-                "This must be a valid issuer.");
-        }
+        } catch (dml_missing_record_exception $e) {}
 
         if ($adminoptions->update) {
             // Add the course settings link
@@ -4921,10 +4918,7 @@ class settings_navigation extends navigation_node {
                 $modulenode->add(get_string('moodlenet:sharetomoodlenet', 'moodle'),
                     $action, self::TYPE_SETTING, null, 'exportmoodlenet')->set_force_into_more_menu(true);
             }
-        } catch (dml_missing_record_exception $e) {
-            debugging("Invalid MoodleNet OAuth 2 service set in site administration: 'moodlenet | oauthservice'. " .
-                "This must be a valid issuer.");
-        }
+        } catch (dml_missing_record_exception $e) {}
 
         // Remove the module node if there are no children.
         if ($modulenode->children->count() <= 0) {
