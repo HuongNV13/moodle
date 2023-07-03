@@ -95,23 +95,41 @@ class course_sender_test extends \advanced_testcase {
         // Test with invalid share format.
         $this->expectException(\moodle_exception::class);
         $this->expectExceptionMessage(get_string('moodlenet:invalidshareformat', 'error'));
-        $method->invoke(course_sender::load_by_instance(
+
+        $httpclient = new http_client();
+        $moodlenetclient = new moodlenet_client($httpclient, $this->mockoauthclient);
+        $coursesender = new course_sender(
+            random_int(5, 30),
+            $USER->id,
+            $moodlenetclient,
+            $this->mockoauthclient,
+            random_int(5, 30)
+        );
+        $coursesender = $method->invoke(new course_sender(
             $this->course->id,
             $USER->id,
-            random_int(5, 30)
+            $moodlenetclient,
+            $this->mockoauthclient,
+            resource_sender::SHARE_FORMAT_BACKUP
         ));
 
         // Test with valid share format and invalid course module.
-        $package = $method->invoke(course_sender::load_by_instance(
-            random_int(5, 30),
+        $package = $method->invoke(new course_sender(
+            $this->course->id,
             $USER->id,
+            $moodlenetclient,
+            $this->mockoauthclient,
+            resource_sender::SHARE_FORMAT_BACKUP
         ));
         $this->assertEmpty($package);
 
         // Test with valid share format and valid course module.
-        $package = $method->invoke(course_sender::load_by_instance(
+        $package = $method->invoke(new course_sender(
             $this->course->id,
             $USER->id,
+            $moodlenetclient,
+            $this->mockoauthclient,
+            resource_sender::SHARE_FORMAT_BACKUP
         ));
         $this->assertNotEmpty($package);
 
@@ -143,9 +161,14 @@ class course_sender_test extends \advanced_testcase {
         $method->setAccessible(true);
 
         // Test the processed description.
-        $processeddescription = $method->invoke(course_sender::load_by_instance(
+        $httpclient = new http_client();
+        $moodlenetclient = new moodlenet_client($httpclient, $this->mockoauthclient);
+        $processeddescription = $method->invoke(new course_sender(
             $course->id,
             $USER->id,
+            $moodlenetclient,
+            $this->mockoauthclient,
+            resource_sender::SHARE_FORMAT_BACKUP
         ), $this->coursecontext);
 
         $this->assertEquals('This is an example Moodle course description.
@@ -158,17 +181,17 @@ The last word of this sentence is in bold', $processeddescription);
     }
 
     /**
-     * Test share_course() method.
+     * Test share_resource() method.
      *
-     * @dataProvider share_course_provider
-     * @covers ::share_course
+     * @dataProvider share_resource_provider
+     * @covers ::share_resource
      * @covers ::log_event
      * @covers \core\moodlenet\moodlenet_client::create_resource_from_stored_file
      * @covers \core\moodlenet\moodlenet_client::prepare_file_share_request_data
      * @param ResponseInterface $httpresponse
      * @param array $expected
      */
-    public function test_share_course(ResponseInterface $httpresponse, array $expected): void {
+    public function test_share_resource(ResponseInterface $httpresponse, array $expected): void {
         global $CFG, $USER;
         $this->setAdminUser();
 
@@ -196,9 +219,13 @@ The last word of this sentence is in bold', $processeddescription);
         $sink = $this->redirectEvents();
 
         // Create sender.
-        $coursesender = course_sender::load_by_instance(
+        $moodlenetclient = new moodlenet_client($httpclient, $this->mockoauthclient);
+        $coursesender = new course_sender(
             $this->course->id,
             $USER->id,
+            $moodlenetclient,
+            $this->mockoauthclient,
+            resource_sender::SHARE_FORMAT_BACKUP
         );
 
         if (isset($expected['exception'])) {
@@ -206,8 +233,7 @@ The last word of this sentence is in bold', $processeddescription);
             $this->expectExceptionMessage($expected['exception']);
         }
         // Call the API.
-        $moodlenetclient = new moodlenet_client($httpclient, $this->mockoauthclient);
-        $result = $coursesender->share_course($this->mockoauthclient, $moodlenetclient);
+        $result = $coursesender->share_resource();
 
         // Verify the result.
         $this->assertEquals($expected['response_code'], $result['responsecode']);
@@ -221,21 +247,21 @@ The last word of this sentence is in bold', $processeddescription);
         $this->assertEquals($USER->id, $event->userid);
 
         if ($result['responsecode'] == 201) {
-            $description = "The user with id '{$USER->id}' successfully shared courses to MoodleNet with the " .
-                "following course module ids, from context with id '{$this->coursecontext->id}': '{$this->course->id}'.";
+            $description = "The user with id '{$USER->id}' successfully shared course to MoodleNet with the " .
+                "following course id, from context with id '{$this->coursecontext->id}': '{$this->course->id}'.";
         } else {
-            $description = "The user with id '{$USER->id}' failed to share courses to MoodleNet with the " .
-                "following course module ids, from context with id '{$this->coursecontext->id}': '{$this->course->id}'.";
+            $description = "The user with id '{$USER->id}' failed to share course to MoodleNet with the " .
+                "following course id, from context with id '{$this->coursecontext->id}': '{$this->course->id}'.";
         }
         $this->assertEquals($description, $event->get_description());
     }
 
     /**
-     * Provider for test share_course().
+     * Provider for test share_resource().
      *
      * @return array Test data.
      */
-    public function share_course_provider(): array {
+    public function share_resource_provider(): array {
         return [
             'Success' => [
                 'http_response' => new Response(

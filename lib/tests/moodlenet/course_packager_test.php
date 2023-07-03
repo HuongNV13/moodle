@@ -43,7 +43,7 @@ class course_packager_test extends \advanced_testcase {
         $course = $generator->create_course();
 
         // Load the course packager.
-        $packager = course_packager::load_by_instance($course, $USER->id);
+        $packager = new course_packager($course, $USER->id);
 
         // Fetch all backup task settings.
         $rc = new \ReflectionClass(course_packager::class);
@@ -104,7 +104,7 @@ class course_packager_test extends \advanced_testcase {
         $course = $generator->create_course();
 
         // Load the course packager.
-        $packager = course_packager::load_by_instance($course, $USER->id);
+        $packager = new course_packager($course, $USER->id);
         $package = $packager->get_package();
 
         // Confirm the expected stored_file object is returned.

@@ -28,17 +28,7 @@ use stored_file;
  * @copyright 2023 Safat Shahin <safat.shahin@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class course_sender {
-
-    /**
-     * @var int Backup share format - the content is being shared as a Moodle backup file.
-     */
-    public const SHARE_FORMAT_BACKUP = 0;
-
-    /**
-     * @var int Maximum upload file size (1.07 GB).
-     */
-    private const MAX_FILESIZE = 1070000000;
+class course_sender extends resource_sender {
 
     /**
      * @var \core\context\course|false The course context.
@@ -48,62 +38,40 @@ class course_sender {
     /**
      * Constructor for course sender.
      *
-     * @param \stdClass $course The course to share.
-     * @param int $userid The ID of the user performing the sharing.
-     * @param int $shareformat The format to share the course in.
+     * @param int $courseid The course ID of the course being shared
+     * @param int $userid The user ID who is sharing the activity
+     * @param moodlenet_client $moodlenetclient The moodlenet_client object used to perform the share
+     * @param client $oauthclient The OAuth 2 client for the MoodleNet instance
+     * @param int $shareformat The data format to share in. Defaults to a Moodle backup (SHARE_FORMAT_BACKUP)
      */
-    private function __construct(
-        protected \stdClass $course,
-        protected int $userid,
-        protected int $shareformat,
-    ) {
-        $this->coursecontext = \core\context\course::instance($course->id);
-    }
-
-    /**
-     * Factory method to load a course sender by course id and userid
-     *
-     * @param int $courseid The ID of the course to share.
-     * @param int $userid The ID of the user performing the sharing.
-     * @param int $shareformat The format to share the course in.
-     * @return self
-     */
-    public static function load_by_instance(
+    public function __construct(
         int $courseid,
-        int $userid,
-        int $shareformat = self::SHARE_FORMAT_BACKUP,
-    ): self {
-
-        if (!in_array($shareformat, self::get_allowed_share_formats())) {
-            throw new moodle_exception('moodlenet:invalidshareformat');
-        }
-
-        $course = get_course($courseid);
-
-        return new self($course, $userid, $shareformat);
+        protected int $userid,
+        protected moodlenet_client $moodlenetclient,
+        protected client $oauthclient,
+        protected int $shareformat = self::SHARE_FORMAT_BACKUP,
+    ) {
+        parent::__construct($courseid, $userid, $moodlenetclient, $oauthclient, $shareformat);
+        $this->course = get_course($courseid);
+        $this->coursecontext = \core\context\course::instance($courseid);
     }
 
     /**
      * Share a course to MoodleNet.
      *
-     * @param client $oauthclient The OAuth 2 client for the MoodleNet instance.
-     * @param moodlenet_client $moodlenetclient The MoodleNet client.
      * @return array The HTTP response code from MoodleNet and the MoodleNet draft resource URL (URL empty string on fail).
      *               Format: ['responsecode' => 201, 'drafturl' => 'https://draft.mnurl/here']
      */
-    public function share_course(
-        client $oauthclient,
-        moodlenet_client $moodlenetclient,
-    ): array {
+    public function share_resource(): array {
 
         $accesstoken = '';
-        $issuer = $oauthclient->get_issuer();
+        $issuer = $this->oauthclient->get_issuer();
 
         // Check user can share to the requested MoodleNet instance.
-        $usercanshare = utilities::can_user_share_course_to_moodlenet($this->coursecontext, $this->userid);
+        $usercanshare = utilities::can_user_share($this->coursecontext, $this->userid, 'course');
 
-        if ($usercanshare && utilities::is_valid_instance($issuer) && $oauthclient->is_logged_in()) {
-            $accesstoken = $oauthclient->get_accesstoken()->token;
+        if ($usercanshare && utilities::is_valid_instance($issuer) && $this->oauthclient->is_logged_in()) {
+            $accesstoken = $this->oauthclient->get_accesstoken()->token;
         }
 
         // Throw an exception if the user is not currently set up to be able to share to MoodleNet.
@@ -129,7 +97,7 @@ class course_sender {
         // MoodleNet only accept plaintext descriptions.
         $resourcedescription = $this->get_resource_description();
 
-        $response = $moodlenetclient->create_resource_from_stored_file(
+        $response = $this->moodlenetclient->create_resource_from_stored_file(
             $filedata,
             $this->course->shortname,
             $resourcedescription,
@@ -158,8 +126,9 @@ class course_sender {
      * @return stored_file
      */
     protected function prepare_share_contents(): stored_file {
+        $packager = new course_packager($this->course, $this->userid);
         return match ($this->shareformat) {
-            self::SHARE_FORMAT_BACKUP => course_packager::load_by_instance($this->course, $this->userid)->get_package(),
+            self::SHARE_FORMAT_BACKUP => $packager->get_package(),
             default => throw new \coding_exception("Unknown share format: {$this->shareformat}'"),
         };
     }
@@ -178,7 +147,7 @@ class course_sender {
         $event = moodlenet_resource_exported::create([
             'context' => $this->coursecontext,
             'other' => [
-                'courseids' => [$this->course->id],
+                'courseid' => [$this->course->id],
                 'resourceurl' => $resourceurl,
                 'success' => ($responsecode === 201),
             ],
