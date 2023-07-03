@@ -55,7 +55,8 @@ class resource_packager {
     public function __construct(
         protected stdClass|cm_info $resource,
         protected int $userid,
-    ) {}
+    ) {
+    }
 
     /**
      * Destructor
@@ -125,7 +126,6 @@ class resource_packager {
      * Package the resource identified by resource id into a new stored_file.
      *
      * @return stored_file
-     * @throws \moodle_exception
      */
     protected function package(): stored_file {
         // Execute the backup and fetch the result.
