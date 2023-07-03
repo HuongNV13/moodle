@@ -4635,7 +4635,8 @@ class settings_navigation extends navigation_node {
                 $coursenode->add(get_string('moodlenet:sharetomoodlenet', 'moodle'),
                     $action, self::TYPE_SETTING, null, 'exportcoursetomoodlenet')->set_force_into_more_menu(true);
             }
-        } catch (dml_missing_record_exception $e) {}
+        } catch (dml_missing_record_exception $e) {
+        }
 
         if ($adminoptions->update) {
             // Add the course settings link
@@ -4918,7 +4919,8 @@ class settings_navigation extends navigation_node {
                 $modulenode->add(get_string('moodlenet:sharetomoodlenet', 'moodle'),
                     $action, self::TYPE_SETTING, null, 'exportmoodlenet')->set_force_into_more_menu(true);
             }
-        } catch (dml_missing_record_exception $e) {}
+        } catch (dml_missing_record_exception $e) {
+        }
 
         // Remove the module node if there are no children.
         if ($modulenode->children->count() <= 0) {
