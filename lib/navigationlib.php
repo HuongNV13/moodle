@@ -4636,6 +4636,7 @@ class settings_navigation extends navigation_node {
                     $action, self::TYPE_SETTING, null, 'exportcoursetomoodlenet')->set_force_into_more_menu(true);
             }
         } catch (dml_missing_record_exception $e) {
+            // Do nothing.
         }
 
         if ($adminoptions->update) {
@@ -4920,6 +4921,7 @@ class settings_navigation extends navigation_node {
                     $action, self::TYPE_SETTING, null, 'exportmoodlenet')->set_force_into_more_menu(true);
             }
         } catch (dml_missing_record_exception $e) {
+            // Do nothing.
         }
 
         // Remove the module node if there are no children.
