@@ -79,7 +79,7 @@ class moodlenet_send_course extends external_api {
         // Check capability.
         $course = get_course($courseid);
         $coursecontext = context_course::instance($course->id);
-        $usercanshare = utilities::can_user_share_course_to_moodlenet($coursecontext, $USER->id);
+        $usercanshare = utilities::can_user_share($coursecontext, $USER->id, 'course');
         if (!$usercanshare) {
             return self::return_errors(
                 $course->id,
@@ -130,17 +130,14 @@ class moodlenet_send_course extends external_api {
             );
         }
 
+        // Get the HTTP Client.
+        $client = new http_client();
+
         // Share course.
         try {
-            $coursesender = course_sender::load_by_instance(
-                $courseid,
-                $USER->id,
-                $shareformat
-            );
-            // Get the HTTP Client.
-            $client = new http_client();
             $moodlenetclient = new moodlenet_client($client, $oauthclient);
-            $result = $coursesender->share_course($oauthclient, $moodlenetclient);
+            $coursesender = new course_sender($course->id, $USER->id, $moodlenetclient, $oauthclient, $shareformat);
+            $result = $coursesender->share_resource();
             if (empty($result['drafturl'])) {
                 return self::return_errors(
                     $result['responsecode'],

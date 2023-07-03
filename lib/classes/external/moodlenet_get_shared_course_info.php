@@ -65,25 +65,17 @@ class moodlenet_get_shared_course_info extends external_api {
 
         // Check capability.
         $coursecontext = context_course::instance($course->id);
-        if (!utilities::can_user_share_course_to_moodlenet($coursecontext, $USER->id)) {
+        if (!utilities::can_user_share($coursecontext, $USER->id, 'course')) {
             return self::return_errors($courseid, 'errorpermission',
                 get_string('nopermissions', 'error', get_string('moodlenet:sharetomoodlenet', 'moodle')));
         }
 
         $warnings = [];
-        $supporturl = '';
+        $supporturl = utilities::get_support_url();
         $issuerid = get_config('moodlenet', 'oauthservice');
 
         if (empty($issuerid)) {
             return self::return_errors(0, 'errorissuernotset', get_string('moodlenet:issuerisnotset', 'moodle'));
-        }
-
-        if ($CFG->supportavailability && $CFG->supportavailability !== CONTACT_SUPPORT_DISABLED) {
-            if (!empty($CFG->supportpage)) {
-                $supporturl = $CFG->supportpage;
-            } else {
-                $supporturl = $CFG->wwwroot . '/user/contactsitesupport.php';
-            }
         }
 
         // Get the issuer.

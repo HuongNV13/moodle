@@ -116,7 +116,7 @@ class moodlenet_send_activity extends external_api {
         try {
             $moodlenetclient = new moodlenet_client($client, $oauthclient);
             $activitysender = new activity_sender($cmid, $USER->id, $moodlenetclient, $oauthclient, $shareformat);
-            $result = $activitysender->share_activity();
+            $result = $activitysender->share_resource();
             if (empty($result['drafturl'])) {
                 return self::return_errors($result['responsecode'], 'errorsendingactivity',
                     get_string('moodlenet:cannotconnecttoserver', 'moodle'));
