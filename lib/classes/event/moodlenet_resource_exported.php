@@ -59,13 +59,13 @@ class moodlenet_resource_exported extends \core\event\base {
             $cmids = implode("', '", $this->other['cmids']);
             $description = "The user with id '{$this->userid}' {$outcome} activities to MoodleNet with the " .
                 "following course module ids, from context with id '{$this->data['contextid']}': '{$cmids}'.";
-        } else if (!empty($this->other['courseids'])) {
-            $courseids = implode("', '", $this->other['courseids']);
-            $description = "The user with id '{$this->userid}' {$outcome} courses to MoodleNet with the " .
-                "following course module ids, from context with id '{$this->data['contextid']}': '{$courseids}'.";
+        } else if (!empty($this->other['courseid'])) {
+            $courseid = implode("', '", $this->other['courseid']);
+            $description = "The user with id '{$this->userid}' {$outcome} course to MoodleNet with the " .
+                "following course id, from context with id '{$this->data['contextid']}': '{$courseid}'.";
         } else {
-            $description = "The user with id '{$this->userid}' {$outcome} courses to MoodleNet with the " .
-                "following course module ids, from context with id '{$this->data['contextid']}'.";
+            $description = "The user with id '{$this->userid}' {$outcome} resource to MoodleNet " .
+                "from context with id '{$this->data['contextid']}'.";
         }
 
         return rtrim($description, ", '");
