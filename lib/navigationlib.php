@@ -4912,6 +4912,7 @@ class settings_navigation extends navigation_node {
             $issuer = \core\oauth2\api::get_issuer($issuerid);
             $isvalidinstance = utilities::is_valid_instance($issuer);
             if ($usercanshare && $isvalidinstance) {
+                $this->page->requires->js_call_amd('core/moodlenet/send_resource', 'init');
                 $action = new action_link(new moodle_url(''), '', null, [
                     'data-action' => 'sendtomoodlenet',
                     'data-type' => 'activity',
