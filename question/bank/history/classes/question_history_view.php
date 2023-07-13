@@ -68,7 +68,7 @@ class question_history_view extends view {
     protected function wanted_columns(): array {
         $this->requiredcolumns = [];
         $excludefeatures = [
-            'history_action_column'
+            'history_action_column',
             'question_usage_column',
         ];
         $questionbankcolumns = $this->get_question_bank_plugins();
