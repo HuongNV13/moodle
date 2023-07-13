@@ -54,7 +54,7 @@ class helper {
         }
         [$questionsql, $params] = $DB->get_in_or_equal($questionids, SQL_PARAMS_NAMED);
         $questions = $DB->get_records_select('question', 'id ' . $questionsql, $params,
-            'name ASC', 'id, name');
+            'id ASC, name ASC', 'id, name');
         foreach ($questions as $question) {
             if (questions_in_use([$question->id])) {
                 $questionnames .= '* ';
