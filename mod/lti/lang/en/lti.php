@@ -461,7 +461,7 @@ Tools which do not require secure communication from Moodle and do not provide a
 may not require a resource key.';
 $string['resourceurl'] = 'Resource URL';
 $string['restricttocategory'] = 'Restrict to category';
-$string['restricttocategory_help'] = 'To restrict use of this external tool on all courses within a category, select course category / categories from the list.';
+$string['restricttocategory_help'] = 'You can restrict the use of the tool to only courses within selected course categories.';
 $string['return_to_course'] = 'Click <a href="{$a->link}" target="_top">here</a> to return to the course.';
 $string['saveallfeedback'] = 'Save all my feedback';
 $string['search:activity'] = 'External tool - activity information';

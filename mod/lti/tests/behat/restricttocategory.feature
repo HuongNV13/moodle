@@ -49,9 +49,10 @@ Feature: Make an LTI only available to specific course categories
 
   Scenario: Tool is set to "Show as preconfigured tool when adding an external tool" on parent category
     Given I log in as "teacher1"
-    When I am on "Course 2" course homepage with editing mode on
+    And I am on "Course 2" course homepage with editing mode on
     And I add a "External tool" to section "1"
-    Then "Teaching Tool 1" "text" should exist in the "Preconfigured tool" "select"
+    When I click on "Preconfigured tool" "select"
+    Then I should see "Teaching Tool 1"
 
   Scenario: Tool is set to "Show in activity chooser and as preconfigured tool" on child category
     Given I log in as "teacher1"

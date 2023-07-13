@@ -17,21 +17,22 @@
  * Select course categories for LTI tool.
  *
  * @module     mod_lti/coursecategory
- * @copyright  2020 Jackson D'souza <jackson.dsouza@catalyst-eu.net>
+ * @copyright  2023 Jackson D'souza <jackson.dsouza@catalyst-eu.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @since      4.1
+ * @since      4.2
  */
 
 define([], function() {
 
-    const checkedbox = document.getElementsByClassName("lticoursecategories");
-    for (let i = 0; i < checkedbox.length; i++) {
-        checkedbox[i].addEventListener('click', (event) => {
-            // Checkbox status.
-            const checkboxstatus = checkedbox[i].checked;
+    document.addEventListener('click', event => {
+        const checkedbox = event.target.closest(".lticoursecategories");
+
+        if (checkedbox) {
+            // Get checkbox status.
+            const checkboxstatus = checkedbox.checked;
 
             // Check / Uncheck all child category checkboxes based on selected checkbox status.
-            const categorycontainer = document.querySelector('#collapse' + event.currentTarget.value);
+            const categorycontainer = document.querySelector('#collapse' + checkedbox.value);
             if (categorycontainer) {
                 const categorycontainercheckbox = categorycontainer.querySelectorAll('input[type="checkbox"]');
                 for (let i = 0; i < categorycontainercheckbox.length; i++) {
@@ -52,8 +53,8 @@ define([], function() {
                 }
             }
             document.querySelector('input[name="lti_coursecategories"]').value = listvalue;
-        });
-    }
+        }
+    });
 
     /**
      * Get parent elements with class = accordion.

@@ -2235,6 +2235,30 @@ function lti_get_tools_by_url($url, $state, $courseid = null) {
     return lti_get_tools_by_domain($domain, $state, $courseid);
 }
 
+/**
+ * Build SQL filter for course category.
+ *
+ * @return string
+ */
+function lti_filter_course_categories_sql() {
+    global $DB;
+
+    // Cast to char for Oracle DB cross compatibity.
+    $coursecategories = $DB->sql_cast_to_char('coursecategories');
+    $coursecategorysql1 = $DB->sql_like('coursecategories', ':coursecategorylike1');
+    $coursecategorysql2 = $DB->sql_like('coursecategories', ':coursecategorylike2');
+    $coursecategorysql3 = $DB->sql_like('coursecategories', ':coursecategorylike3');
+
+    $sql = "AND (TRIM(" . $coursecategories . ") IS NULL" .
+                " OR " . $coursecategories . "= :emptycoursecategory" .
+                " OR " . $coursecategories . "= :coursecategory" .
+                " OR " . $coursecategorysql1 .
+                " OR " . $coursecategorysql2 .
+                " OR " . $coursecategorysql3 . ")";
+
+    return $sql;
+}
+
 function lti_get_tools_by_domain($domain, $state = null, $courseid = null) {
     global $DB, $SITE;
 
@@ -2250,23 +2274,17 @@ function lti_get_tools_by_domain($domain, $state = null, $courseid = null) {
     }
 
     $coursecategory = $DB->get_field('course', 'category', ['id' => $courseid]);
-    // Field 'coursecategories' has comma separated value.
-    // Build SQL like params to check if course category is part of this list.
-    $coursecategorysql1 = $DB->sql_like('coursecategories', ':coursecategorylike1');
-    $coursecategorysql2 = $DB->sql_like('coursecategories', ':coursecategorylike2');
-    $coursecategorysql3 = $DB->sql_like('coursecategories', ':coursecategorylike3');
+    $coursecategoriesfilter = lti_filter_course_categories_sql($coursecategory);
     $coursecategorylike1 = $coursecategory . ',%';
     $coursecategorylike2 = '%,' . $coursecategory . ',%';
     $coursecategorylike3 = '%,' . $coursecategory;
 
-    $coursecategories = $DB->sql_cast_to_char('coursecategories');
     $query = "SELECT *
                 FROM {lti_types}
                WHERE tooldomain = :tooldomain
                  AND (course = :siteid $coursefilter)
                  $statefilter
-                 AND ($coursecategories IS NULL OR $coursecategories = '' OR $coursecategories = :coursecategory
-                        OR $coursecategorysql1 OR $coursecategorysql2 OR $coursecategorysql3)";
+                 $coursecategoriesfilter";
 
     return $DB->get_records_sql($query,
         [
@@ -2274,6 +2292,7 @@ function lti_get_tools_by_domain($domain, $state = null, $courseid = null) {
             'siteid' => $SITE->id,
             'tooldomain' => $domain,
             'state' => $state,
+            'emptycoursecategory' => '',
             'coursecategory' => $coursecategory,
             'coursecategorylike1' => $coursecategorylike1,
             'coursecategorylike2' => $coursecategorylike2,
@@ -2350,22 +2369,16 @@ function lti_get_lti_types_by_course($courseid, $coursevisible = null) {
     }
     $coursecond = implode(" OR ", $courseconds);
     $coursecategory = $DB->get_field('course', 'category', ['id' => $courseid]);
-    // Field 'coursecategories' has comma separated value.
-    // Build SQL like params to check if course category is part of this list.
-    $coursecategorysql1 = $DB->sql_like('coursecategories', ':coursecategorylike1');
-    $coursecategorysql2 = $DB->sql_like('coursecategories', ':coursecategorylike2');
-    $coursecategorysql3 = $DB->sql_like('coursecategories', ':coursecategorylike3');
+    $coursecategoriesfilter = lti_filter_course_categories_sql($coursecategory);
     $coursecategorylike1 = $coursecategory . ',%';
     $coursecategorylike2 = '%,' . $coursecategory . ',%';
     $coursecategorylike3 = '%,' . $coursecategory;
-    $coursecategories = $DB->sql_cast_to_char('coursecategories');
     $query = "SELECT *
                 FROM {lti_types}
                WHERE coursevisible $coursevisiblesql
                  AND ($coursecond)
                  AND state = :active
-                 AND ($coursecategories IS NULL OR coursecategories = '' OR $coursecategories = :coursecategory
-                        OR $coursecategorysql1 OR $coursecategorysql2 OR $coursecategorysql3)
+                 $coursecategoriesfilter
             ORDER BY name ASC";
 
     return $DB->get_records_sql($query,
@@ -2373,6 +2386,7 @@ function lti_get_lti_types_by_course($courseid, $coursevisible = null) {
             'siteid' => $SITE->id,
             'courseid' => $courseid,
             'active' => LTI_TOOL_STATE_CONFIGURED,
+            'emptycoursecategory' => '',
             'coursecategory' => $coursecategory,
             'coursecategorylike1' => $coursecategorylike1,
             'coursecategorylike2' => $coursecategorylike2,

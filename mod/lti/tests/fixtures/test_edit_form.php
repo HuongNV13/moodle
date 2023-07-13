@@ -18,11 +18,10 @@
  * Unit tests for mod_lti edit_form
  *
  * @package    mod_lti
- * @copyright  2022 Jackson D'Souza <jackson.dsouza@catalyst-eu.net>
+ * @copyright  2023 Jackson D'Souza <jackson.dsouza@catalyst-eu.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @since      Moodle 4.1
+ * @since      Moodle 4.2
  */
-namespace mod_lti;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -33,9 +32,9 @@ require_once($CFG->dirroot . '/mod/lti/edit_form.php');
  * Testing fixture.
  *
  * @package    mod_lti
- * @copyright  2022 Jackson D'Souza <jackson.dsouza@catalyst-eu.net>
+ * @copyright  2023 Jackson D'Souza <jackson.dsouza@catalyst-eu.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @since      Moodle 4.1
+ * @since      Moodle 4.2
  */
 class test_edit_form extends \mod_lti_edit_types_form {
 

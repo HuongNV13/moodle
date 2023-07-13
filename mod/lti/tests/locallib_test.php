@@ -624,6 +624,46 @@ class locallib_test extends mod_lti_testcase {
     }
 
     /**
+     * @covers ::lti_get_tools_by_domain()
+     *
+     * Test lti_get_tools_by_domain.
+     */
+    public function test_lti_get_tools_by_domain() {
+        $this->resetAfterTest();
+
+        $this->setAdminUser();
+
+        // Create a tool type with good domain.
+        $type = new \stdClass();
+        $data = new \stdClass();
+        $data->lti_contentitem = true;
+        $type->state = LTI_TOOL_STATE_CONFIGURED;
+        $type->name = "Test tool 1";
+        $type->description = "Good example description";
+        $type->tooldomain = 'example.com';
+        $type->baseurl = 'https://example.com/i/am/?where=here';
+        $type->course = SITEID;
+        $typeid = lti_add_type($type, $data);
+
+        // Create a tool type with bad domain.
+        $type = new \stdClass();
+        $data = new \stdClass();
+        $data->lti_contentitem = true;
+        $type->state = LTI_TOOL_STATE_CONFIGURED;
+        $type->name = "Test tool 2";
+        $type->description = "Bad example description";
+        $type->tooldomain = 'badexample.com';
+        $type->baseurl = 'https://badexample.com/i/am/?where=here';
+        $type->course = SITEID;
+        $typeid = lti_add_type($type, $data);
+
+        $records = lti_get_tools_by_domain('example.com', LTI_TOOL_STATE_CONFIGURED, null);
+        foreach ($records as $record) {
+            $this->assertEquals('example.com', $record->tooldomain);
+        }
+    }
+
+    /**
      * Test lti_get_jwt_message_type_mapping().
      */
     public function test_lti_get_jwt_message_type_mapping() {
