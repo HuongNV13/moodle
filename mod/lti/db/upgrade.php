@@ -114,5 +114,20 @@ function xmldb_lti_upgrade($oldversion) {
     // Automatically generated Moodle v4.2.0 release upgrade line.
     // Put any upgrade step following this.
 
+    if ($oldversion < 2023042401) {
+
+        // Define field coursecategories to be added to lti_types.
+        $table = new xmldb_table('lti_types');
+        $field = new xmldb_field('coursecategories', XMLDB_TYPE_TEXT, null, null, null, null, null, 'description');
+
+        // Conditionally launch add field coursecategories.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Lti savepoint reached.
+        upgrade_mod_savepoint(true, 2023042401, 'lti');
+    }
+
     return true;
 }
