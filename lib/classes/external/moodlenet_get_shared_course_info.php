@@ -85,6 +85,8 @@ class moodlenet_get_shared_course_info extends external_api {
             return self::return_errors($issuerid, 'errorissuernotenabled', get_string('moodlenet:issuerisnotenabled', 'moodle'));
         }
 
+        $totalactivities = count(get_fast_modinfo($course)->get_cms());
+
         return [
             'status' => true,
             'name' => $course->fullname,
@@ -92,6 +94,7 @@ class moodlenet_get_shared_course_info extends external_api {
             'server' => $issuer->get_display_name(),
             'supportpageurl' => $supporturl,
             'issuerid' => $issuerid,
+            'totalactivities' => $totalactivities,
             'warnings' => $warnings
         ];
     }
@@ -109,6 +112,7 @@ class moodlenet_get_shared_course_info extends external_api {
             'server' => new external_value(PARAM_TEXT, 'MoodleNet server'),
             'supportpageurl' => new external_value(PARAM_URL, 'Support page URL'),
             'issuerid' => new external_value(PARAM_INT, 'MoodleNet issuer id'),
+            'totalactivities' => new external_value(PARAM_INT, 'Total activities in the course'),
             'status' => new external_value(PARAM_BOOL, 'status: true if success'),
             'warnings' => new external_warnings()
         ]);

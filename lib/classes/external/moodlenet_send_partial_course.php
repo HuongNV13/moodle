@@ -17,9 +17,13 @@
 namespace core\external;
 
 use context_course;
+use core\http_client;
+use core\moodlenet\course_partial_sender;
 use core\moodlenet\course_sender;
 use core\moodlenet\moodlenet_client;
 use core\moodlenet\utilities;
+use core\oauth2\api;
+use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
@@ -27,13 +31,14 @@ use core_external\external_warnings;
 use moodle_url;
 
 /**
- * The external API to send course to MoodleNet.
+ * [Description here].
  *
- * @package    core
- * @copyright  2023 Safat Shahin <safat.shahin@gmail.com>
+ * @package    xxx_yyy
+ * @copyright  2023 Huong Nguyen <huongnv13@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class moodlenet_send_course extends external_api {
+
+class moodlenet_send_partial_course extends external_api {
 
     /**
      * Describes the parameters for sending the course.
@@ -45,6 +50,7 @@ class moodlenet_send_course extends external_api {
             'issuerid' => new external_value(PARAM_INT, 'OAuth 2 issuer ID', VALUE_REQUIRED),
             'courseid' => new external_value(PARAM_INT, 'Course ID', VALUE_REQUIRED),
             'shareformat' => new external_value(PARAM_INT, 'Share format', VALUE_REQUIRED),
+            'cmids' => new external_value(PARAM_TAGLIST, 'Cmids', VALUE_REQUIRED),
         ]);
     }
 
@@ -54,12 +60,14 @@ class moodlenet_send_course extends external_api {
      * @param int $issuerid The MoodleNet OAuth 2 issuer ID
      * @param int $courseid The course ID
      * @param int $shareformat The share format being used, as defined by \core\moodlenet\course_sender
+     * @param string $cmids
      * @return array
      */
     public static function execute(
         int $issuerid,
         int $courseid,
-        int $shareformat
+        int $shareformat,
+        string $cmids,
     ): array {
         global $CFG, $USER;
 
@@ -67,10 +75,12 @@ class moodlenet_send_course extends external_api {
             'issuerid' => $issuerid,
             'courseid' => $courseid,
             'shareformat' => $shareformat,
+            'cmids' => $cmids,
         ] = self::validate_parameters(self::execute_parameters(), [
             'issuerid' => $issuerid,
             'courseid' => $courseid,
             'shareformat' => $shareformat,
+            'cmids' => $cmids,
         ]);
 
         // Check capability.
@@ -90,6 +100,16 @@ class moodlenet_send_course extends external_api {
             return self::return_errors(
                 $shareformat,
                 'errorinvalidformat',
+                get_string('invalidparameter', 'debug')
+            );
+        }
+
+        // Check cmids.
+        $activities = explode(',', $cmids);
+        if (!$activities) {
+            return self::return_errors(
+                $cmids,
+                'errorinvalidcmids',
                 get_string('invalidparameter', 'debug')
             );
         }
@@ -133,7 +153,7 @@ class moodlenet_send_course extends external_api {
         // Share course.
         try {
             $moodlenetclient = new moodlenet_client($client, $oauthclient);
-            $coursesender = new course_sender($course->id, $USER->id, $moodlenetclient, $oauthclient, $shareformat);
+            $coursesender = new course_partial_sender($course->id, $USER->id, $moodlenetclient, $oauthclient, $activities, $shareformat);
             $result = $coursesender->share_resource();
             if (empty($result['drafturl'])) {
                 return self::return_errors(

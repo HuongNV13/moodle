@@ -156,6 +156,7 @@ class resource_packager {
         // Create the local file based on the backup.
         $fs = get_file_storage();
         $file = $fs->create_file_from_storedfile($filerecord, $backupfile);
+        file_put_contents('/Users/huongnv/Work/www/m/stable_master/' . $this->resourcefilename . '_backup.mbz', $file->get_content());
 
         // Delete the backup now it has been created in the file area.
         $backupfile->delete();
