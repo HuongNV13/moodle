@@ -2235,6 +2235,30 @@ function lti_get_tools_by_url($url, $state, $courseid = null) {
     return lti_get_tools_by_domain($domain, $state, $courseid);
 }
 
+/**
+ * Build SQL filter for course category.
+ *
+ * @return string
+ */
+function lti_filter_course_categories_sql() {
+    global $DB;
+
+    // Cast to char for Oracle DB cross compatibity.
+    $coursecategories = $DB->sql_cast_to_char('coursecategories');
+    $coursecategorysql1 = $DB->sql_like('coursecategories', ':coursecategorylike1');
+    $coursecategorysql2 = $DB->sql_like('coursecategories', ':coursecategorylike2');
+    $coursecategorysql3 = $DB->sql_like('coursecategories', ':coursecategorylike3');
+
+    $sql = "AND (TRIM(" . $coursecategories . ") IS NULL" .
+                " OR " . $coursecategories . "= :emptycoursecategory" .
+                " OR " . $coursecategories . "= :coursecategory" .
+                " OR " . $coursecategorysql1 .
+                " OR " . $coursecategorysql2 .
+                " OR " . $coursecategorysql3 . ")";
+
+    return $sql;
+}
+
 function lti_get_tools_by_domain($domain, $state = null, $courseid = null) {
     global $DB, $SITE;
 
@@ -2249,18 +2273,32 @@ function lti_get_tools_by_domain($domain, $state = null, $courseid = null) {
         $coursefilter = 'OR course = :courseid';
     }
 
+    $coursecategory = $DB->get_field('course', 'category', ['id' => $courseid]);
+    $coursecategoriesfilter = lti_filter_course_categories_sql($coursecategory);
+    $coursecategorylike1 = $coursecategory . ',%';
+    $coursecategorylike2 = '%,' . $coursecategory . ',%';
+    $coursecategorylike3 = '%,' . $coursecategory;
+
     $query = "SELECT *
                 FROM {lti_types}
                WHERE tooldomain = :tooldomain
                  AND (course = :siteid $coursefilter)
-                 $statefilter";
+                 $statefilter
+                 $coursecategoriesfilter";
 
-    return $DB->get_records_sql($query, array(
-        'courseid' => $courseid,
-        'siteid' => $SITE->id,
-        'tooldomain' => $domain,
-        'state' => $state
-    ));
+    return $DB->get_records_sql($query,
+        [
+            'courseid' => $courseid,
+            'siteid' => $SITE->id,
+            'tooldomain' => $domain,
+            'state' => $state,
+            'emptycoursecategory' => '',
+            'coursecategory' => $coursecategory,
+            'coursecategorylike1' => $coursecategorylike1,
+            'coursecategorylike2' => $coursecategorylike2,
+            'coursecategorylike3' => $coursecategorylike3
+        ]
+    );
 }
 
 /**
@@ -2330,15 +2368,30 @@ function lti_get_lti_types_by_course($courseid, $coursevisible = null) {
         return [];
     }
     $coursecond = implode(" OR ", $courseconds);
+    $coursecategory = $DB->get_field('course', 'category', ['id' => $courseid]);
+    $coursecategoriesfilter = lti_filter_course_categories_sql($coursecategory);
+    $coursecategorylike1 = $coursecategory . ',%';
+    $coursecategorylike2 = '%,' . $coursecategory . ',%';
+    $coursecategorylike3 = '%,' . $coursecategory;
     $query = "SELECT *
                 FROM {lti_types}
                WHERE coursevisible $coursevisiblesql
                  AND ($coursecond)
                  AND state = :active
+                 $coursecategoriesfilter
             ORDER BY name ASC";
 
     return $DB->get_records_sql($query,
-        array('siteid' => $SITE->id, 'courseid' => $courseid, 'active' => LTI_TOOL_STATE_CONFIGURED) + $coursevisparams);
+        [
+            'siteid' => $SITE->id,
+            'courseid' => $courseid,
+            'active' => LTI_TOOL_STATE_CONFIGURED,
+            'emptycoursecategory' => '',
+            'coursecategory' => $coursecategory,
+            'coursecategorylike1' => $coursecategorylike1,
+            'coursecategorylike2' => $coursecategorylike2,
+            'coursecategorylike3' => $coursecategorylike3
+        ] + $coursevisparams);
 }
 
 /**
@@ -2647,6 +2700,8 @@ function lti_get_type_type_config($id) {
 
     $type->lti_secureicon = $basicltitype->secureicon;
 
+    $type->lti_coursecategories = $basicltitype->coursecategories;
+
     if (isset($config['resourcekey'])) {
         $type->lti_resourcekey = $config['resourcekey'];
     }
@@ -2788,6 +2843,10 @@ function lti_prepare_type_for_save($type, $config) {
         $type->secureicon = $config->lti_secureicon;
     }
 
+    if (isset($config->lti_coursecategories)) {
+        $type->coursecategories = $config->lti_coursecategories;
+    }
+
     $type->forcessl = !empty($config->lti_forcessl) ? $config->lti_forcessl : 0;
     $config->lti_forcessl = $type->forcessl;
     if (isset($config->lti_contentitem)) {
@@ -2812,6 +2871,7 @@ function lti_prepare_type_for_save($type, $config) {
     unset ($config->lti_clientid);
     unset ($config->lti_icon);
     unset ($config->lti_secureicon);
+    unset ($config->lti_coursecategories);
 }
 
 function lti_update_type($type, $config) {

@@ -140,6 +140,9 @@ class restore_lti_activity_structure_step extends restore_activity_structure_ste
                 // Need to rebuild clientid to ensure uniqueness.
                 $data->clientid = registration_helper::get()->new_clientid();
             }
+            if (!$this->task->is_samesite()) {
+                unset($data->coursecategories); // Course categories won't exists if restoring to another site.
+            }
             $ltitypeid = $DB->insert_record('lti_types', $data);
             $this->newltitype = true;
             $this->set_mapping('ltitype', $oldid, $ltitypeid);
