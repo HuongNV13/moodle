@@ -73,18 +73,40 @@ class gradebook_setup_action_bar extends action_bar {
         $data['addgradeitembutton'] = $addgradeitembutton->export_for_template($output);
 
         // If outcomes are enabled, add a button to the action bar with a link to the 'add outcome item' page.
-        if (!empty($CFG->enableoutcomes)) {
-            $addoutcomeitemlink = new moodle_url('/grade/edit/tree/outcomeitem.php', ['courseid' => $courseid]);
-            $addoutcomeitembutton = new \single_button($addoutcomeitemlink, get_string('addoutcomeitem', 'grades'),
-                'get');
+        if (!empty($CFG->enableoutcomes) && count(\grade_outcome::fetch_all_available($courseid)) > 0) {
+            // Add a button to the action bar with a link to the 'add outcome item' page.
+            $addoutcomeitem = new moodle_url('#');
+            $addoutcomeitembutton = new \single_button(
+                $addoutcomeitem,
+                get_string('addoutcomeitem', 'grades'),
+                'get',
+                \single_button::BUTTON_SECONDARY,
+                [
+                    'class' => 'btn btn-secondary',
+                    'data-courseid' => $courseid,
+                    'data-itemid' => -1,
+                    'data-trigger' => 'add-outcome-form',
+                    'data-gprplugin' => 'tree'
+                ]
+            );
             $data['addoutcomeitembutton'] = $addoutcomeitembutton->export_for_template($output);
         }
 
         // Add a button to the action bar with a link to the 'add category' page.
-        $addcategorylink = new moodle_url('/grade/edit/tree/category.php', ['courseid' => $courseid]);
-        $addcategorybutton = new \single_button($addcategorylink, get_string('addcategory', 'grades'), 'get');
-        $data['addcategorybutton'] = $addcategorybutton->export_for_template($output);
-
+        $addgradecategorybutton = new \single_button(
+            $addgradeitemlink,
+            get_string('addcategory', 'grades'),
+            'get',
+            \single_button::BUTTON_SECONDARY,
+            [
+                'class' => 'btn btn-secondary',
+                'data-courseid' => $courseid,
+                'data-category' => -1,
+                'data-trigger' => 'add-category-form',
+                'data-gprplugin' => 'tree'
+            ]
+        );
+        $data['addcategorybutton'] = $addgradecategorybutton->export_for_template($output);
         return $data;
     }
 }
