@@ -3090,6 +3090,12 @@ $functions = array(
         'type'        => 'read',
         'ajax'        => true,
     ],
+    'core_moodlenet_send_partial_course' => [
+        'classname'   => 'core\external\moodlenet_send_partial_course',
+        'description' => 'Send selected activities in a course to MoodleNet',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
 );
 
 $services = array(
