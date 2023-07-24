@@ -54,6 +54,7 @@
             {{#actions}}
             <li class="nav-item">
                 <button
+                    {{#id}} data-id="{{id}}" {{/id}}
                     class="btn py-0 d-flex flex-column"
                     data-action="{{action}}"
                     data-bulk="{{bulk}}"
