@@ -1383,6 +1383,8 @@ $string['moodlenet:issuerisnotenabled'] = 'MoodleNet issuer is not enabled';
 $string['moodlenet:issuerisnotset'] = 'MoodleNet issuer is not set at site administration';
 $string['moodlenet:outboundsettings'] = 'MoodleNet outbound settings';
 $string['moodlenet:sharenotice'] = 'You are sharing this to MoodleNet as a {$a}';
+$string['moodlenet:sharenotice_partial'] = 'This course, including your selected activities, is being shared with MoodleNet as a {$a}';
+$string['moodlenet:sharenotice_partial_activity_number'] = 'Included Activities {$a->selected} of {$a->total}';
 $string['moodlenet:sharefailtitle'] = 'Something went wrong';
 $string['moodlenet:sharefailtext'] = 'There was an error sharing your content to MoodleNet.<br>Please try again later.';
 $string['moodlenet:sharefailtextwithsitesupport'] = 'There was an error sharing your content to MoodleNet.<br>Please try again later or <a href="{$a}">contact site support</a>.';

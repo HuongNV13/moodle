@@ -4629,6 +4629,9 @@ class settings_navigation extends navigation_node {
 
         // Share course to moodlenet.
         $this->page->requires->js_call_amd('core/moodlenet/send_resource', 'init');
+        if ($this->page->user_is_editing()) {
+            $this->page->requires->js_call_amd('core/moodlenet/mutations', 'init');
+        }
         $usercanshare = utilities::can_user_share($coursecontext, $USER->id, 'course');
         $issuerid = get_config('moodlenet', 'oauthservice');
         try {
