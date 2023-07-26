@@ -43,12 +43,12 @@ Feature: MoodleNet outbound share selected activities in a course
       | moodle/moodlenet:sharecourse  | Prohibit   | editingteacher | Course       | C1        |
     When I am on the "C1" "course" page logged in as teacher1
     And I turn editing mode on
-    And I click on "Bulk edit" "button"
+    And I click on "Bulk actions" "button"
     And I click on "Select activity Test Assignment 1" "checkbox"
     Then "Share to MoodleNet" "button" should not exist in the "sticky-footer" "region"
     And I am on the "C1" "course" page logged in as manager1
     And I turn editing mode on
-    And I click on "Bulk edit" "button"
+    And I click on "Bulk actions" "button"
     And I click on "Select activity Test Assignment 1" "checkbox"
     And "Share to MoodleNet" "button" should exist in the "sticky-footer" "region"
     And the following "permission overrides" exist:
@@ -56,7 +56,7 @@ Feature: MoodleNet outbound share selected activities in a course
       | moodle/moodlenet:sharecourse  | Prohibit   | manager | Course       | C1        |
     And I am on the "C1" "course" page logged in as manager1
     And I turn editing mode on
-    And I click on "Bulk edit" "button"
+    And I click on "Bulk actions" "button"
     And I click on "Select activity Test Assignment 1" "checkbox"
     And "Share to MoodleNet" "button" should not exist in the "sticky-footer" "region"
 
@@ -64,7 +64,7 @@ Feature: MoodleNet outbound share selected activities in a course
   Scenario: User can share selected activities in a course to MoodleNet
     Given I am on the "C1" "course" page logged in as teacher1
     And I turn editing mode on
-    And I click on "Bulk edit" "button"
+    And I click on "Bulk actions" "button"
     And I click on "Select activity Test Assignment 1" "checkbox"
     And I click on "Select activity Test Assignment 2" "checkbox"
     When I click on "Share to MoodleNet" "button" in the "sticky-footer" "region"
@@ -81,7 +81,7 @@ Feature: MoodleNet outbound share selected activities in a course
   Scenario: User can share activity directly in a course bulk mode to MoodleNet
     Given I am on the "C1" "course" page logged in as teacher1
     And I turn editing mode on
-    And I click on "Bulk edit" "button"
+    And I click on "Bulk actions" "button"
     And I click on "Select activity Test Assignment 1" "checkbox"
     When I click on "Share to MoodleNet" "button" in the "sticky-footer" "region"
     Then I should see "Test Assignment 1" in the "Share to MoodleNet" "dialogue"
