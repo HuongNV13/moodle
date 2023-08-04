@@ -27,7 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 $functions = array(
     'get_tiny_premium_api_key' => array(
         'classname'       => 'tiny_premium\external\apikey',
-        'methodname'      => 'get_api_key',
         'description'     => 'xxxxxx',
         'type'            => 'read',
         'capabilities'    => '',

@@ -16,6 +16,7 @@
 
 namespace tiny_premium\external;
 
+use core\context;
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
@@ -28,14 +29,50 @@ use core_external\external_value;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class apikey extends external_api {
+
     /**
-     * Returns description of method parameters
+     * Describes the parameters for premium API key.
      *
      * @return external_function_parameters
+     * @since Moodle 4.3
      */
-    public static function get_api_key(): external_function_parameters {
+    public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'apikey' => new external_value(PARAM_ALPHANUM, 'The api key for Tiny Premium', VALUE_REQUIRED),
+            'contextid' => new external_value(PARAM_INT, 'The context ID', VALUE_REQUIRED),
+        ]);
+    }
+
+    /**
+     * External function to get the premium API key.
+     *
+     * @param int $contextid Context ID.
+     * @return array
+     * @since Moodle 4.3
+     */
+    public static function execute(int $contextid): array {
+        [
+            'contextid' => $contextid,
+        ] = self::validate_parameters(self::execute_parameters(), [
+            'contextid' => $contextid,
+        ]);
+
+        $context = context::instance_by_id($contextid);
+        self::validate_context($context);
+
+        return [
+            'apikey' => 'Putyourapihere',
+        ];
+    }
+
+    /**
+     * Describes the data returned from the external function.
+     *
+     * @return external_single_structure
+     * @since Moodle 4.3
+     */
+    public static function execute_returns(): external_single_structure {
+        return new external_single_structure([
+            'apikey' => new external_value(PARAM_ALPHANUM, 'The api key for Tiny Premium'),
         ]);
     }
 }
