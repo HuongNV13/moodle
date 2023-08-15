@@ -31,6 +31,7 @@ use core_external\external_warnings;
  * @package    core
  * @copyright  2023 Safat Shahin <safat.shahin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @since      Moodle 4.3
  */
 class moodlenet_get_shared_course_info extends external_api {
 
@@ -100,7 +101,6 @@ class moodlenet_get_shared_course_info extends external_api {
      * Describes the data returned from the external function.
      *
      * @return external_single_structure
-     * @since Moodle 4.2
      */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
