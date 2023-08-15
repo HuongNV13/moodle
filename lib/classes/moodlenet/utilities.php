@@ -43,7 +43,8 @@ class utilities {
     }
 
     /**
-     * Check whether a user has the capabilities required to share activities from a given course to MoodleNet.
+     * Check whether a user has the capabilities required to share activities from a given course or the actual course to MoodleNet.
+     * The checking is done against 4 caps to enture the user the ability to share and backup the resource.
      *
      * @param \core\context\course $coursecontext Course context where the activity would be shared from.
      * @param int $userid The user ID being checked.
@@ -53,9 +54,7 @@ class utilities {
         if ($type === 'course') {
             return (has_capability('moodle/moodlenet:sharecourse', $coursecontext, $userid) &&
                 has_capability('moodle/backup:backupcourse', $coursecontext, $userid));
-        }
-
-        if ($type === 'activity') {
+        } else if ($type === 'activity') {
             return (has_capability('moodle/moodlenet:shareactivity', $coursecontext, $userid) &&
                 has_capability('moodle/backup:backupactivity', $coursecontext, $userid));
         }
