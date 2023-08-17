@@ -75,7 +75,7 @@ class moodlenet_client {
         $stream = $file->get_psr_stream();
 
         $requestdata = $this->prepare_file_share_request_data(
-            $file->get_filename(),
+            str_replace(' ', '', $file->get_filename()), // Remove all spaces from the filename.
             $file->get_mimetype(),
             $stream,
             $resourcename,
