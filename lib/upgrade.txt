@@ -86,6 +86,8 @@ information provided here is intended especially for developers.
 * New behat behat_navigation::i_close_block_drawer_if_open() and behat_navigation::i_keep_block_drawer_closed()
 to ensure in some test that the block drawer is closed. This helps with random failures due to the block drawer
 being forced open in all behat tests.
+* The can_user_share method in core\moodlenet\utilities now checks the ability of a user to share an entire course to moodlenet. The previous checking
+  for activity sharing ability check has no changes and will continue to work as is.
 
 === 4.2 ===
 
