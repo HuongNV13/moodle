@@ -28,24 +28,19 @@ use editor_tiny\plugin_with_configuration;
  * @copyright   2023 David Woloszyn <david.woloszyn@moodle.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class plugininfo extends plugin implements plugin_with_configuration {
+class plugininfo extends plugin {
 
     /**
-     * Configure the premium plugins with settings that change their behaviour.
+     * Whether the plugin is enabled
      *
      * @param context $context The context that the editor is used within
      * @param array $options The options passed in when requesting the editor
      * @param array $fpoptions The filepicker options passed in when requesting the editor
      * @param editor $editor The editor instance in which the plugin is initialised
-     * @return array
+     * @return boolean
      */
-    public static function get_plugin_configuration_for_context(
-        context $context,
-        array $options,
-        array $fpoptions,
-        ?editor $editor = null
-    ): array {
-
-        return [];
+    public static function is_enabled(context $context, array $options, array $fpoptions, ?editor $editor = null): bool {
+        return get_config('tiny_premium', 'apikey') != false;
     }
+
 }
