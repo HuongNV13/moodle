@@ -597,5 +597,6 @@ $definitions = array(
             'changesincategoryenrolment',
             'changesincourse',
         ],
+        'ttl' => 1800,
     ],
 );

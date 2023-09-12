@@ -31,19 +31,8 @@ if (isguestuser()) {
     throw new \moodle_exception('noguest');
 }
 
-// Check cache for the user's capability to share to MoodleNet and avoid expensive query.
-$usercanshare = 'no';
-$cache = cache::make('core', 'moodlenet_usercanshare')->get($USER->id);
-
-if ($cache === false) {
-    $usercanshare = utilities::does_user_have_capability_in_any_course($USER->id) ? 'yes' : 'no';
-    $cache = cache::make('core', 'moodlenet_usercanshare')->set($USER->id, $usercanshare);
-} else {
-    $usercanshare = $cache;
-}
-
 // Capability was not found.
-if ($usercanshare !== 'yes') {
+if (!utilities::does_user_have_capability_in_any_course($USER->id)) {
     throw new \moodle_exception('nocapabilitytousethisservice');
 }
 

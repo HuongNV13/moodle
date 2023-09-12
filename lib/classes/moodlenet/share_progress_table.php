@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/tablelib.php');
 
 use html_writer;
-use core\moodlenet\share_recorder;
 use moodle_url;
 use stdClass;
 use table_sql;
@@ -91,51 +90,57 @@ class share_progress_table extends table_sql {
     /**
      * Name column.
      *
-     * @param array $data Row data.
+     * @param stdClass $row Row data.
      * @return string
      */
     protected function col_name(stdClass $row): string {
-        global $OUTPUT, $DB;
+        global $OUTPUT;
+
+        $class = '';
         // Track deletion of resources on Moodle.
         $deleted = false;
         // Courses.
         if ($row->type == share_recorder::TYPE_COURSE) {
-            if ($course = $DB->get_record('course', ['id' => $row->courseid], 'fullname')) {
-                $name = $course->fullname;
+            if ($row->fullname) {
+                $name = $row->fullname;
             } else {
-                $name = html_writer::span(get_string('moodlenet:deletedcourse'), 'font-italic');
+                $name = get_string('moodlenet:deletedcourse');
                 $deleted = true;
             }
         // Activities.
         } else if ($row->type == share_recorder::TYPE_ACTIVITY) {
-            if ($cm = get_coursemodule_from_id('', $row->cmid)) {
-                $name = ucfirst($cm->name);
+            if ($row->modname) {
+                $name = get_string('modulename', $row->modname);
             } else {
-                $name = html_writer::span(get_string('moodlenet:deletedactivity'), 'font-italic');
+                $name = get_string('moodlenet:deletedactivity');
                 $deleted = true;
             }
         }
-        // Add a link to the resource if it was recorded.
+        if ($deleted) {
+            $class = 'font-italic';
+        }
+
         if (!empty($row->resourceurl)) {
             // Apply bold to resource links that aren't deleted.
-            $boldclass = !$deleted ? 'font-weight-bold' : null;
-            $icon = $OUTPUT->pix_icon('i/externallink', get_string('opensinnewwindow'), 'moodle');
-            $text = $name . ' ' . $icon;
+            if (!$deleted) {
+                $class = 'font-weight-bold';
+            }
+            $icon = $OUTPUT->pix_icon('i/externallink', get_string('opensinnewwindow'), 'moodle', ['class' => 'ml-1']);
+            $text = $name . $icon;
             $attributes = [
                 'target' => '_blank',
                 'rel' => 'noopener noreferrer',
-                'class' => $boldclass
             ];
             $name = html_writer::link($row->resourceurl, $text, $attributes);
         }
 
-        return $name;
+        return html_writer::span($name, $class);
     }
 
     /**
      * Type column.
      *
-     * @param array $data Row data.
+     * @param stdClass $row Row data.
      * @return string
      */
     protected function col_type(stdClass $row): string {
@@ -159,7 +164,7 @@ class share_progress_table extends table_sql {
     /**
      * Time created column (Send date).
      *
-     * @param array $data Row data.
+     * @param stdClass $row Row data.
      * @return string
      */
     protected function col_timecreated(stdClass $row): string {
@@ -170,7 +175,7 @@ class share_progress_table extends table_sql {
     /**
      * Status column (Send status).
      *
-     * @param array $data Row data.
+     * @param stdClass $row Row data.
      * @return string
      */
     protected function col_status(stdClass $row): string {
@@ -196,11 +201,16 @@ class share_progress_table extends table_sql {
         if ($count) {
             $select = "COUNT(1)";
         } else {
-            $select = "*";
+            $select = "msp.id, msp.type, msp.courseid, msp.cmid, msp.timecreated, " .
+                "msp.resourceurl, msp.status, c.fullname, md.name AS modname";
         }
 
         $sql = "SELECT $select
                   FROM {moodlenet_share_progress} msp
+             LEFT JOIN {course} c ON c.id = msp.courseid
+             LEFT JOIN {course_modules} cm ON cm.course = msp.courseid
+                       AND cm.id = msp.cmid
+             LEFT JOIN {modules} md ON md.id = cm.module
                  WHERE msp.userid = :userid";
 
         $params = ['userid' => $this->userid];
