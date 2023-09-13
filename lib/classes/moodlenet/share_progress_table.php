@@ -109,8 +109,8 @@ class share_progress_table extends table_sql {
             }
         // Activities.
         } else if ($row->type == share_recorder::TYPE_ACTIVITY) {
-            if ($row->modname) {
-                $name = get_string('modulename', $row->modname);
+            if ($cm = get_coursemodule_from_id('', $row->cmid)) {
+                $name = $cm->name;
             } else {
                 $name = get_string('moodlenet:deletedactivity');
                 $deleted = true;
@@ -149,9 +149,8 @@ class share_progress_table extends table_sql {
             $type = get_string('course');
         // Activities.
         } else if ($row->type == share_recorder::TYPE_ACTIVITY) {
-            if ($cm = get_coursemodule_from_id('', $row->cmid)) {
-                // If the module type is known, show it.
-                $type = get_string('modulename', $cm->modname);
+            if ($row->modname) {
+                $type = get_string('modulename', $row->modname);
             } else {
                 // Alternatively, default to 'activity'.
                 $type = get_string('activity');
