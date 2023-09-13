@@ -43,6 +43,7 @@ Feature: Communication matrix form field
     And I navigate to "Communication" in current page administration
     Then the field "id_communicationroomname" matches value "Sampleroomname"
     And I press "Cancel"
+    And I process all sync queues
     And I run all adhoc tasks
     And I navigate to "Communication" in current page administration
     And the field "id_matrixroomtopic" matches value "Sampleroomtopic"

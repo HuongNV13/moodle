@@ -25,6 +25,7 @@ Feature: Display communication room status banner
     Then I should not see "Your Matrix room will be ready soon." in the "page-content" "region"
 
   Scenario: I can see the room has been created and ready to access
+    Given I process all sync queues
     When I run all adhoc tasks
     And I am on the "Test course" "Course" page logged in as "teacher1"
     Then I should see "Your Matrix room is ready!" in the "page-content" "region"

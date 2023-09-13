@@ -3601,5 +3601,30 @@ privatefiles,moodle|/user/files.php';
         upgrade_main_savepoint(true, 2023091300.03);
     }
 
+    if ($oldversion < 2023091600.02) {
+
+        // Define table communication_sync to be created.
+        $table = new xmldb_table('communication_sync');
+
+        // Adding fields to table communication_sync.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('commid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('customdata', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('type', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        // Adding keys to table communication_sync.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('commid', XMLDB_KEY_FOREIGN, ['commid'], 'communication', ['id']);
+
+        // Conditionally launch create table for communication_sync.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2023091600.02);
+    }
+
     return true;
 }

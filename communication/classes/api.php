@@ -16,11 +16,6 @@
 
 namespace core_communication;
 
-use core_communication\task\add_members_to_room_task;
-use core_communication\task\create_and_configure_room_task;
-use core_communication\task\delete_room_task;
-use core_communication\task\remove_members_from_room;
-use core_communication\task\update_room_task;
 use stdClass;
 
 /**
@@ -44,6 +39,19 @@ class api {
      * @var null|processor $communication The communication settings object
      */
     private ?processor $communication;
+
+    /** @var int Create room. */
+    const SYNC_CREATE_ROOM = 1;
+    /** @var int Create user. */
+    const SYNC_ADD_USER = 2;
+    /** @var int Set user permission. */
+    const SYNC_USER_PERMISSION = 3;
+    /** @var int Remove user. */
+    const SYNC_REMOVE_USER = 4;
+    /** @var int Delete room. */
+    const SYNC_DELETE_ROOM = 5;
+    /** @var int Update room. */
+    const SYNC_UPDATE_ROOM = 6;
 
     /**
      * Communication handler constructor to manage and handle all communication related actions.
@@ -406,10 +414,7 @@ class api {
                 $this->set_avatar($avatar);
             }
 
-            // Add ad-hoc task to create the provider room.
-            create_and_configure_room_task::queue(
-                $this->communication,
-            );
+            $this->create_sync_record(synctype: self::SYNC_CREATE_ROOM);
         }
     }
 
@@ -473,16 +478,11 @@ class api {
             if (
                 $previousprovider === $selectedprovider
             ) {
-                update_room_task::queue(
-                    $this->communication,
-                );
+                $this->create_sync_record(synctype: self::SYNC_UPDATE_ROOM);
             } else if (
                 $previousprovider !== $selectedprovider
             ) {
-                // Add ad-hoc task to create the provider room.
-                create_and_configure_room_task::queue(
-                    $this->communication,
-                );
+                $this->create_sync_record(synctype: self::SYNC_CREATE_ROOM);
             }
         } else {
             // The instance didn't have any communication record, so create one.
@@ -496,10 +496,7 @@ class api {
      */
     public function delete_room(): void {
         if ($this->communication !== null) {
-            // Add the ad-hoc task to remove the room data from the communication table and associated provider actions.
-            delete_room_task::queue(
-                $this->communication,
-            );
+            $this->create_sync_record(synctype: self::SYNC_DELETE_ROOM);
         }
     }
 
@@ -525,8 +522,9 @@ class api {
         $this->communication->create_instance_user_mapping($userids);
 
         if ($queue) {
-            add_members_to_room_task::queue(
-                $this->communication
+            $this->create_sync_record(
+                synctype: self::SYNC_ADD_USER,
+                customdata: ['userids' => $userids],
             );
         }
     }
@@ -559,8 +557,9 @@ class api {
         $this->communication->add_delete_user_flag($userids);
 
         if ($queue) {
-            remove_members_from_room::queue(
-                $this->communication
+            $this->create_sync_record(
+                synctype: self::SYNC_REMOVE_USER,
+                customdata: ['userids' => $userids],
             );
         }
     }
@@ -599,5 +598,25 @@ class api {
                 }
                 break;
         }
+    }
+
+    /**
+     * Create a sync record for the communication.
+     * @param int $synctype
+     * @param array $customdata
+     */
+    private function create_sync_record(int $synctype, array $customdata = []): void {
+        global $DB;
+
+        $syncdata = [
+            'commid' => $this->communication->get_id(),
+            'type' => $synctype,
+            'timecreated' => time(),
+        ];
+        if (!empty($customdata)) {
+            $syncdata['customdata'] = json_encode($customdata);
+        }
+
+        $DB->insert_record('communication_sync', $syncdata);
     }
 }

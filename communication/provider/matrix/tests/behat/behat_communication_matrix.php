@@ -62,4 +62,13 @@ class behat_communication_matrix extends \behat_base {
         $this->setup_communication_configs();
         $this->initialise_mock_configs();
     }
+
+    /**
+     * Clear the sync queue for communication.
+     *
+     * @Given /^I process all sync queues$/
+     */
+    public function clear_sync_queue(): void {
+        $this->process_sync_queue();
+    }
 }

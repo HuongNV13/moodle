@@ -274,6 +274,9 @@ trait matrix_test_helper_trait {
 
         $communication->add_members_to_room($members);
 
+        // Process sync queue.
+        $this->process_sync_queue();
+
         // Run the adhoc task.
         $this->run_all_adhoc_tasks();
 

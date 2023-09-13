@@ -40,22 +40,25 @@ class add_members_to_room_task extends adhoc_task {
             return;
         }
 
-        $communication->get_room_user_provider()->add_members_to_room($communication->get_instance_userids());
+        $communication->get_room_user_provider()->add_members_to_room($data->userids);
     }
 
     /**
      * Queue the task for the next run.
      *
      * @param processor $communication The communication processor to perform the action on
+     * @params array $userids The user ids to add to the room
      */
     public static function queue(
-        processor $communication
+        processor $communication,
+        array $userids,
     ): void {
 
         // Add ad-hoc task to update the provider room.
         $task = new self();
         $task->set_custom_data([
-            'id' => $communication->get_id()
+            'id' => $communication->get_id(),
+            'userids' => $userids,
         ]);
 
         // Queue the task for the next run.

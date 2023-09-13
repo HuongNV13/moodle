@@ -448,4 +448,13 @@ $tasks = array(
         'month' => '*',
         'disabled' => true,
     ],
+    [
+        'classname' => 'core_communication\task\sync_task',
+        'blocking' => 0,
+        'minute' => '*',
+        'hour' => '*',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+    ]
 );

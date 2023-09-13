@@ -147,6 +147,12 @@ class api_test extends \advanced_testcase {
         );
         $communication->create_and_configure_room($selectedcommunication, $communicationroomname);
 
+        // Execute the sync task.
+        ob_start();
+        $task = \core\task\manager::get_scheduled_task('\core_communication\task\sync_task');
+        $task->execute();
+        ob_end_clean();
+
         // Test the tasks added.
         $adhoctask = \core\task\manager::get_adhoc_tasks('\\core_communication\\task\\create_and_configure_room_task');
         $this->assertCount(1, $adhoctask);
@@ -171,6 +177,12 @@ class api_test extends \advanced_testcase {
     public function test_create_and_configure_room_without_communication_provider_selected(): void {
         // Get the course by disabling communication so that we can create it manually calling the api.
         $course = $this->get_course('Sampleroom', 'none');
+
+        // Execute the sync task.
+        ob_start();
+        $task = \core\task\manager::get_scheduled_task('\core_communication\task\sync_task');
+        $task->execute();
+        ob_end_clean();
 
         // Test the tasks added.
         $adhoctask = \core\task\manager::get_adhoc_tasks('\\core_communication\\task\\create_and_configure_room_task');
@@ -241,11 +253,24 @@ class api_test extends \advanced_testcase {
         );
         $communication->delete_room();
 
-        // Test the tasks added.
-        $adhoctask = \core\task\manager::get_adhoc_tasks('\\core_communication\\task\\delete_room_task');
-        // Should be 2 as one for create, another for update.
+        // Execute the sync task - This will trigger create_and_configure_room_task task.
+        ob_start();
+        $task = \core\task\manager::get_scheduled_task('\core_communication\task\sync_task');
+        $task->execute();
+        ob_end_clean();
+
+        $adhoctask = \core\task\manager::get_adhoc_tasks('\\core_communication\\task\\create_and_configure_room_task');
         $this->assertCount(1, $adhoctask);
 
+        // Execute the sync task - This will trigger delete_room_task task.
+        ob_start();
+        $task = \core\task\manager::get_scheduled_task('\core_communication\task\sync_task');
+        $task->execute();
+        ob_end_clean();
+
+        // Test the tasks added.
+        $adhoctask = \core\task\manager::get_adhoc_tasks('\\core_communication\\task\\delete_room_task');
+        $this->assertCount(1, $adhoctask);
         $adhoctask = reset($adhoctask);
         $this->assertInstanceOf('\\core_communication\\task\\delete_room_task', $adhoctask);
     }
@@ -265,12 +290,30 @@ class api_test extends \advanced_testcase {
         );
         $communication->add_members_to_room([$userid]);
 
+        // Execute the sync task - This will trigger create_and_configure_room_task task.
+        ob_start();
+        $task = \core\task\manager::get_scheduled_task('\core_communication\task\sync_task');
+        $task->execute();
+        ob_end_clean();
+
+        // Execute the sync task - This will trigger add_members_to_room_task task.
+        ob_start();
+        $task = \core\task\manager::get_scheduled_task('\core_communication\task\sync_task');
+        $task->execute();
+        ob_end_clean();
+
         // Test the tasks added.
         $adhoctask = \core\task\manager::get_adhoc_tasks('\\core_communication\\task\\add_members_to_room_task');
         $this->assertCount(1, $adhoctask);
 
         // Now test the removing members from a room.
         $communication->remove_members_from_room([$userid]);
+
+        // Execute the sync task - This will trigger remove_members_from_room task.
+        ob_start();
+        $task = \core\task\manager::get_scheduled_task('\core_communication\task\sync_task');
+        $task->execute();
+        ob_end_clean();
 
         // Test the tasks added.
         $adhoctask = \core\task\manager::get_adhoc_tasks('\\core_communication\\task\\remove_members_from_room');

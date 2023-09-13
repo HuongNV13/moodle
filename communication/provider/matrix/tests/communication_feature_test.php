@@ -274,6 +274,7 @@ class communication_feature_test extends \advanced_testcase {
         $communication->update_room(
             avatar: $after,
         );
+        $this->process_sync_queue();
         $this->run_all_adhoc_tasks();
 
         // Confirm that the avatar was updated remotely.
@@ -435,6 +436,8 @@ class communication_feature_test extends \advanced_testcase {
 
         $communication->add_members_to_room($members);
 
+        // Process sync queue.
+        $this->process_sync_queue();
         // Run the adhoc task.
         $this->run_all_adhoc_tasks();
 

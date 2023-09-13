@@ -40,25 +40,28 @@ class remove_members_from_room extends adhoc_task {
             return;
         }
 
-        $communication->get_room_user_provider()->remove_members_from_room($communication->get_instance_userids(true, true));
+        $communication->get_room_user_provider()->remove_members_from_room($data->userids);
 
         // Now remove any mapping for users who are not in the room.
-        $communication->delete_instance_non_synced_user_mapping($communication->get_instance_userids(false, true));
+        $communication->delete_instance_non_synced_user_mapping($data->userids);
     }
 
     /**
      * Queue the task for the next run.
      *
      * @param processor $communication The communication processor to perform the action on
+     * @params array $userids The user ids to remove from the room
      */
     public static function queue(
-        processor $communication
+        processor $communication,
+        array $userids,
     ): void {
 
         // Add ad-hoc task to update the provider room.
         $task = new self();
         $task->set_custom_data([
-            'id' => $communication->get_id()
+            'id' => $communication->get_id(),
+            'userids' => $userids,
         ]);
 
         // Queue the task for the next run.

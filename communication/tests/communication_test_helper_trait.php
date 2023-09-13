@@ -115,4 +115,17 @@ trait communication_test_helper_trait {
             'filename' => $storedname,
         ], "{$CFG->dirroot}/communication/tests/fixtures/{$filename}");
     }
+
+    /**
+     * Clear all sync queues for communication.
+     */
+    protected function process_sync_queue(): void {
+        global $DB;
+        while ($DB->count_records('communication_sync') > 0) {
+            ob_start();
+            $task = \core\task\manager::get_scheduled_task('\core_communication\task\sync_task');
+            $task->execute();
+            ob_end_clean();
+        }
+    }
 }
