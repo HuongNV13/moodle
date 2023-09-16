@@ -428,11 +428,15 @@ class communication_feature_test extends \advanced_testcase {
 
         // Assign teacher role to the user.
         $coursecontext = \context_course::instance($course->id);
-        $teacherrole = $DB->get_record('role', array('shortname' => 'teacher'));
+        $teacherrole = $DB->get_record('role', ['shortname' => 'teacher']);
         $this->getDataGenerator()->enrol_user($user->id, $course->id);
-        role_assign($teacherrole->id, $user->id, $coursecontext->id);
+
+        // Clear the sync queue.
+        // This make life easier to verify the permission sync users.
+        $this->process_sync_queue();
 
         // Test the tasks added as the role is a teacher.
+        role_assign($teacherrole->id, $user->id, $coursecontext->id);
         $provider->update_room_membership([$user->id]);
 
         $processor = \core_communication\processor::load_by_instance(
@@ -440,12 +444,16 @@ class communication_feature_test extends \advanced_testcase {
             instancetype: 'coursecommunication',
             instanceid: $course->id,
         );
-        $synceduser = $processor->get_instance_userids(
-            synced: true,
-        );
-        $synceduser = reset($synceduser);
+
+        $permissionsyncs = $DB->get_record('communication_sync', [
+            'commid' => $processor->get_id(),
+            'type' => \core_communication\api::SYNC_USER_PERMISSION
+        ]);
+        $syncedusers = json_decode($permissionsyncs->customdata)->userids;
+        $this->assertCount(1, $syncedusers);
 
         // Test if the communication user record is synced.
+        $synceduser = reset($syncedusers);
         $this->assertEquals($user->id, $synceduser);
     }
 
@@ -464,8 +472,8 @@ class communication_feature_test extends \advanced_testcase {
 
         $course = $this->get_course();
         $coursecontext = \context_course::instance($course->id);
-        $teacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
-        $studentrole = $DB->get_record('role', array('shortname' => 'student'));
+        $teacherrole = $DB->get_record('role', ['shortname' => 'editingteacher']);
+        $studentrole = $DB->get_record('role', ['shortname' => 'student']);
         $this->getDataGenerator()->enrol_user($user1->id, $course->id);
         $this->getDataGenerator()->enrol_user($user2->id, $course->id);
         // Assign roles.
