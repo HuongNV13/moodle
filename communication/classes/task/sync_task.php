@@ -84,6 +84,23 @@ class sync_task extends scheduled_task {
             return;
         }
 
+        // User permission.
+        $userpermissionsyncs = $DB->get_records('communication_sync', ['type' => api::SYNC_USER_PERMISSION]);
+        if (count($userpermissionsyncs) > 0) {
+            mtrace('\n  Found ' . count($userpermissionsyncs) . ' create user records to sync');
+            foreach ($userpermissionsyncs as $sync) {
+                $customdata = json_decode($sync->customdata);
+                update_room_membership_task::queue(
+                    processor::load_by_id($sync->commid),
+                    $customdata->userids,
+                );
+                mtrace('\n  Sync for communication with id' . $sync->commid . ' is completed');
+                // Delete the sync task record - it is finished.
+                $DB->delete_records('communication_sync', ['id' => $sync->id]);
+            }
+            return;
+        }
+
         // Remove user.
         $removeusersyncs = $DB->get_records('communication_sync', ['type' => api::SYNC_REMOVE_USER]);
         if (count($removeusersyncs) > 0) {

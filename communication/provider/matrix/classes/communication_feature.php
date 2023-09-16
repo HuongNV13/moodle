@@ -515,4 +515,13 @@ class communication_feature implements
 
         return json_decode($body, false, 512, JSON_THROW_ON_ERROR);
     }
+
+    /**
+     * Update room membership for the communication room.
+     *
+     * @param array $userids The user ids to be updated
+     */
+    public function update_room_membership(array $userids): void {
+        // TODO: Implement update_room_membership() method.
+    }
 }

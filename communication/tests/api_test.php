@@ -347,18 +347,58 @@ class api_test extends \advanced_testcase {
         $user = $this->getDataGenerator()->create_user();
         $course = $this->get_course();
         $coursecontext = \context_course::instance($course->id);
+        $studentrole = $DB->get_record('role', ['shortname' => 'student']);
         $teacherrole = $DB->get_record('role', ['shortname' => 'teacher']);
-        $this->getDataGenerator()->enrol_user($user->id, $course->id);
+        $this->getDataGenerator()->enrol_user($user->id, $course->id, $studentrole->id);
 
+        // Execute the sync task - This will trigger create_and_configure_room_task task.
+        ob_start();
+        $task = \core\task\manager::get_scheduled_task('\core_communication\task\sync_task');
+        $task->execute();
+        ob_end_clean();
+
+        // Execute the sync task - This will trigger add_members_to_room_task task.
+        ob_start();
+        $task = \core\task\manager::get_scheduled_task('\core_communication\task\sync_task');
+        $task->execute();
+        ob_end_clean();
         $adhoctask = \core\task\manager::get_adhoc_tasks('\\core_communication\\task\\add_members_to_room_task');
         $this->assertCount(1, $adhoctask);
 
+        // Execute the sync task - This will trigger add_members_to_room_task task.
+        ob_start();
+        $task = \core\task\manager::get_scheduled_task('\core_communication\task\sync_task');
+        $task->execute();
+        ob_end_clean();
         $adhoctask = reset($adhoctask);
         $this->assertInstanceOf('\\core_communication\\task\\add_members_to_room_task', $adhoctask);
 
-        // Test the tasks added as the role is a teacher.
+        // Execute the sync task - This will trigger update_room_membership_task task.
+        ob_start();
+        $task = \core\task\manager::get_scheduled_task('\core_communication\task\sync_task');
+        $task->execute();
+        ob_end_clean();
+
+        // Test the tasks added as the role is a student.
         $adhoctask = \core\task\manager::get_adhoc_tasks('\\core_communication\\task\\update_room_membership_task');
         $this->assertCount(1, $adhoctask);
+
+        $adhoctask = reset($adhoctask);
+        $this->assertInstanceOf('\\core_communication\\task\\update_room_membership_task', $adhoctask);
+
+        // Assign teacher role to the user.
+        role_assign($teacherrole->id, $user->id, $coursecontext);
+
+        // Execute the sync task - This will trigger update_room_membership_task task.
+        ob_start();
+        $task = \core\task\manager::get_scheduled_task('\core_communication\task\sync_task');
+        $task->execute();
+        ob_end_clean();
+
+        // Test the tasks added as the role is a teacher.
+        $adhoctask = \core\task\manager::get_adhoc_tasks('\\core_communication\\task\\update_room_membership_task');
+        // Should be 2 as we have 2 role changes.
+        $this->assertCount(2, $adhoctask);
 
         $adhoctask = reset($adhoctask);
         $this->assertInstanceOf('\\core_communication\\task\\update_room_membership_task', $adhoctask);

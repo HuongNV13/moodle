@@ -172,21 +172,6 @@ class processor {
     }
 
     /**
-     * Get all the user ids flagged as deleted.
-     *
-     * @return array
-     */
-    public function get_all_delete_flagged_userids(): array {
-        global $DB;
-        return $DB->get_fieldset_select(
-            'communication_user',
-            'userid',
-            'commid = ? AND deleted = ?',
-            [$this->instancedata->id, 1]
-        );
-    }
-
-    /**
      * Create communication user record for mapping and sync.
      *
      * @param array $userids The user ids

@@ -16,7 +16,6 @@
 
 namespace core_communication;
 
-use core_communication\task\update_room_membership_task;
 use stdClass;
 
 /**
@@ -552,8 +551,9 @@ class api {
         $this->communication->reset_users_sync_flag($userids);
 
         if ($queue) {
-            update_room_membership_task::queue(
-                $this->communication
+            $this->create_sync_record(
+                synctype: self::SYNC_USER_PERMISSION,
+                customdata: ['userids' => $userids],
             );
         }
     }
