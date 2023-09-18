@@ -143,6 +143,9 @@ class activity_packager {
             throw new \moodle_exception('Failed to package activity.');
         }
 
+        // Have finished with the controller, let's destroy it, freeing mem and resources.
+        $this->controller->destroy();
+
         $backupfile = $result['backup_destination'];
 
         if (!$backupfile->get_contenthash()) {
