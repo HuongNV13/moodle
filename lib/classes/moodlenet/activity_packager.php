@@ -64,7 +64,7 @@ class activity_packager extends resource_packager {
     /**
      * Destructor
      */
-    public function __destruct() {
-        $this->destroy();
+    public function destroy(): void {
+        $this->controller->destroy();
     }
 }
