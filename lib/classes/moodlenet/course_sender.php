@@ -96,7 +96,11 @@ class course_sender extends resource_sender {
         }
 
         // MoodleNet only accept plaintext descriptions.
-        $resourcedescription = $this->get_resource_description();
+        $resourcedescription = utilities::format_resource_description(
+            coursecontext: $this->coursecontext,
+            description: $this->course->summary,
+            descriptionformat: $this->course->summaryformat,
+        );
 
         $response = $this->moodlenetclient->create_resource_from_stored_file(
             $filedata,
@@ -152,29 +156,5 @@ class course_sender extends resource_sender {
         return [
             self::SHARE_FORMAT_BACKUP,
         ];
-    }
-
-    /**
-     * Fetch the description for the resource being created, in a supported text format.
-     *
-     * @return string Converted course description.
-     */
-    protected function get_resource_description(): string {
-        global $PAGE;
-
-        // We need to set the page context here because content_to_text and format_text will need the page context to work.
-        $PAGE->set_context($this->coursecontext);
-
-        $processeddescription = strip_tags($this->course->summary);
-        $processeddescription = content_to_text
-        (
-            format_text(
-                $processeddescription,
-                $this->course->summaryformat,
-            ),
-            $this->course->summaryformat
-        );
-
-        return $processeddescription;
     }
 }

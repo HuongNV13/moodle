@@ -47,7 +47,15 @@ class utilities_test extends \advanced_testcase {
 
         $this->resetAfterTest();
         $this->generator = $this->getDataGenerator();
-        $this->course = $this->generator->create_course();
+        $this->course = $this->generator->create_course([
+            'summary' => '<p>This is an example Moodle course description.</p>
+<p>&nbsp;</p>
+<p>This is a formatted intro</p>
+<p>&nbsp;</p>
+<p>This thing has many lines.</p>
+<p>&nbsp;</p>
+<p>The last word of this sentence is in <strong>bold</strong></p>'
+        ]);
         $this->coursecontext = context_course::instance($this->course->id);
     }
 
@@ -189,5 +197,57 @@ class utilities_test extends \advanced_testcase {
         $this->assertFalse($teachercachedvalue);
         $studentcachedvalue = \cache::make('core', 'moodlenet_usercanshare')->get($student1->id);
         $this->assertFalse($studentcachedvalue);
+    }
+
+    /**
+     * Test get_resource_description method.
+     *
+     * @covers ::get_resource_description
+     */
+    public function test_get_resource_description(): void {
+        global $USER;
+        $this->setAdminUser();
+
+        // Test with activity.
+        $activity = $this->generator->create_module('assign', [
+            'course' => $this->course->id,
+            'intro' => '<p>This is an example Moodle activity description.</p>
+<p>&nbsp;</p>
+<p>This is a formatted intro</p>
+<p>&nbsp;</p>
+<p>This thing has many lines.</p>
+<p>&nbsp;</p>
+<p>The last word of this sentence is in <strong>bold</strong></p>'
+        ]);
+
+        // Test the processed description.
+        $processeddescription = utilities::format_resource_description(
+            coursecontext: $this->coursecontext,
+            description: $activity->intro,
+            descriptionformat: $activity->introformat,
+        );
+
+        $this->assertEquals('This is an example Moodle activity description.
+ 
+This is a formatted intro
+ 
+This thing has many lines.
+ 
+The last word of this sentence is in bold', $processeddescription);
+
+        // Test with course.
+        $processeddescription = utilities::format_resource_description(
+            coursecontext: $this->coursecontext,
+            description: $this->course->summary,
+            descriptionformat: $this->course->summaryformat,
+        );
+
+        $this->assertEquals('This is an example Moodle course description.
+ 
+This is a formatted intro
+ 
+This thing has many lines.
+ 
+The last word of this sentence is in bold', $processeddescription);
     }
 }

@@ -120,4 +120,33 @@ class utilities {
 
         return $isallowed;
     }
+
+    /**
+     * Format the description for the resource being created, in a supported text format.
+     *
+     * @param \context $coursecontext The course context being shared from.
+     * @param string $description The description to format.
+     * @param int $descriptionformat The format of the description.
+     * @return string Converted activity description.
+     */
+    public static function format_resource_description(
+        \context $coursecontext,
+        string $description,
+        int $descriptionformat,
+    ): string {
+        global $PAGE, $DB;
+        // We need to set the page context here because content_to_text and format_text will need the page context to work.
+        $PAGE->set_context($coursecontext);
+        $processeddescription = strip_tags($description);
+        $processeddescription = content_to_text
+        (
+            format_text(
+                $processeddescription,
+                $descriptionformat,
+            ),
+            $descriptionformat,
+        );
+
+        return $processeddescription;
+    }
 }

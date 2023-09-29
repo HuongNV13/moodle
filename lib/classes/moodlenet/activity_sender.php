@@ -77,6 +77,7 @@ class activity_sender extends resource_sender {
      *               Format: ['responsecode' => 201, 'drafturl' => 'https://draft.mnurl/here']
      */
     public function share_resource(): array {
+        global $DB;
         $accesstoken = '';
         $resourceurl = '';
         $issuer = $this->oauthclient->get_issuer();
@@ -112,7 +113,12 @@ class activity_sender extends resource_sender {
             }
 
             // MoodleNet only accept plaintext descriptions.
-            $resourcedescription = $this->get_resource_description($coursecontext);
+            $info = $DB->get_record($this->cminfo->modname, ['id' => $this->cminfo->instance], 'intro, introformat', MUST_EXIST);
+            $resourcedescription = utilities::format_resource_description(
+                coursecontext: $coursecontext,
+                description: $info->intro,
+                descriptionformat: $info->introformat,
+            );
 
             $response = $this->moodlenetclient->create_resource_from_stored_file(
                 $filedata,
@@ -162,28 +168,5 @@ class activity_sender extends resource_sender {
             ],
         ]);
         $event->trigger();
-    }
-
-    /**
-     * Fetch the description for the resource being created, in a supported text format.
-     *
-     * @param \context $coursecontext The course context being shared from.
-     * @return string Converted activity description.
-     */
-    protected function get_resource_description(
-        \context $coursecontext,
-    ): string {
-        global $PAGE, $DB;
-        // We need to set the page context here because content_to_text and format_text will need the page context to work.
-        $PAGE->set_context($coursecontext);
-
-        $intro = $DB->get_record($this->cminfo->modname, ['id' => $this->cminfo->instance], 'intro, introformat', MUST_EXIST);
-        $processeddescription = strip_tags($intro->intro);
-        $processeddescription = content_to_text(format_text(
-            $processeddescription,
-            $intro->introformat,
-        ), $intro->introformat);
-
-        return $processeddescription;
     }
 }
