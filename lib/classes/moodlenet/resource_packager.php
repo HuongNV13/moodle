@@ -63,6 +63,8 @@ class resource_packager {
      */
     public function __destruct() {
         $this->controller->destroy();
+        unset($this->controller);
+        gc_collect_cycles();
     }
 
     /**
