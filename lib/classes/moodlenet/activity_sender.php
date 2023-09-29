@@ -58,6 +58,13 @@ class activity_sender extends resource_sender {
     }
 
     /**
+     * Destructor
+     */
+    public function __destruct() {
+        $this->packager->destroy();
+    }
+
+    /**
      * Share an activity/resource to MoodleNet.
      *
      * @return array The HTTP response code from MoodleNet and the MoodleNet draft resource URL (URL empty string on fail).
