@@ -59,14 +59,6 @@ class resource_packager {
     }
 
     /**
-     * Destructor
-     */
-    public function __destruct() {
-        // Have finished with the controller, let's destroy it, freeing mem and resources.
-        $this->controller->destroy();
-    }
-
-    /**
      * Prepare the backup file using appropriate setting overrides and return relevant information.
      *
      * @return stored_file
@@ -136,6 +128,9 @@ class resource_packager {
         if (!isset($result['backup_destination'])) {
             throw new \moodle_exception('Failed to package resource.');
         }
+
+        // Have finished with the controller, let's destroy it, freeing mem and resources.
+        $this->controller->destroy();
 
         $backupfile = $result['backup_destination'];
 

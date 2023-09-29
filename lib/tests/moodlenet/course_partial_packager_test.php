@@ -30,6 +30,7 @@ class course_partial_packager_test extends \advanced_testcase {
      * Test fetching task settings.
      *
      * @covers ::get_all_task_settings
+     * @covers ::remove_unselected_activities
      */
     public function test_get_all_task_settings(): void {
         global $USER;
@@ -47,7 +48,13 @@ class course_partial_packager_test extends \advanced_testcase {
         // Fetch all backup task settings.
         $rc = new \ReflectionClass(course_partial_packager::class);
 
-        $rcmgetall = $rc->getMethod('get_package');
+        // Get all the task settings first.
+        $rcmgetall = $rc->getMethod('get_all_task_settings');
+        $rcmgetall->setAccessible(true);
+        $rcmgetall->invoke($packager);
+
+        // Remove unselected activities.
+        $rcmgetall = $rc->getMethod('remove_unselected_activities');
         $rcmgetall->setAccessible(true);
         $rcmgetall->invoke($packager);
 
