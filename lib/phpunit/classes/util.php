@@ -113,6 +113,9 @@ class phpunit_util extends testing_util {
         // Stop any message redirection.
         self::stop_event_redirection();
 
+        // Release memory and indirectly call destroy() methods to release resource handles, etc.
+        gc_collect_cycles();
+
         // Start a new email redirection.
         // This will clear any existing phpmailer redirection.
         // We redirect all phpmailer output to this message sink which is
