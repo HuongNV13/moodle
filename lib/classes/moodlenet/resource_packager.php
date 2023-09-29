@@ -62,6 +62,7 @@ class resource_packager {
      * Destructor
      */
     public function __destruct() {
+        // Have finished with the controller, let's destroy it, freeing mem and resources.
         $this->controller->destroy();
     }
 

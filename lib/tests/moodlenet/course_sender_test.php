@@ -138,49 +138,6 @@ class course_sender_test extends \advanced_testcase {
     }
 
     /**
-     * Test get_resource_description method.
-     *
-     * @covers ::get_resource_description
-     */
-    public function test_get_resource_description(): void {
-        global $USER;
-        $this->setAdminUser();
-
-        $course = $this->generator->create_course([
-            'summary' => '<p>This is an example Moodle course description.</p>
-<p>&nbsp;</p>
-<p>This is a formatted intro</p>
-<p>&nbsp;</p>
-<p>This thing has many lines.</p>
-<p>&nbsp;</p>
-<p>The last word of this sentence is in <strong>bold</strong></p>'
-        ]);
-
-        // Set get_resource_description method accessibility.
-        $method = new ReflectionMethod(course_sender::class, 'get_resource_description');
-        $method->setAccessible(true);
-
-        // Test the processed description.
-        $httpclient = new http_client();
-        $moodlenetclient = new moodlenet_client($httpclient, $this->mockoauthclient);
-        $processeddescription = $method->invoke(new course_sender(
-            $course->id,
-            $USER->id,
-            $moodlenetclient,
-            $this->mockoauthclient,
-            resource_sender::SHARE_FORMAT_BACKUP
-        ), $this->coursecontext);
-
-        $this->assertEquals('This is an example Moodle course description.
- 
-This is a formatted intro
- 
-This thing has many lines.
- 
-The last word of this sentence is in bold', $processeddescription);
-    }
-
-    /**
      * Test share_resource() method.
      *
      * @dataProvider share_resource_provider
