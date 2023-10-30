@@ -792,6 +792,38 @@ if ($hassiteconfig) {
     }
 }
 
+// Captcha plugins.
+if ($hassiteconfig) {
+    $ADMIN->add('modules', new admin_category('captchasettings', new lang_string('captcha', 'core_captcha')));
+    $temp = new admin_settingpage('managecaptchaproviders',
+        new lang_string('managecaptchaproviders', 'core_captcha'));
+    $temp->add(new \core_captcha\admin\manage_captcha_providers_page());
+    $ADMIN->add('captchasettings', $temp);
+    $plugins = core_plugin_manager::instance()->get_plugins_of_type('captcha');
+    foreach ($plugins as $plugin) {
+        /** @var \core\plugininfo\captcha $plugin */
+        $plugin->load_settings($ADMIN, 'captchasettings', $hassiteconfig);
+    }
+
+    // Common settings.
+    $temp->add(new admin_setting_heading('captchacommonsettings', 'Common captcha settings', ''));
+    // Provider.
+    $pluginmanager = core_plugin_manager::instance();
+    $plugins = $pluginmanager->get_plugins_of_type('captcha');
+    $providers = ['none' => get_string('none')];
+    foreach ($plugins as $key => $plugin) {
+        if ($plugin->is_enabled()) {
+            $providers['captcha_' . $key] = get_string('pluginname', 'captcha_' . $key);
+        }
+    }
+    $temp->add(new admin_setting_configselect('captcha/provider',
+        'Select captcha provider',
+        '',
+        '',
+        $providers
+    ));
+}
+
 // Communication plugins.
 if ($hassiteconfig && core_communication\api::is_available()) {
     $ADMIN->add('modules', new admin_category('communicationsettings', new lang_string('communication', 'core_communication')));

@@ -2744,10 +2744,9 @@ abstract class enrol_plugin {
         }
 
         $communication = \core_communication\api::load_by_instance(
-            context: \core\context\course::instance($courseid),
-            component: 'core_course',
-            instancetype: 'coursecommunication',
-            instanceid: $courseid,
+            'core_course',
+            'coursecommunication',
+            $courseid
         );
 
         switch ($action) {
