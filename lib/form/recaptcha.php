@@ -75,10 +75,8 @@ class MoodleQuickForm_recaptcha extends HTML_QuickForm_input implements templata
      * @return string The HTML to render
      */
     public function toHtml() {
-        global $CFG;
-        require_once($CFG->libdir . '/recaptchalib_v2.php');
-
-        return recaptcha_get_challenge_html(RECAPTCHA_API_URL, $CFG->recaptchapublickey);
+        $provider = new \core_captcha\provider(get_config('captcha', 'provider'));
+        return $provider->get_output_html();
     }
 
     /**
@@ -102,6 +100,9 @@ class MoodleQuickForm_recaptcha extends HTML_QuickForm_input implements templata
 
         $response = recaptcha_check_response(RECAPTCHA_VERIFY_URL, $CFG->recaptchaprivatekey,
                                            getremoteaddr(), $responsestr);
+        $provider = new \core_captcha\provider(get_config('captcha', 'provider'));
+        $response = $provider->verify_response($responsestr);
+
         if (!$response['isvalid']) {
             $attributes = $this->getAttributes();
             $attributes['error_message'] = $response['error'];
