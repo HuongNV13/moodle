@@ -37,7 +37,7 @@ class manager {
     /**
      * @var string The main mailbox to check.
      */
-    const MAILBOX = 'INBOX';
+    const MAILBOX = 'Test IMAP';
 
     /**
      * @var string The mailbox to store messages in when they are awaiting confirmation.
@@ -52,7 +52,7 @@ class manager {
     /**
      * @var string The flag for flagged messages.
      */
-    const MESSAGE_FLAGGED = '\flagged';
+    const MESSAGE_FLAGGED = '\Flagged';
 
     /**
      * @var string The flag for deleted messages.
@@ -65,9 +65,14 @@ class manager {
     protected $imapnamespace = null;
 
     /**
-     * @var \Horde_Imap_Client_Socket A reference to the IMAP client.
+     * @var IMAP\Connection A reference to the IMAP connection.
      */
     protected $client = null;
+
+    /**
+     * @var null The connection URL for the IMAP client.
+     */
+    protected $connectionurl = null;
 
     /**
      * @var \core\message\inbound\address_manager A reference to the Inbound Message Address Manager instance.
@@ -95,13 +100,13 @@ class manager {
 
         mtrace("Connecting to {$CFG->messageinbound_host} as {$CFG->messageinbound_hostuser}...");
 
-        $configuration = array(
+        $configuration = [
             'username' => $CFG->messageinbound_hostuser,
             'password' => $CFG->messageinbound_hostpass,
             'hostspec' => $CFG->messageinbound_host,
             'secure'   => $CFG->messageinbound_hostssl,
             'debug'    => empty($CFG->debugimap) ? null : fopen('php://stderr', 'w'),
-        );
+        ];
 
         if (strpos($configuration['hostspec'], ':')) {
             $hostdata = explode(':', $configuration['hostspec']);
@@ -112,40 +117,18 @@ class manager {
             }
         }
 
-        // XOAUTH2.
-        if ($CFG->messageinbound_hostoauth != '') {
-            // Get the issuer.
-            $issuer = \core\oauth2\api::get_issuer($CFG->messageinbound_hostoauth);
-            // Validate the issuer and check if it is enabled or not.
-            if ($issuer && $issuer->get('enabled')) {
-                // Get the OAuth Client.
-                if ($oauthclient = \core\oauth2\api::get_system_oauth_client($issuer)) {
-                    $xoauth2token = new \Horde_Imap_Client_Password_Xoauth2(
-                        $configuration['username'],
-                        $oauthclient->get_accesstoken()->token
-                    );
-                    $configuration['xoauth2_token'] = $xoauth2token;
-                    // Password is not necessary when using OAuth2 but Horde still needs it. We just set a random string here.
-                    $configuration['password'] = random_string(64);
-                }
-            }
+        // TODO: Implement XOAUTH2.
+
+        $this->connectionurl = '{' . $configuration['hostspec'] . '/imap/' . $configuration['secure'] . '}';
+        $this->client = imap_open($this->connectionurl . self::MAILBOX, $configuration['username'], $configuration['password']);
+        if (imap_errors()) {
+            throw new \moodle_exception('imapconnectfailure', 'tool_messageinbound', '', null, imap_last_error());
         }
+        mtrace("Connection established.");
 
-        $this->client = new \Horde_Imap_Client_Socket($configuration);
-
-        try {
-            $this->client->login();
-            mtrace("Connection established.");
-
-            // Ensure that mailboxes exist.
-            $this->ensure_mailboxes_exist();
-
-            return true;
-
-        } catch (\Horde_Imap_Client_Exception $e) {
-            $message = $e->getMessage();
-            throw new \moodle_exception('imapconnectfailure', 'tool_messageinbound', '', null, $message);
-        }
+        // Ensure that mailboxes exist.
+        $this->ensure_mailboxes_exist();
+        return true;
     }
 
     /**
@@ -153,7 +136,7 @@ class manager {
      */
     protected function close_connection() {
         if ($this->client) {
-            $this->client->close();
+            imap_close($this->client);
         }
         $this->client = null;
     }
@@ -205,24 +188,12 @@ class manager {
         }
 
         // Restrict results to messages which are unseen, and have not been flagged.
-        $search = new \Horde_Imap_Client_Search_Query();
-        $search->flag(self::MESSAGE_SEEN, false);
-        $search->flag(self::MESSAGE_FLAGGED, false);
         mtrace("Searching for Unseen, Unflagged email in the folder '" . self::MAILBOX . "'");
-        $results = $this->client->search(self::MAILBOX, $search);
-
-        // We require the envelope data and structure of each message.
-        $query = new \Horde_Imap_Client_Fetch_Query();
-        $query->envelope();
-        $query->structure();
-
-        // Retrieve the message id.
-        $messages = $this->client->fetch(self::MAILBOX, $query, array('ids' => $results['match']));
-
-        mtrace("Found " . $messages->count() . " messages to parse. Parsing...");
+        $messagesequences = imap_search($this->client, 'UNSEEN UNFLAGGED');
+        mtrace("Found " . count($messagesequences) . " messages to parse. Parsing...");
         $this->addressmanager = new \core\message\inbound\address_manager();
-        foreach ($messages as $message) {
-            $this->process_message($message);
+        foreach ($messagesequences as $messagesequence) {
+            $this->process_message($messagesequence);
         }
 
         // Close the client connection.
@@ -342,173 +313,171 @@ class manager {
     /**
      * Process a message and pass it through the Inbound Message handling systems.
      *
-     * @param \Horde_Imap_Client_Data_Fetch $message The message to process
+     * @param int $messagesequence The message sequence to process
      * @param bool $viewreadmessages Whether to also look at messages which have been marked as read
      * @param bool $skipsenderverification Whether to skip the sender verification stage
      */
     public function process_message(
-            \Horde_Imap_Client_Data_Fetch $message,
+            int $messagesequence,
             $viewreadmessages = false,
             $skipsenderverification = false) {
         global $USER;
 
-        // We use the Client IDs several times - store them here.
-        $messageid = new \Horde_Imap_Client_Ids($message->getUid());
-
-        mtrace("- Parsing message " . $messageid);
+        mtrace("- Parsing message " . $messagesequence);
 
         // First flag this message to prevent another running hitting this message while we look at the headers.
-        $this->add_flag_to_message($messageid, self::MESSAGE_FLAGGED);
+        $this->add_flag_to_message($messagesequence, self::MESSAGE_FLAGGED);
 
+        // TODO: Implement bulk check.
         if ($this->is_bulk_message($message, $messageid)) {
             mtrace("- The message has a bulk header set. This is likely an auto-generated reply - discarding.");
-            return;
+            //return;
         }
-
-        // Record the user that this script is currently being run as.  This is important when re-processing existing
-        // messages, as \core\cron::setup_user is called multiple times.
-        $originaluser = $USER;
-
-        $envelope = $message->getEnvelope();
-        $recipients = $envelope->to->bare_addresses;
-        foreach ($recipients as $recipient) {
-            if (!\core\message\inbound\address_manager::is_correct_format($recipient)) {
-                // Message did not contain a subaddress.
-                mtrace("- Recipient '{$recipient}' did not match Inbound Message headers.");
-                continue;
-            }
-
-            // Message contained a match.
-            $senders = $message->getEnvelope()->from->bare_addresses;
-            if (count($senders) !== 1) {
-                mtrace("- Received multiple senders. Only the first sender will be used.");
-            }
-            $sender = array_shift($senders);
-
-            mtrace("-- Subject:\t"      . $envelope->subject);
-            mtrace("-- From:\t"         . $sender);
-            mtrace("-- Recipient:\t"    . $recipient);
-
-            // Grab messagedata including flags.
-            $query = new \Horde_Imap_Client_Fetch_Query();
-            $query->structure();
-            $messagedata = $this->client->fetch($this->get_mailbox(), $query, array(
-                'ids' => $messageid,
-            ))->first();
-
-            if (!$viewreadmessages && $this->message_has_flag($messageid, self::MESSAGE_SEEN)) {
-                // Something else has already seen this message. Skip it now.
-                mtrace("-- Skipping the message - it has been marked as seen - perhaps by another process.");
-                continue;
-            }
-
-            // Mark it as read to lock the message.
-            $this->add_flag_to_message($messageid, self::MESSAGE_SEEN);
-
-            // Now pass it through the Inbound Message processor.
-            $status = $this->addressmanager->process_envelope($recipient, $sender);
-
-            if (($status & ~ \core\message\inbound\address_manager::VALIDATION_DISABLED_HANDLER) !== $status) {
-                // The handler is disabled.
-                mtrace("-- Skipped message - Handler is disabled. Fail code {$status}");
-                // In order to handle the user error, we need more information about the message being failed.
-                $this->process_message_data($envelope, $messagedata, $messageid);
-                $this->inform_user_of_error(get_string('handlerdisabled', 'tool_messageinbound', $this->currentmessagedata));
-                return;
-            }
-
-            // Check the validation status early. No point processing garbage messages, but we do need to process it
-            // for some validation failure types.
-            if (!$this->passes_key_validation($status, $messageid)) {
-                // None of the above validation failures were found. Skip this message.
-                mtrace("-- Skipped message - it does not appear to relate to a Inbound Message pickup. Fail code {$status}");
-
-                // Remove the seen flag from the message as there may be multiple recipients.
-                $this->remove_flag_from_message($messageid, self::MESSAGE_SEEN);
-
-                // Skip further processing for this recipient.
-                continue;
-            }
-
-            // Process the message as the user.
-            $user = $this->addressmanager->get_data()->user;
-            mtrace("-- Processing the message as user {$user->id} ({$user->username}).");
-            \core\cron::setup_user($user);
-
-            // Process and retrieve the message data for this message.
-            // This includes fetching the full content, as well as all headers, and attachments.
-            if (!$this->process_message_data($envelope, $messagedata, $messageid)) {
-                mtrace("--- Message could not be found on the server. Is another process removing messages?");
-                return;
-            }
-
-            // When processing validation replies, we need to skip the sender verification phase as this has been
-            // manually completed.
-            if (!$skipsenderverification && $status !== 0) {
-                // Check the validation status for failure types which require confirmation.
-                // The validation result is tested in a bitwise operation.
-                mtrace("-- Message did not meet validation but is possibly recoverable. Fail code {$status}");
-                // This is a recoverable error, but requires user input.
-
-                if ($this->handle_verification_failure($messageid, $recipient)) {
-                    mtrace("--- Original message retained on mail server and confirmation message sent to user.");
-                } else {
-                    mtrace("--- Invalid Recipient Handler - unable to save. Informing the user of the failure.");
-                    $this->inform_user_of_error(get_string('invalidrecipientfinal', 'tool_messageinbound', $this->currentmessagedata));
-                }
-
-                // Returning to normal cron user.
-                mtrace("-- Returning to the original user.");
-                \core\cron::setup_user($originaluser);
-                return;
-            }
-
-            // Add the content and attachment data.
-            mtrace("-- Validation completed. Fetching rest of message content.");
-            $this->process_message_data_body($messagedata, $messageid);
-
-            // The message processor throws exceptions upon failure. These must be caught and notifications sent to
-            // the user here.
-            try {
-                $result = $this->send_to_handler();
-            } catch (\core\message\inbound\processing_failed_exception $e) {
-                // We know about these kinds of errors and they should result in the user being notified of the
-                // failure. Send the user a notification here.
-                $this->inform_user_of_error($e->getMessage());
-
-                // Returning to normal cron user.
-                mtrace("-- Returning to the original user.");
-                \core\cron::setup_user($originaluser);
-                return;
-            } catch (\Exception $e) {
-                // An unknown error occurred. The user is not informed, but the administrator is.
-                mtrace("-- Message processing failed. An unexpected exception was thrown. Details follow.");
-                mtrace($e->getMessage());
-
-                // Returning to normal cron user.
-                mtrace("-- Returning to the original user.");
-                \core\cron::setup_user($originaluser);
-                return;
-            }
-
-            if ($result) {
-                // Handle message cleanup. Messages are deleted once fully processed.
-                mtrace("-- Marking the message for removal.");
-                $this->add_flag_to_message($messageid, self::MESSAGE_DELETED);
-            } else {
-                mtrace("-- The Inbound Message processor did not return a success status. Skipping message removal.");
-            }
-
-            // Returning to normal cron user.
-            mtrace("-- Returning to the original user.");
-            \core\cron::setup_user($originaluser);
-
-            mtrace("-- Finished processing " . $message->getUid());
-
-            // Skip the outer loop too. The message has already been processed and it could be possible for there to
-            // be two recipients in the envelope which match somehow.
-            return;
-        }
+        //
+        //// Record the user that this script is currently being run as.  This is important when re-processing existing
+        //// messages, as \core\cron::setup_user is called multiple times.
+        //$originaluser = $USER;
+        //
+        //$envelope = $message->getEnvelope();
+        //$recipients = $envelope->to->bare_addresses;
+        //foreach ($recipients as $recipient) {
+        //    if (!\core\message\inbound\address_manager::is_correct_format($recipient)) {
+        //        // Message did not contain a subaddress.
+        //        mtrace("- Recipient '{$recipient}' did not match Inbound Message headers.");
+        //        continue;
+        //    }
+        //
+        //    // Message contained a match.
+        //    $senders = $message->getEnvelope()->from->bare_addresses;
+        //    if (count($senders) !== 1) {
+        //        mtrace("- Received multiple senders. Only the first sender will be used.");
+        //    }
+        //    $sender = array_shift($senders);
+        //
+        //    mtrace("-- Subject:\t"      . $envelope->subject);
+        //    mtrace("-- From:\t"         . $sender);
+        //    mtrace("-- Recipient:\t"    . $recipient);
+        //
+        //    // Grab messagedata including flags.
+        //    $query = new \Horde_Imap_Client_Fetch_Query();
+        //    $query->structure();
+        //    $messagedata = $this->client->fetch($this->get_mailbox(), $query, array(
+        //        'ids' => $messageid,
+        //    ))->first();
+        //
+        //    if (!$viewreadmessages && $this->message_has_flag($messageid, self::MESSAGE_SEEN)) {
+        //        // Something else has already seen this message. Skip it now.
+        //        mtrace("-- Skipping the message - it has been marked as seen - perhaps by another process.");
+        //        continue;
+        //    }
+        //
+        //    // Mark it as read to lock the message.
+        //    $this->add_flag_to_message($messageid, self::MESSAGE_SEEN);
+        //
+        //    // Now pass it through the Inbound Message processor.
+        //    $status = $this->addressmanager->process_envelope($recipient, $sender);
+        //
+        //    if (($status & ~ \core\message\inbound\address_manager::VALIDATION_DISABLED_HANDLER) !== $status) {
+        //        // The handler is disabled.
+        //        mtrace("-- Skipped message - Handler is disabled. Fail code {$status}");
+        //        // In order to handle the user error, we need more information about the message being failed.
+        //        $this->process_message_data($envelope, $messagedata, $messageid);
+        //        $this->inform_user_of_error(get_string('handlerdisabled', 'tool_messageinbound', $this->currentmessagedata));
+        //        return;
+        //    }
+        //
+        //    // Check the validation status early. No point processing garbage messages, but we do need to process it
+        //    // for some validation failure types.
+        //    if (!$this->passes_key_validation($status, $messageid)) {
+        //        // None of the above validation failures were found. Skip this message.
+        //        mtrace("-- Skipped message - it does not appear to relate to a Inbound Message pickup. Fail code {$status}");
+        //
+        //        // Remove the seen flag from the message as there may be multiple recipients.
+        //        $this->remove_flag_from_message($messageid, self::MESSAGE_SEEN);
+        //
+        //        // Skip further processing for this recipient.
+        //        continue;
+        //    }
+        //
+        //    // Process the message as the user.
+        //    $user = $this->addressmanager->get_data()->user;
+        //    mtrace("-- Processing the message as user {$user->id} ({$user->username}).");
+        //    \core\cron::setup_user($user);
+        //
+        //    // Process and retrieve the message data for this message.
+        //    // This includes fetching the full content, as well as all headers, and attachments.
+        //    if (!$this->process_message_data($envelope, $messagedata, $messageid)) {
+        //        mtrace("--- Message could not be found on the server. Is another process removing messages?");
+        //        return;
+        //    }
+        //
+        //    // When processing validation replies, we need to skip the sender verification phase as this has been
+        //    // manually completed.
+        //    if (!$skipsenderverification && $status !== 0) {
+        //        // Check the validation status for failure types which require confirmation.
+        //        // The validation result is tested in a bitwise operation.
+        //        mtrace("-- Message did not meet validation but is possibly recoverable. Fail code {$status}");
+        //        // This is a recoverable error, but requires user input.
+        //
+        //        if ($this->handle_verification_failure($messageid, $recipient)) {
+        //            mtrace("--- Original message retained on mail server and confirmation message sent to user.");
+        //        } else {
+        //            mtrace("--- Invalid Recipient Handler - unable to save. Informing the user of the failure.");
+        //            $this->inform_user_of_error(get_string('invalidrecipientfinal', 'tool_messageinbound', $this->currentmessagedata));
+        //        }
+        //
+        //        // Returning to normal cron user.
+        //        mtrace("-- Returning to the original user.");
+        //        \core\cron::setup_user($originaluser);
+        //        return;
+        //    }
+        //
+        //    // Add the content and attachment data.
+        //    mtrace("-- Validation completed. Fetching rest of message content.");
+        //    $this->process_message_data_body($messagedata, $messageid);
+        //
+        //    // The message processor throws exceptions upon failure. These must be caught and notifications sent to
+        //    // the user here.
+        //    try {
+        //        $result = $this->send_to_handler();
+        //    } catch (\core\message\inbound\processing_failed_exception $e) {
+        //        // We know about these kinds of errors and they should result in the user being notified of the
+        //        // failure. Send the user a notification here.
+        //        $this->inform_user_of_error($e->getMessage());
+        //
+        //        // Returning to normal cron user.
+        //        mtrace("-- Returning to the original user.");
+        //        \core\cron::setup_user($originaluser);
+        //        return;
+        //    } catch (\Exception $e) {
+        //        // An unknown error occurred. The user is not informed, but the administrator is.
+        //        mtrace("-- Message processing failed. An unexpected exception was thrown. Details follow.");
+        //        mtrace($e->getMessage());
+        //
+        //        // Returning to normal cron user.
+        //        mtrace("-- Returning to the original user.");
+        //        \core\cron::setup_user($originaluser);
+        //        return;
+        //    }
+        //
+        //    if ($result) {
+        //        // Handle message cleanup. Messages are deleted once fully processed.
+        //        mtrace("-- Marking the message for removal.");
+        //        $this->add_flag_to_message($messageid, self::MESSAGE_DELETED);
+        //    } else {
+        //        mtrace("-- The Inbound Message processor did not return a success status. Skipping message removal.");
+        //    }
+        //
+        //    // Returning to normal cron user.
+        //    mtrace("-- Returning to the original user.");
+        //    \core\cron::setup_user($originaluser);
+        //
+        //    mtrace("-- Finished processing " . $message->getUid());
+        //
+        //    // Skip the outer loop too. The message has already been processed and it could be possible for there to
+        //    // be two recipients in the envelope which match somehow.
+        //    return;
+        //}
     }
 
     /**
@@ -737,14 +706,8 @@ class manager {
      * @param string $flag The flag to add
      */
     private function add_flag_to_message($messageid, $flag) {
-        // Get the current mailbox.
-        $mailbox = $this->get_mailbox();
-
         // Mark it as read to lock the message.
-        $this->client->store($mailbox, array(
-            'ids' => new \Horde_Imap_Client_Ids($messageid),
-            'add' => $flag,
-        ));
+        imap_setflag_full($this->client, $messageid, $flag);
     }
 
     /**
@@ -791,21 +754,20 @@ class manager {
      * Ensure that all mailboxes exist.
      */
     private function ensure_mailboxes_exist() {
-
-        $requiredmailboxes = array(
+        $requiredmailboxes = [
             self::MAILBOX,
-            $this->get_confirmation_folder(),
-        );
+            self::CONFIRMATIONFOLDER,
+        ];
 
-        $existingmailboxes = $this->client->listMailboxes($requiredmailboxes);
+        $existingmailboxes = imap_list($this->client, $this->connectionurl, "*");
         foreach ($requiredmailboxes as $mailbox) {
-            if (isset($existingmailboxes[$mailbox])) {
+            if (in_array($this->connectionurl . $mailbox, $existingmailboxes)) {
                 // This mailbox was found.
                 continue;
             }
 
             mtrace("Unable to find the '{$mailbox}' mailbox - creating it.");
-            $this->client->createMailbox($mailbox);
+            imap_createmailbox($this->client, $this->connectionurl . $mailbox);
         }
     }
 
