@@ -2985,6 +2985,11 @@ class html_table_cell {
     public $attributes = array();
 
     /**
+     * @var string Class name to add to this html table cell.
+     */
+    public $class = null;
+
+    /**
      * Constructs a table cell
      *
      * @param string $text
