@@ -12,10 +12,21 @@ print("Connection established...."."<br>");
 $messages = imap_search($imap, 'UNSEEN UNFLAGGED');
 echo "<pre>";
 foreach ($messages as $messageid) {
+    $structure = imap_fetchstructure($imap, $messageid);
+    //var_dump($structure);
+    $data = imap_fetchbody($imap, $messageid, '1.1', FT_PEEK);
+    var_dump($data);
+    foreach ($structure->parts as $partno => $part) {
+        //$data = imap_fetchbody($this->client, $messageid, '1.1');
+        //var_dump($data);
+    //    if (strtolower($part->subtype) == 'html') {
+    //        var_dump($data);
+    //    }
+    }
     //var_dump(imap_headerinfo($imap, $messageid));
-    var_dump(imap_fetchstructure($imap, $messageid));
+    //var_dump(imap_fetchstructure($imap, $messageid));
     //var_dump(imap_fetchmime($imap, $messageid, 1));
-    var_dump(imap_fetchbody($imap, $messageid, 2));
+    //var_dump(imap_fetchbody($imap, $messageid, 2));
 }
 //var_dump($messages);
 exit();

@@ -343,14 +343,19 @@ class manager {
         $originaluser = $USER;
 
         $envelope = imap_headerinfo($this->client, $messagesequence);
+        if (!$envelope) {
+            // Message was not found! Somehow it has been removed or is no longer returned.
+            mtrace("--- Message could not be found on the server. Is another process removing messages?");
+            return;
+        }
         $recipients = $envelope->to;
         foreach ($recipients as $bareaddress) {
             $recipient = $bareaddress->mailbox . '@' . $bareaddress->host;
-            //if (!\core\message\inbound\address_manager::is_correct_format($recipient)) {
-            //    // Message did not contain a subaddress.
-            //    mtrace("- Recipient '{$recipient}' did not match Inbound Message headers.");
-            //    continue;
-            //}
+            if (!\core\message\inbound\address_manager::is_correct_format($recipient)) {
+                // Message did not contain a subaddress.
+                mtrace("- Recipient '{$recipient}' did not match Inbound Message headers.");
+                continue;
+            }
 
             // Message contained a match.
             $baresenders = $envelope->from;
@@ -380,7 +385,7 @@ class manager {
                 // The handler is disabled.
                 mtrace("-- Skipped message - Handler is disabled. Fail code {$status}");
                 // In order to handle the user error, we need more information about the message being failed.
-        //        $this->process_message_data($envelope, $messagedata, $messageid);
+                //$this->process_message_data($envelope, $messagedata, $messageid);
         //        $this->inform_user_of_error(get_string('handlerdisabled', 'tool_messageinbound', $this->currentmessagedata));
                 return;
             }
@@ -404,11 +409,7 @@ class manager {
             \core\cron::setup_user($user);
 
             // Process and retrieve the message data for this message.
-            // This includes fetching the full content, as well as all headers, and attachments.
-            //if (!$this->process_message_data($envelope, $messagedata, $messagesequence)) {
-            //    mtrace("--- Message could not be found on the server. Is another process removing messages?");
-            //    return;
-            //}
+            $this->process_message_data($envelope, $messagesequence);
 
             // When processing validation replies, we need to skip the sender verification phase as this has been
             // manually completed.
@@ -482,45 +483,22 @@ class manager {
     /**
      * Process a message to retrieve it's header data without body and attachemnts.
      *
-     * @param \Horde_Imap_Client_Data_Envelope $envelope The Envelope of the message
-     * @param \Horde_Imap_Client_Data_Fetch $basemessagedata The structure and part of the message body
-     * @param string|\Horde_Imap_Client_Ids $messageid The Hore message Uid
+     * @param \stdClass $envelope The Envelope of the message
+     * @param int $messageid The Hore message Uid
      * @return \stdClass The current value of the messagedata
      */
     private function process_message_data(
-            \Horde_Imap_Client_Data_Envelope $envelope,
-            \Horde_Imap_Client_Data_Fetch $basemessagedata,
-            $messageid) {
-
-        // Get the current mailbox.
-        $mailbox = $this->get_mailbox();
-
-        // We need the structure at various points below.
-        $structure = $basemessagedata->getStructure();
-
-        // Now fetch the rest of the message content.
-        $query = new \Horde_Imap_Client_Fetch_Query();
-        $query->imapDate();
-
-        // Fetch the message header.
-        $query->headerText();
-
-        // Retrieve the message with the above components.
-        $messagedata = $this->client->fetch($mailbox, $query, array('ids' => $messageid))->first();
-
-        if (!$messagedata) {
-            // Message was not found! Somehow it has been removed or is no longer returned.
-            return null;
-        }
-
+            \stdClass $envelope,
+            int $messageid,
+    ) {
         // The message ID should always be in the first part.
         $data = new \stdClass();
-        $data->messageid = $messagedata->getHeaderText(0, \Horde_Imap_Client_Data_Fetch::HEADER_PARSE)->getValue('Message-ID');
+        $data->messageid = $envelope->message_id;
         $data->subject = $envelope->subject;
-        $data->timestamp = $messagedata->getImapDate()->__toString();
+        $data->timestamp = $envelope->udate;
         $data->envelope = $envelope;
         $data->data = $this->addressmanager->get_data();
-        $data->headers = $messagedata->getHeaderText();
+        //$data->headers = $messagedata->getHeaderText();
 
         $this->currentmessagedata = $data;
 
@@ -541,46 +519,88 @@ class manager {
         } else {
             // Multipart.
             foreach ($structure->parts as $partno => $part) {
-                $data = imap_fetchbody($this->client, $messageid, $partno);
-                // Any part may be encoded, even plain text messages, so check everything.
-                if ($part->encoding == 4) {
-                    $data = quoted_printable_decode($data);
-                } else if ($part->encoding == 3) {
-                    $data = base64_decode($data);
-                }
+                $this->process_message_data_body_part(
+                    $messageid,
+                    $part,
+                    $partno,
+                    $contentplain,
+                    $contenthtml,
+                    $attachments,
+                );
 
-                // PARAMETERS
-                // get all parameters, like charset, filenames of attachments, etc.
-                $params = [];
-                if (isset($part->parameters)) {
-                    foreach ($part->parameters as $x) {
-                        $params[strtolower($x->attribute)] = $x->value;
-                    }
-                }
-                if (isset($part->dparameters)) {
-                    foreach ($part->dparameters as $x) {
-                        $params[strtolower($x->attribute)] = $x->value;
-                    }
-                }
-                // ATTACHMENT.
-                if (isset($params['filename']) || isset($params['name'])) {
-                    $filename = isset($params['filename']) ? $params['filename'] : $params['name'];
-                    if ($attachment = $this->process_message_part_attachment($part, $data, $filename)) {
-                        $disposition = strtolower($part->disposition);
-                        $disposition = $disposition == 'inline' ? 'inline' : 'attachment';
-                        $attachments[$disposition][] = $attachment;
+                // SUBPART RECURSION.
+                if (isset($part->parts) && is_array($part->parts)) {
+                    foreach ($part->parts as $subpartno => $subpart) {
+                        $this->process_message_data_body_part(
+                            $messageid,
+                            $subpart,
+                            $subpartno,
+                            $contentplain,
+                            $contenthtml,
+                            $attachments,
+                        );
                     }
                 }
             }
         }
 
         // The message ID should always be in the first part.
-        $this->currentmessagedata = new \stdClass();
         $this->currentmessagedata->plain = $contentplain;
         $this->currentmessagedata->html = $contenthtml;
         $this->currentmessagedata->attachments = $attachments;
 
         return $this->currentmessagedata;
+    }
+
+    private function process_message_data_body_part(
+        $messageid,
+        $part,
+        $partno,
+        &$contentplain,
+        &$contenthtml,
+        &$attachments,
+    ): array {
+        $data = imap_fetchbody($this->client, $messageid, $partno, FT_PEEK);
+        // Any part may be encoded, even plain text messages, so check everything.
+        if ($part->encoding == 4) {
+            $data = quoted_printable_decode($data);
+        } else if ($part->encoding == 3) {
+            $data = base64_decode($data);
+        }
+
+        // PARAMETERS
+        // get all parameters, like charset, filenames of attachments, etc.
+        $params = [];
+        if (isset($part->parameters)) {
+            foreach ($part->parameters as $x) {
+                $params[strtolower($x->attribute)] = $x->value;
+            }
+        }
+        if (isset($part->dparameters)) {
+            foreach ($part->dparameters as $x) {
+                $params[strtolower($x->attribute)] = $x->value;
+            }
+        }
+
+        // HTML.
+        if (strtolower($part->subtype) == 'html') {
+            $contenthtml = $this->process_message_part_body($data, $params['charset']);
+        }
+        // PLAIN.
+        if (strtolower($part->subtype) == 'plain') {
+            $contentplain = $this->process_message_part_body($data, $params['charset']);
+        }
+        // ATTACHMENT.
+        if (isset($params['filename']) || isset($params['name'])) {
+            $filename = isset($params['filename']) ? $params['filename'] : $params['name'];
+            if ($attachment = $this->process_message_part_attachment($part, $data, $filename)) {
+                $disposition = strtolower($part->disposition);
+                $disposition = $disposition == 'inline' ? 'inline' : 'attachment';
+                $attachments[$disposition][] = $attachment;
+            }
+        }
+
+        return [$attachments, $contenthtml, $contentplain];
     }
 
     /**
@@ -667,24 +687,13 @@ class manager {
     /**
      * Process the messagedata and part data to extract the content of this part.
      *
-     * @param \Horde_Imap_Client_Data_Fetch $messagedata The structure and part of the message body
-     * @param \Horde_Mime_Part $partdata The part data
-     * @param string $part The part ID
+     * @param string $bodycontent Body content
+     * @param string $charset The charset
      * @return string
      */
-    private function process_message_part_body($messagedata, $partdata, $part) {
-        // This is a content section for the main body.
-
-        // Get the string version of it.
-        $content = $messagedata->getBodyPart($part);
-        if (!$messagedata->getBodyPartDecode($part)) {
-            // Decode the content.
-            $partdata->setContents($content);
-            $content = $partdata->getContents();
-        }
-
+    private function process_message_part_body($bodycontent, $charset) {
         // Convert the text from the current encoding to UTF8.
-        $content = \core_text::convert($content, $partdata->getCharset());
+        $content = \core_text::convert($bodycontent, $charset);
 
         // Fix any invalid UTF8 characters.
         // Note: XSS cleaning is not the responsibility of this code. It occurs immediately before display when
