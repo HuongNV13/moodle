@@ -57,7 +57,7 @@ class manager {
     /**
      * @var string The flag for deleted messages.
      */
-    const MESSAGE_DELETED = '\deleted';
+    const MESSAGE_DELETED = '\Deleted';
 
     /**
      * @var \string IMAP folder namespace.
@@ -89,7 +89,9 @@ class manager {
      *
      * @return bool Whether a connection was successfully established.
      */
-    protected function get_imap_client() {
+    protected function get_imap_client(
+        string $mailbox = self::MAILBOX,
+    ) {
         global $CFG;
 
         if (!\core\message\inbound\manager::is_enabled()) {
@@ -119,8 +121,16 @@ class manager {
 
         // TODO: Implement XOAUTH2.
 
-        $this->connectionurl = '{' . $configuration['hostspec'] . '/imap/' . $configuration['secure'] . '}';
-        $this->client = imap_open($this->connectionurl . self::MAILBOX, $configuration['username'], $configuration['password']);
+        $this->connectionurl = '{' . $configuration['hostspec'];
+        if (isset($configuration['port'])) {
+            // Use the port if provided.
+            $this->connectionurl .= ':' . $configuration['port'];
+        }
+        if ($configuration['debug']) {
+            $this->connectionurl .= '/debug';
+        }
+        $this->connectionurl .= '/imap/' . $configuration['secure'] . '}';
+        $this->client = imap_open($this->connectionurl . $mailbox, $configuration['username'], $configuration['password']);
         if (imap_errors()) {
             throw new \moodle_exception('imapconnectfailure', 'tool_messageinbound', '', null, imap_last_error());
         }
@@ -132,49 +142,13 @@ class manager {
     }
 
     /**
-     * Shutdown and close the connection to the IMAP client.
+     * Shutdown and close the connection to the IMAP connection.
      */
     protected function close_connection() {
         if ($this->client) {
             imap_close($this->client);
         }
         $this->client = null;
-    }
-
-    /**
-     * Get the confirmation folder imap name
-     *
-     * @return string
-     */
-    protected function get_confirmation_folder() {
-
-        if ($this->imapnamespace === null) {
-            if ($this->client->queryCapability('NAMESPACE')) {
-                $namespaces = $this->client->getNamespaces(array(), array('ob_return' => true));
-                $this->imapnamespace = $namespaces->getNamespace('INBOX');
-            } else {
-                $this->imapnamespace = '';
-            }
-        }
-
-        return $this->imapnamespace . self::CONFIRMATIONFOLDER;
-    }
-
-    /**
-     * Get the current mailbox information.
-     *
-     * @return \Horde_Imap_Client_Mailbox
-     * @throws \core\message\inbound\processing_failed_exception if the mailbox could not be opened.
-     */
-    protected function get_mailbox() {
-        // Get the current mailbox.
-        $mailbox = $this->client->currentMailbox();
-
-        if (isset($mailbox['mailbox'])) {
-            return $mailbox['mailbox'];
-        } else {
-            throw new \core\message\inbound\processing_failed_exception('couldnotopenmailbox', 'tool_messageinbound');
-        }
     }
 
     /**
@@ -214,38 +188,31 @@ class manager {
      * @throws \core\message\inbound\processing_failed_exception if the message cannot be found.
      */
     public function process_existing_message(\stdClass $maildata) {
-        // Grab the new IMAP client.
-        if (!$this->get_imap_client()) {
+        // Grab the new IMAP connection.
+        if (!$this->get_imap_client(self::CONFIRMATIONFOLDER)) {
             return false;
         }
 
         // Build the search.
-        $search = new \Horde_Imap_Client_Search_Query();
         // When dealing with Inbound Message messages, we mark them as flagged and seen. Restrict the search to those criterion.
-        $search->flag(self::MESSAGE_SEEN, true);
-        $search->flag(self::MESSAGE_FLAGGED, true);
-        mtrace("Searching for a Seen, Flagged message in the folder '" . $this->get_confirmation_folder() . "'");
-
-        // Match the message ID.
-        $search->headerText('message-id', $maildata->messageid);
-        $search->headerText('to', $maildata->address);
-
-        $results = $this->client->search($this->get_confirmation_folder(), $search);
-
-        // Build the base query.
-        $query = new \Horde_Imap_Client_Fetch_Query();
-        $query->envelope();
-        $query->structure();
-
-
-        // Fetch the first message from the client.
-        $messages = $this->client->fetch($this->get_confirmation_folder(), $query, array('ids' => $results['match']));
+        mtrace("Searching for a Seen, Flagged message in the folder '" . self::CONFIRMATIONFOLDER . "'");
+        $messagesequences = imap_search($this->client, 'SEEN FLAGGED TO "' . $maildata->address . '"');
         $this->addressmanager = new \core\message\inbound\address_manager();
-        if ($message = $messages->first()) {
-            mtrace("--> Found the message. Passing back to the pickup system.");
+        if ($messagesequences) {
+            $targetsequence = 0;
+            mtrace("Found " . count($messagesequences) . " messages to parse. Parsing...");
+            foreach ($messagesequences as $messagesequence) {
+                $envelope = imap_headerinfo($this->client, $messagesequence);
+                // Match the message id.
+                if (htmlentities($envelope->message_id) == $maildata->messageid) {
+                    $targetsequence = $messagesequence;
+                    break;
+                }
+            }
+            mtrace("--> Found the messages. Passing back to the pickup system.");
 
             // Process the message.
-            $this->process_message($message, true, true);
+            $this->process_message($targetsequence, true, true);
 
             // Close the client connection.
             $this->close_connection();
@@ -268,34 +235,23 @@ class manager {
      */
     public function tidy_old_messages() {
         // Grab the new IMAP client.
-        if (!$this->get_imap_client()) {
+        if (!$this->get_imap_client(self::CONFIRMATIONFOLDER)) {
             return false;
         }
 
         // Open the mailbox.
         mtrace("Searching for messages older than 24 hours in the '" .
-                $this->get_confirmation_folder() . "' folder.");
-        $this->client->openMailbox($this->get_confirmation_folder());
-
-        $mailbox = $this->get_mailbox();
-
-        // Build the search.
-        $search = new \Horde_Imap_Client_Search_Query();
+            self::CONFIRMATIONFOLDER . "' folder.");
 
         // Delete messages older than 24 hours old.
-        $search->intervalSearch(DAYSECS, \Horde_Imap_Client_Search_Query::INTERVAL_OLDER);
-
-        $results = $this->client->search($mailbox, $search);
-
-        // Build the base query.
-        $query = new \Horde_Imap_Client_Fetch_Query();
-        $query->envelope();
-
+        $date = date('Y-m-d', time() - DAYSECS);
         // Retrieve the messages and mark them for removal.
-        $messages = $this->client->fetch($mailbox, $query, array('ids' => $results['match']));
-        mtrace("Found " . $messages->count() . " messages for removal.");
-        foreach ($messages as $message) {
-            $this->add_flag_to_message($message->getUid(), self::MESSAGE_DELETED);
+        $messagesequences = imap_search($this->client, 'BEFORE "' . $date . '"');
+        if ($messagesequences) {
+            mtrace("Found " . count($messagesequences) . " messages for removal.");
+            foreach ($messagesequences as $messagesequence) {
+                $this->add_flag_to_message($messagesequence, self::MESSAGE_DELETED);
+            }
         }
 
         mtrace("Finished removing messages.");
@@ -324,7 +280,8 @@ class manager {
     public function process_message(
             int $messagesequence,
             $viewreadmessages = false,
-            $skipsenderverification = false) {
+            $skipsenderverification = false,
+    ) {
         global $USER;
 
         mtrace("- Parsing message " . $messagesequence);
@@ -332,11 +289,10 @@ class manager {
         // First flag this message to prevent another running hitting this message while we look at the headers.
         $this->add_flag_to_message($messagesequence, self::MESSAGE_FLAGGED);
 
-        // TODO: Implement bulk check.
-        //if ($this->is_bulk_message($message, $messageid)) {
-        //    mtrace("- The message has a bulk header set. This is likely an auto-generated reply - discarding.");
-        //    return;
-        //}
+        if ($this->is_bulk_message($messagesequence)) {
+            mtrace("- The message has a bulk header set. This is likely an auto-generated reply - discarding.");
+            return;
+        }
 
         // Record the user that this script is currently being run as.  This is important when re-processing existing
         // messages, as \core\cron::setup_user is called multiple times.
@@ -493,7 +449,7 @@ class manager {
     ) {
         // The message ID should always be in the first part.
         $data = new \stdClass();
-        $data->messageid = $envelope->message_id;
+        $data->messageid = htmlentities($envelope->message_id);
         $data->subject = $envelope->subject;
         $data->timestamp = $envelope->udate;
         $data->envelope = $envelope;
@@ -604,87 +560,6 @@ class manager {
     }
 
     /**
-     * Process a message again to add body and attachment data.
-     *
-     * @param $basemessagedata The structure and part of the message body
-     * @param string|\Horde_Imap_Client_Ids $messageid The Hore message Uid
-     * @return \stdClass The current value of the messagedata
-     */
-    private function process_message_data_body_old(
-            \Horde_Imap_Client_Data_Fetch $basemessagedata,
-            $messageid) {
-        global $CFG;
-
-        // Get the current mailbox.
-        $mailbox = $this->get_mailbox();
-
-        // We need the structure at various points below.
-        $structure = $basemessagedata->getStructure();
-
-        // Now fetch the rest of the message content.
-        $query = new \Horde_Imap_Client_Fetch_Query();
-        $query->fullText();
-
-        // Fetch all of the message parts too.
-        $typemap = $structure->contentTypeMap();
-        foreach ($typemap as $part => $type) {
-            // The body of the part - attempt to decode it on the server.
-            $query->bodyPart($part, array(
-                'decode' => true,
-                'peek' => true,
-            ));
-            $query->bodyPartSize($part);
-        }
-
-        $messagedata = $this->client->fetch($mailbox, $query, array('ids' => $messageid))->first();
-
-        // Store the data for this message.
-        $contentplain = '';
-        $contenthtml = '';
-        $attachments = array(
-            'inline' => array(),
-            'attachment' => array(),
-        );
-
-        $plainpartid = $structure->findBody('plain');
-        $htmlpartid = $structure->findBody('html');
-
-        foreach ($typemap as $part => $type) {
-            // Get the message data from the body part, and combine it with the structure to give a fully-formed output.
-            $stream = $messagedata->getBodyPart($part, true);
-            $partdata = $structure->getPart($part);
-            $partdata->setContents($stream, array(
-                'usestream' => true,
-            ));
-
-            if ($part == $plainpartid) {
-                $contentplain = $this->process_message_part_body($messagedata, $partdata, $part);
-
-            } else if ($part == $htmlpartid) {
-                $contenthtml = $this->process_message_part_body($messagedata, $partdata, $part);
-
-            } else if ($filename = $partdata->getName($part)) {
-                if ($attachment = $this->process_message_part_attachment($messagedata, $partdata, $part, $filename)) {
-                    // The disposition should be one of 'attachment', 'inline'.
-                    // If an empty string is provided, default to 'attachment'.
-                    $disposition = $partdata->getDisposition();
-                    $disposition = $disposition == 'inline' ? 'inline' : 'attachment';
-                    $attachments[$disposition][] = $attachment;
-                }
-            }
-
-            // We don't handle any of the other MIME content at this stage.
-        }
-
-        // The message ID should always be in the first part.
-        $this->currentmessagedata->plain = $contentplain;
-        $this->currentmessagedata->html = $contenthtml;
-        $this->currentmessagedata->attachments = $attachments;
-
-        return $this->currentmessagedata;
-    }
-
-    /**
      * Process the messagedata and part data to extract the content of this part.
      *
      * @param string $bodycontent Body content
@@ -718,13 +593,10 @@ class manager {
 
         // If a filename is present, assume that this part is an attachment.
         $attachment = new \stdClass();
-        $attachment->filename       = $filename;
-        //$attachment->type           = $partdata->getType();
-        $attachment->content        = $filecontent;
-        //$attachment->charset        = $partdata->getCharset();
-        //$attachment->description    = $partdata->getDescription();
-        //$attachment->contentid      = $partdata->getContentId();
-        $attachment->filesize       = $partdata->bytes;
+        $attachment->filename = $filename;
+        $attachment->content = $filecontent;
+        $attachment->contentid = htmlentities($partdata->id);
+        $attachment->filesize = $partdata->bytes;
 
         if (!empty($CFG->antiviruses)) {
             mtrace("--> Attempting virus scan of '{$attachment->filename}'");
@@ -770,7 +642,6 @@ class manager {
      * @param string $flag The flag to add
      */
     private function add_flag_to_message($messageid, $flag) {
-        // Mark it as read to lock the message.
         imap_setflag_full($this->client, $messageid, $flag);
     }
 
@@ -825,35 +696,35 @@ class manager {
     /**
      * Attempt to determine whether this message is a bulk message (e.g. automated reply).
      *
-     * @param \Horde_Imap_Client_Data_Fetch $message The message to process
-     * @param string|\Horde_Imap_Client_Ids $messageid The Hore message Uid
+     * @param int $messageid The Hore message Uid
      * @return boolean
      */
     private function is_bulk_message(
-            \Horde_Imap_Client_Data_Fetch $message,
-            $messageid) {
-        $query = new \Horde_Imap_Client_Fetch_Query();
-        $query->headerText(array('peek' => true));
-
-        $messagedata = $this->client->fetch($this->get_mailbox(), $query, array('ids' => $messageid))->first();
+            $messageid,
+    ) {
+        // Get header string.
+        $header = imap_fetchheader($this->client, $messageid);
+        // Parse the header string.
+        preg_match_all('/([^: ]+): (.+?(?:\r\n\s(?:.+?))*)\r\n/m', $header, $matches);
+        $headers = array_combine($matches[1], $matches[2]);
 
         // Assume that this message is not bulk to begin with.
         $isbulk = false;
 
         // An auto-reply may itself include the Bulk Precedence.
-        $precedence = $messagedata->getHeaderText(0, \Horde_Imap_Client_Data_Fetch::HEADER_PARSE)->getValue('Precedence');
+        $precedence = $headers['Precedence'] ?? '';
         $isbulk = $isbulk || strtolower($precedence ?? '') == 'bulk';
 
         // If the X-Autoreply header is set, and not 'no', then this is an automatic reply.
-        $autoreply = $messagedata->getHeaderText(0, \Horde_Imap_Client_Data_Fetch::HEADER_PARSE)->getValue('X-Autoreply');
+        $autoreply = $headers['X-Autoreply'] ?? '';
         $isbulk = $isbulk || ($autoreply && $autoreply != 'no');
 
         // If the X-Autorespond header is set, and not 'no', then this is an automatic response.
-        $autorespond = $messagedata->getHeaderText(0, \Horde_Imap_Client_Data_Fetch::HEADER_PARSE)->getValue('X-Autorespond');
+        $autorespond = $headers['X-Autorespond'] ?? '';
         $isbulk = $isbulk || ($autorespond && $autorespond != 'no');
 
         // If the Auto-Submitted header is set, and not 'no', then this is a non-human response.
-        $autosubmitted = $messagedata->getHeaderText(0, \Horde_Imap_Client_Data_Fetch::HEADER_PARSE)->getValue('Auto-Submitted');
+        $autosubmitted = $headers['Auto-Submitted'] ?? '';;
         $isbulk = $isbulk || ($autosubmitted && $autosubmitted != 'no');
 
         return $isbulk;

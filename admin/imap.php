@@ -12,17 +12,22 @@ print("Connection established...."."<br>");
 $messages = imap_search($imap, 'UNSEEN UNFLAGGED');
 echo "<pre>";
 foreach ($messages as $messageid) {
-    $structure = imap_fetchstructure($imap, $messageid);
+    $header = imap_fetchheader($imap, $messageid);
+    preg_match_all('/([^: ]+): (.+?(?:\r\n\s(?:.+?))*)\r\n/m', $header, $matches);
+    $headers = array_combine($matches[1], $matches[2]);
     //var_dump($structure);
-    $data = imap_fetchbody($imap, $messageid, '1.1', FT_PEEK);
-    var_dump($data);
-    foreach ($structure->parts as $partno => $part) {
-        //$data = imap_fetchbody($this->client, $messageid, '1.1');
-        //var_dump($data);
+    //$data = imap_fetchheader($imap, $messageid, '1.1', FT_PEEK);
+    var_dump($headers);
+    //foreach ($structure->parts as $partno => $part) {
+    //    //$data = imap_fetchbody($this->client, $messageid, '1.1');
+    //    if (isset($part->id)) {
+    //        var_dump(htmlentities($part->id));
+    //    }
+    //    var_dump($part);
     //    if (strtolower($part->subtype) == 'html') {
     //        var_dump($data);
     //    }
-    }
+    //}
     //var_dump(imap_headerinfo($imap, $messageid));
     //var_dump(imap_fetchstructure($imap, $messageid));
     //var_dump(imap_fetchmime($imap, $messageid, 1));
