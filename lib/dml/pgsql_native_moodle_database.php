@@ -204,6 +204,12 @@ class pgsql_native_moodle_database extends moodle_database {
             $connection .= " sslmode=$sslmode";
         }
 
+        if (isset($this->dboptions['extrainfo']) && is_array($this->dboptions['extrainfo'])) {
+            foreach ($this->dboptions['extrainfo'] as $extraoption => $extravalue) {
+                $connection .= " $extraoption=$extravalue";
+            }
+        }
+
         ob_start();
         // It seems that pg_connect() handles some errors differently.
         // For example, name resolution error will raise an exception, and non-existing
