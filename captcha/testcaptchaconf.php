@@ -11,10 +11,11 @@ $returnurl = new moodle_url('/captcha/testcaptchaconf.php');
 echo $OUTPUT->header();
 echo $OUTPUT->heading($headingtitle);
 
-$provider = new \core_captcha\provider(get_config('captcha', 'provider'));
+$providertype = get_config('captcha', 'provider');
+$provider = new \core_captcha\provider($providertype);
 
 $form = html_writer::start_tag('form', ['method' => 'POST', 'action' => $returnurl]);
-$form .= $provider->get_output_html();
+$form .= html_writer::div($provider->get_output_html(), 'pb-2 pt-2');
 $form .= $button = html_writer::tag('button', 'Submit', [
     'name' => 'submit',
     'class' => 'btn btn-primary',
@@ -22,8 +23,21 @@ $form .= $button = html_writer::tag('button', 'Submit', [
 ]);
 $form .= html_writer::end_tag('form');
 
-if (isset($_POST['submit']) && isset($_POST['g-recaptcha-response'])) {
-    $check = $provider->verify_response($_POST['g-recaptcha-response']);
+if (isset($_POST['submit'])) {
+    switch ($providertype) {
+        case 'captcha_recaptchav2':
+        case 'captcha_hcaptcha':
+            $check = $provider->verify_response($_POST['g-recaptcha-response']);
+            break;
+        case 'captcha_mtcaptcha':
+            $check = $provider->verify_response($_POST['mtcaptcha-verifiedtoken']);
+            break;
+        case 'captcha_geetest':
+            $check = $provider->verify_response($_POST['mtcaptcha-verifiedtoken']);
+            break;
+        default:
+            $check = ['isvalid' => false, 'error' => ['Unknown provider']];
+    }
     $result = html_writer::start_div();
     $result .= html_writer::div('Valid: ' . ($check['isvalid'] ? 'Yes' : 'No'));
     if (!empty($check['error'])) {

@@ -14,18 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace captcha_mtcaptcha;
+namespace captcha_geetest;
 
 use core\http_client;
 use core_captcha\captcha_provider;
-use GuzzleHttp\Psr7\Request;
 use html_writer;
-use moodle_url;
 
 /**
  * Provider.
  *
- * @package    captcha_mtcaptcha
+ * @package    captcha_hcaptcha
  * @copyright  2023 Huong Nguyen <huongnv13@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -36,27 +34,28 @@ class provider implements captcha_provider {
     private const SITE_VERIFY_URL = 'https://hcaptcha.com/siteverify';
 
     public static function get_provider($provider): captcha_provider {
-        self::$publickey = get_config('captcha_mtcaptcha', 'sitekey');
-        self::$privatekey = get_config('captcha_mtcaptcha', 'privatekey');
+        self::$publickey = get_config('captcha_geetest', 'sitekey');
+        self::$privatekey = get_config('captcha_geetest', 'privatekey');
         return new self($provider);
     }
 
     public static function get_output_html(): string {
-        global $PAGE;
-        $pubkey = self::$publickey;
-        $jscode = "
-        var mtcaptchaConfig = {
-            'sitekey': '$pubkey'
-        }
-        (function(){var mt_service = document.createElement('script');mt_service.async = true;mt_service.src = 'https://service.mtcaptcha.com/mtcv1/client/mtcaptcha.min.js';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(mt_service);
-   var mt_service2 = document.createElement('script');mt_service2.async = true;mt_service2.src = 'https://service2.mtcaptcha.com/mtcv1/client/mtcaptcha2.min.js';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(mt_service2);}) ();
-        ";
-        //$return = html_writer::script($jscode);;
-        $return = html_writer::div('', 'mtcaptcha');
+        $return = "\n<script src='https://static.geetest.com/v4/gt4.js'></script>\n";
+        $return .= html_writer::div(
+            '',
+            'geetest-captcha',
+        );
 
-        //$PAGE->requires->js_call_amd('captcha_mtcaptcha/captcha', 'init', [$pubkey]);
-        //$PAGE->requires->js($jscode, true);
-        $PAGE->requires->js(new moodle_url('/captcha/provider/mtcaptcha/captcha.js'));
+        $jscode = 'initGeetest4(
+  {
+    captchaId: "' . self::$publickey . '",
+  },
+  function (captcha) {
+    // call appendTo to insert CAPTCHA into an element of the page, which can be customized by you
+    captcha.appendTo(".geetest-captcha");
+  }
+);';
+        $return .= html_writer::script($jscode);
 
         return $return;
     }

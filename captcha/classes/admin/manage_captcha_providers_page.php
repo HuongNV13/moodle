@@ -18,6 +18,7 @@ namespace core_captcha\admin;
 
 use admin_setting;
 use core_plugin_manager;
+use core_text;
 use html_table;
 use html_table_row;
 use html_writer;

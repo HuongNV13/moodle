@@ -42,7 +42,7 @@ class provider implements captcha_provider {
     }
 
     public static function get_output_html(): string {
-        $return = "\n<script src='https://www.hCaptcha.com/1/api.js' async defer></script>\n";;
+        $return = "\n<script src='https://www.hCaptcha.com/1/api.js' async defer></script>\n";
         $return .= html_writer::div(
             '',
             'h-captcha',
