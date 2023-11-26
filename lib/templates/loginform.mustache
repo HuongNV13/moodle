@@ -91,7 +91,9 @@
         "sitename": "Beer & Chips",
         "logintoken": "randomstring",
         "maintenance": "For full access to this site, you need to login in as an admin.",
-        "languagemenu": "Choose language"
+        "languagemenu": "Choose language",
+        "togglepassword": true,
+        "smallscreensonly": true
     }
 }}
 
@@ -142,11 +144,39 @@
                 !}}autocomplete="username">
         </div>
         <div class="login-form-password form-group">
-            <label for="password" class="sr-only">{{#str}} password {{/str}}</label>
-            <input type="password" name="password" id="password" value="" {{!
-                !}}class="form-control form-control-lg" {{!
-                !}}placeholder="{{#cleanstr}}password{{/cleanstr}}" {{!
-                !}}autocomplete="current-password">
+            {{#togglepassword}}
+                <div class="input-group toggle-sensitive-wrapper {{#smallscreensonly}}small-screens-only{{/smallscreensonly}}" >
+                    <input
+                        id="password"
+                        type="password"
+                        name="password"
+                        value=""
+                        class="form-control form-control-lg toggle-sensitive-input"
+                        placeholder="{{#cleanstr}}password{{/cleanstr}}"
+                        autocomplete="current-password">
+                    <label for="password">
+                        <span class="sr-only">{{#str}}password{{/str}}</span>
+                    </label>
+                    <div
+                        class="input-group-append toggle-sensitive-button {{#smallscreensonly}}d-sm-none{{/smallscreensonly}}"
+                        role="button"
+                        aria-label="{{#str}}auth_loginpasswordtoggle, auth{{/str}}"
+                        tabindex="0">
+                        <span class="input-group-text">
+                            <i class="icon mr-0 fa fa-eye toggle-sensitive-icon"></i>
+                        </span>
+                    </div>
+                </div>
+            {{/togglepassword}}
+            {{^togglepassword}}
+                <input type="password" name="password" id="password" value="" {{!
+                    !}}class="form-control form-control-lg" {{!
+                    !}}placeholder="{{#cleanstr}}password{{/cleanstr}}" {{!
+                    !}}autocomplete="current-password">
+                <label for="password">
+                    <span class="sr-only">{{#str}}password{{/str}}</span>
+                </label>
+            {{/togglepassword}}
         </div>
         {{#recaptcha}}
             <div class="login-form-recaptcha form-group">
@@ -232,4 +262,9 @@
             Submit.init("loginguestbtn");
         {{/canloginasguest}}
     });
+    {{#togglepassword}}
+        require(['core/togglesensitive'], function(toggle) {
+            toggle.init({{smallscreensonly}});
+        });
+    {{/togglepassword}}
 {{/js}}
