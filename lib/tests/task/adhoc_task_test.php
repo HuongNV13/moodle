@@ -605,4 +605,64 @@ class adhoc_task_test extends \advanced_testcase {
             $output
         );
     }
+
+    /**
+     * Test adhoc task failure without retry.
+     *
+     * @covers ::get_next_adhoc_task
+     * @covers ::get_adhoc_task
+     * @covers ::adhoc_task_failed
+     */
+    public function test_get_next_adhoc_task_without_fail_retry(): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        // Create an adhoc task.
+        $task = new adhoc_test6_task();
+        manager::queue_adhoc_task($task);
+        $this->assertCount(
+            expectedCount: 1,
+            haystack: $DB->get_records(
+                table: 'task_adhoc',
+            ),
+        );
+
+        $now = time();
+
+        // Get the task from the scheduler, execute it, and mark it as failed.
+        $task = manager::get_next_adhoc_task($now);
+        $taskid = $task->get_id();
+        $task->execute();
+        manager::adhoc_task_failed($task);
+        $this->assertCount(
+            expectedCount: 1,
+            haystack: $DB->get_records(
+                table: 'task_adhoc',
+            ),
+        );
+
+        // Get the task from the scheduler (retry after delay). Fail it again.
+        $task = manager::get_next_adhoc_task($now + 120);
+        $this->assertInstanceOf(
+            expected: '\\core\\task\\adhoc_test6_task',
+            actual: $task
+        );
+        $this->assertEquals(
+            expected: $taskid,
+            actual: $task->get_id()
+        );
+        $task->execute();
+        manager::adhoc_task_failed($task);
+
+        // The task was marked as no-retry, so it was deleted.
+        $this->assertCount(
+            expectedCount: 0,
+            haystack: $DB->get_records(
+                table: 'task_adhoc',
+            ),
+        );
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage('error/invalidtaskid');
+        manager::get_adhoc_task($taskid);
+    }
 }
