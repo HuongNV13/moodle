@@ -31,6 +31,7 @@ import ModalFactory from 'core/modal_factory';
 import Notification from 'core/notification';
 import Templates from 'core/templates';
 import {add as notifyUser} from 'core/toast';
+import Pending from 'core/pending';
 
 const Selectors = {
     editEnrolment: '[data-action="editenrolment"]',
@@ -306,6 +307,7 @@ const submitEditFormAjax = (clickedLink, getBody, modal, userEnrolmentId, userDa
  * @param {Object} userData
  */
 const submitUnenrolFormAjax = (clickedLink, modal, args, userData) => {
+    const pendingPromise = new Pending('core_user/status_field:unenrol');
     Repository.unenrolUser(args.ueid)
     .then(data => {
         if (!data.result) {
@@ -331,6 +333,9 @@ const submitUnenrolFormAjax = (clickedLink, modal, args, userData) => {
         notifyUser(notificationString);
 
         return;
+    })
+    .then(() => {
+        pendingPromise.resolve();
     })
     .catch(Notification.exception);
 };
