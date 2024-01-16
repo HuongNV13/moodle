@@ -3680,7 +3680,7 @@ abstract class enrol_plugin {
         ))->out();
 
         if ($message && trim($message) !== '') {
-            $placeholders = [
+            $key = [
                 '{$a->coursename}',
                 '{$a->profileurl}',
                 '{$a->fullname}',
@@ -3689,7 +3689,7 @@ abstract class enrol_plugin {
                 '{$a->lastname}',
                 '{$a->courserole}',
             ];
-            $values = [
+            $value = [
                 $a->coursename,
                 $a->profileurl,
                 fullname($user),
@@ -3698,16 +3698,21 @@ abstract class enrol_plugin {
                 $user->lastname,
                 $courserole,
             ];
-            $message = str_replace($placeholders, $values, $message);
+            $message = str_replace($key, $value, $message);
+            if (strpos($message, '<') === false) {
+                // Plain text only.
+                $messagetext = $message;
+                $messagehtml = text_to_html($messagetext, null, false, true);
+            } else {
+                // This is most probably the tag/newline soup known as FORMAT_MOODLE.
+                $messagehtml = format_text($message, FORMAT_MOODLE,
+                    ['context' => $context, 'para' => false, 'newlines' => true, 'filter' => true]);
+                $messagetext = html_to_text($messagehtml);
+            }
         } else {
-            $message = get_string('welcometocoursetext', '', $a);
+            $messagetext = get_string('welcometocoursetext', '', $a);
+            $messagehtml = text_to_html($messagetext, null, false, true);
         }
-        $messagehtml = format_text(
-            $message,
-            FORMAT_MOODLE,
-            ['context' => $context, 'para' => false, 'newlines' => true, 'filter' => true]
-        );
-        $messagetext = html_to_text($messagehtml);
 
         $subject = get_string('welcometocourse', 'moodle', format_string($course->fullname, true, ['context' => $context]));
         $contact = $this->get_welcome_message_contact(

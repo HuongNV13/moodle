@@ -77,6 +77,7 @@ information provided here is intended especially for developers.
 * The hook API now supports the use of the new \core\attribute\hook\replaces_callbacks() attribute
   as an alternative to implementing the \core\hook\deprecated_callback_replacement interface.
 * There is a new method called enrol_plugin::get_welcome_message_contact() that returns the contact details for the course welcome message.
+* There is a new method called enrol_plugin::send_course_welcome_message_to_user() that sends the course welcome message to a user.
 
 === 4.3 ===
 
