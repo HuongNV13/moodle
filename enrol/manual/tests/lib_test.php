@@ -789,4 +789,26 @@ class lib_test extends \advanced_testcase {
         $this->assertEquals($expected->id, $actual->id);
     }
 
+    /**
+     * Test send_course_welcome_message_to_user() method.
+     * @covers \enrol_plugin::send_course_welcome_message_to_user
+     */
+    public function test_send_course_welcome_message(): void {
+        $this->resetAfterTest();
+        $messagesink = $this->redirectMessages();
+        $course = $this->getDataGenerator()->create_course([
+            'fullname' => 'Course 1',
+            'shortname' => 'C1',
+        ]);
+        $student = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($student->id, $course->id);
+        $messages = $messagesink->get_messages_by_component_and_type(
+            'moodle',
+            'enrolcoursewelcomemessage',
+        );
+        $this->assertNotEmpty($messages);
+        $message = reset($messages);
+        $this->assertStringContainsString($course->fullname, $message->subject);
+    }
+
 }

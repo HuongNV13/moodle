@@ -31,6 +31,16 @@ $string['assignroles'] = 'Assign roles';
 $string['browseusers'] = 'Browse users';
 $string['browsecohorts'] = 'Browse cohorts';
 $string['confirmbulkdeleteenrolment'] = 'Are you sure you want to delete these user enrolments?';
+$string['customwelcomemessage'] = 'Custom welcome message';
+$string['customwelcomemessage_help'] = 'Accepted formats: Plain text or Moodle-auto format. HTML tags and multi-lang tags are also accepted, as well as the following placeholders:<br><br>
+- Course name {$a->coursename}<br>
+- Link to user\'s profile page {$a->profileurl}<br>
+- User email {$a->email}<br>
+- User fullname {$a->fullname}<br>
+- User first name {$a->firstname}<br>
+- User last name {$a->lastname}<br>
+- User course role {$a->courserole}<br>';
+$string['customwelcomemessageplaceholder'] = 'Dear {$a->fullname}, you have successfully been enrolled to course {$a->coursename}';
 $string['defaultstart'] = 'Default enrolment start';
 $string['defaultperiod'] = 'Default enrolment duration';
 $string['defaultperiod_desc'] = 'Default length of time that the enrolment is valid. If set to zero, the enrolment duration will be unlimited by default.';
@@ -67,6 +77,8 @@ $string['pluginname_desc'] = 'The manual enrolments plugin allows users to be en
 $string['selection'] = 'Selection';
 $string['selectusers'] = 'Select users';
 $string['selectcohorts'] = 'Select cohorts';
+$string['sendcoursewelcomemessage'] = 'Send course welcome message';
+$string['sendcoursewelcomemessage_help'] = 'When manually enrolling a user or cohort in the course, they may be sent a welcome message email. If sent from the course contact (by default the teacher), and more than one user has this role, the email is sent from the first user to be assigned the role.';
 $string['sendexpirynotificationstask'] = "Manual enrolment send expiry notifications task";
 $string['status'] = 'Enable manual enrolments';
 $string['status_desc'] = 'Allow course access of internally enrolled users. This should be kept enabled in most cases.';
