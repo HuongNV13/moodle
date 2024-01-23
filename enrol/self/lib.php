@@ -961,7 +961,32 @@ class enrol_self_plugin extends enrol_plugin {
 
         $options = array('cols' => '60', 'rows' => '8');
         $mform->addElement('textarea', 'customtext1', get_string('customwelcomemessage', 'enrol_self'), $options);
-        $mform->addHelpButton('customtext1', 'customwelcomemessage', 'enrol_self');
+        $mform->setDefault('customtext1', get_string('customwelcomemessageplaceholder', 'enrol_self'));
+        $mform->hideIf(
+            elementname: 'customtext1',
+            dependenton: 'customint4',
+            condition: 'eq',
+            value: ENROL_DO_NOT_SEND_EMAIL,
+        );
+
+        // Static form elements cannot be hidden by hideIf() so we need to add a dummy group.
+        // See: https://tracker.moodle.org/browse/MDL-66251.
+        $group[] = $mform->createElement(
+            'static',
+            'customwelcomemessage_extra_help',
+            null,
+            get_string(
+                identifier: 'customwelcomemessage_help',
+                component: 'enrol_self',
+            ),
+        );
+        $mform->addGroup($group, 'group_customwelcomemessage_extra_help', '', ' ', false);
+        $mform->hideIf(
+            elementname: 'group_customwelcomemessage_extra_help',
+            dependenton: 'customint4',
+            condition: 'eq',
+            value: ENROL_DO_NOT_SEND_EMAIL,
+        );
 
         if (enrol_accessing_via_instance($instance)) {
             $warntext = get_string('instanceeditselfwarningtext', 'core_enrol');

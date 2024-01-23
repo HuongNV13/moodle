@@ -32,14 +32,15 @@ $string['browseusers'] = 'Browse users';
 $string['browsecohorts'] = 'Browse cohorts';
 $string['confirmbulkdeleteenrolment'] = 'Are you sure you want to delete these user enrolments?';
 $string['customwelcomemessage'] = 'Custom welcome message';
-$string['customwelcomemessage_help'] = 'Accepted formats: Plain text or Moodle-auto format. HTML tags and multi-lang tags are also accepted, as well as the following placeholders:<br><br>
-- Course name {$a->coursename}<br>
-- Link to user\'s profile page {$a->profileurl}<br>
-- User email {$a->email}<br>
-- User fullname {$a->fullname}<br>
-- User first name {$a->firstname}<br>
-- User last name {$a->lastname}<br>
-- User course role {$a->courserole}<br>';
+$string['customwelcomemessage_help'] = 'Accepted formats: Plain text or Moodle-auto format. HTML tags and multi-lang tags are also accepted, as well as the following placeholders:
+<br>
+* Course name {$a->coursename}<br>
+* Link to user\'s profile page {$a->profileurl}<br>
+* User email {$a->email}<br>
+* User fullname {$a->fullname}<br>
+* User first name {$a->firstname}<br>
+* User last name {$a->lastname}<br>
+* User course role {$a->courserole}<br>';
 $string['customwelcomemessageplaceholder'] = 'Dear {$a->fullname}, you have successfully been enrolled to course {$a->coursename}';
 $string['defaultstart'] = 'Default enrolment start';
 $string['defaultperiod'] = 'Default enrolment duration';
