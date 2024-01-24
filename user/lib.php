@@ -157,6 +157,8 @@ function user_update_user($user, $updatepassword = true, $triggerevent = true) {
         $user = (object) $user;
     }
 
+    $currentrecord = null;
+
     // Communication api update for user.
     if (core_communication\api::is_available()) {
         $usercourses = enrol_get_users_courses($user->id);
@@ -206,6 +208,16 @@ function user_update_user($user, $updatepassword = true, $triggerevent = true) {
     if (empty($user->calendartype)) {
         // Unset this variable, must be an empty string, which we do not want to update the calendartype to.
         unset($user->calendartype);
+    }
+
+    // Delete theme usage cache if the theme has been changed.
+    if (isset($user->theme)) {
+        if ($currentrecord === null) {
+            $currentrecord = $DB->get_record('user', ['id' => $user->id]);
+        }
+        if ($user->theme != $currentrecord->theme) {
+            theme_delete_used_in_context_cache($user->theme, $currentrecord->theme);
+        }
     }
 
     $user->timemodified = time();
