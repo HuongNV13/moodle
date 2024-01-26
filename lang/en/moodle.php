@@ -1041,6 +1041,7 @@ $string['hitsoncourse'] = 'Hits on {$a->coursename} by {$a->username}';
 $string['hitsoncoursetoday'] = 'Today\'s hits on {$a->coursename} by {$a->username}';
 $string['home'] = 'Home';
 $string['homeheader'] = 'Home menu';
+$string['hookfailedtaskmaxdelay'] = 'Allow plugins to get information when a task has reached the maximum fail delay.';
 $string['hour'] = 'hour';
 $string['hours'] = 'hours';
 $string['howtomakethemes'] = 'How to make new themes';

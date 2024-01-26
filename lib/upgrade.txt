@@ -39,6 +39,7 @@ information provided here is intended especially for developers.
 * Added missing deprecation for PARAM_CLEANFILE which was deprecated in Moodle 2.0.
 * Login can now utilise new param 'loginredirect' to indicate when to use value set for $CFG->alternateloginurl.
 * \action_menu_link::$instance has been deprecated as it is no longer used.
+* New failed_task_max_delay hook for maximum fail delay (See MDL-79131).
 
 === 4.3 ===
 
