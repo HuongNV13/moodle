@@ -1125,6 +1125,12 @@ class manager {
         // Max of 24 hour delay.
         if ($delay > 86400) {
             $delay = 86400;
+
+            // Dispatch hook when max fail delay has reached.
+            $hook = new \core\hook\task\failed_task_max_delay(
+                task: $task,
+            );
+            \core\hook\manager::get_instance()->dispatch(event: $hook);
         }
 
         // Reschedule and then release the locks.
@@ -1218,6 +1224,12 @@ class manager {
         // Max of 24 hour delay.
         if ($delay > 86400) {
             $delay = 86400;
+
+            // Dispatch hook when max fail delay has reached.
+            $hook = new \core\hook\task\failed_task_max_delay(
+                task: $task,
+            );
+            \core\hook\manager::get_instance()->dispatch(event: $hook);
         }
 
         $task->set_timestarted();
