@@ -105,22 +105,22 @@ class theme extends base {
                            SELECT '{$courselabel}' AS usagetype, theme, COUNT(theme) AS themecount
                              FROM {course}
                             WHERE theme <> '' AND theme IS NOT NULL
-                         GROUP BY theme
+                         GROUP BY '{$courselabel}', theme
                             UNION
                            SELECT '{$userlabel}' AS usagetype, theme, COUNT(theme) AS themecount
                              FROM {user}
                             WHERE theme <> '' AND theme IS NOT NULL
-                         GROUP BY theme
+                         GROUP BY '{$userlabel}', theme
                             UNION
                            SELECT '{$cohortlabel}' AS usagetype, theme, COUNT(theme) AS themecount
                              FROM {cohort}
                             WHERE theme <> '' AND theme IS NOT NULL
-                         GROUP BY theme
+                         GROUP BY '{$cohortlabel}', theme
                             UNION
                            SELECT '{$categorylabel}' AS usagetype, theme, COUNT(theme) AS themecount
                              FROM {course_categories}
                             WHERE theme <> '' AND theme IS NOT NULL
-                         GROUP BY theme
+                         GROUP BY '{$categorylabel}', theme
                         ) tuse ON tuse.theme={$sqlsubstring}")
             ->set_type(column::TYPE_TEXT)
             ->add_fields("tuse.usagetype, tuse.themecount")
