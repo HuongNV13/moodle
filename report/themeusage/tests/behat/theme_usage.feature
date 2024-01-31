@@ -12,6 +12,7 @@ Feature: Navigate to a theme usage report
       | allowcohortthemes   | 1 |
     And I log in as "admin"
 
+  @javascript
   Scenario: I am able to see theme usage report for all contexts overriding the default theme
     Given the following "courses" exist:
       | fullname | shortname | theme |

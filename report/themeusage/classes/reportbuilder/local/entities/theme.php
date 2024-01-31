@@ -121,7 +121,7 @@ class theme extends base {
                              FROM {course_categories}
                             WHERE theme <> '' AND theme IS NOT NULL
                          GROUP BY '{$categorylabel}', theme
-                        ) tuse ON tuse.theme={$sqlsubstring}")
+                        ) AS tuse ON tuse.theme={$sqlsubstring}")
             ->set_type(column::TYPE_TEXT)
             ->add_fields("tuse.usagetype, tuse.themecount")
             ->add_callback(static function(?string $usagetype, \stdClass $row): string {
