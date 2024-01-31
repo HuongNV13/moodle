@@ -101,7 +101,7 @@ class theme extends base {
             $this->get_entity_name()
         ))
             ->add_joins($this->get_joins())
-            ->add_join("LEFT JOIN (
+            ->add_join("LEFT JOIN (SELECT * FROM (
                            SELECT '{$courselabel}' AS usagetype, theme, COUNT(theme) AS themecount
                              FROM {course}
                             WHERE theme <> '' AND theme IS NOT NULL
@@ -121,7 +121,7 @@ class theme extends base {
                              FROM {course_categories}
                             WHERE theme <> '' AND theme IS NOT NULL
                          GROUP BY '{$categorylabel}', theme
-                        ) AS tuse ON tuse.theme={$sqlsubstring}")
+                        )) AS tuse ON tuse.theme={$sqlsubstring}")
             ->set_type(column::TYPE_TEXT)
             ->add_fields("tuse.usagetype, tuse.themecount")
             ->add_callback(static function(?string $usagetype, \stdClass $row): string {
