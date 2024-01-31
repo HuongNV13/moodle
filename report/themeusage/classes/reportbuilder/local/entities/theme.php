@@ -102,30 +102,30 @@ class theme extends base {
         ))
             ->add_joins($this->get_joins())
             ->add_join("LEFT JOIN (
-                           SELECT '{$courselabel}' AS usagetype, theme, COUNT(theme) AS count
+                           SELECT '{$courselabel}' AS usagetype, theme, COUNT(theme) AS themecount
                              FROM {course}
                             WHERE theme <> '' AND theme IS NOT NULL
-                         GROUP BY usagetype, theme
+                         GROUP BY theme
                             UNION
-                           SELECT '{$userlabel}' AS usagetype, theme, COUNT(theme) AS count
+                           SELECT '{$userlabel}' AS usagetype, theme, COUNT(theme) AS themecount
                              FROM {user}
                             WHERE theme <> '' AND theme IS NOT NULL
-                         GROUP BY usagetype, theme
+                         GROUP BY theme
                             UNION
-                           SELECT '{$cohortlabel}' AS usagetype, theme, COUNT(theme) AS count
+                           SELECT '{$cohortlabel}' AS usagetype, theme, COUNT(theme) AS themecount
                              FROM {cohort}
                             WHERE theme <> '' AND theme IS NOT NULL
-                         GROUP BY usagetype, theme
+                         GROUP BY theme
                             UNION
-                           SELECT '{$categorylabel}' AS usagetype, theme, COUNT(theme) AS count
+                           SELECT '{$categorylabel}' AS usagetype, theme, COUNT(theme) AS themecount
                              FROM {course_categories}
                             WHERE theme <> '' AND theme IS NOT NULL
-                         GROUP BY usagetype, theme
+                         GROUP BY theme
                         ) tuse ON tuse.theme={$sqlsubstring}")
             ->set_type(column::TYPE_TEXT)
-            ->add_fields("tuse.usagetype, tuse.count")
+            ->add_fields("tuse.usagetype, tuse.themecount")
             ->add_callback(static function(?string $usagetype, \stdClass $row): string {
-                $count = $row->count ?? 0;
+                $count = $row->themecount ?? 0;
                 return format_text($usagetype . ' ('. $count . ')', FORMAT_PLAIN);
             });
 
