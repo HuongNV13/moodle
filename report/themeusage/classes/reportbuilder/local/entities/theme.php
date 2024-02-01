@@ -104,22 +104,22 @@ class theme extends base {
             ->add_join("LEFT JOIN (
                            SELECT '{$courselabel}' AS usagetype, theme, COUNT(theme) AS themecount
                              FROM {course}
-                            WHERE theme <> '' AND theme IS NOT NULL
+                            WHERE " . $DB->sql_isnotempty('course', 'theme', false, false) . "
                          GROUP BY theme
                             UNION
                            SELECT '{$userlabel}' AS usagetype, theme, COUNT(theme) AS themecount
                              FROM {user}
-                            WHERE theme <> '' AND theme IS NOT NULL
+                            WHERE " . $DB->sql_isnotempty('user', 'theme', false, false) . "
                          GROUP BY theme
                             UNION
                            SELECT '{$cohortlabel}' AS usagetype, theme, COUNT(theme) AS themecount
                              FROM {cohort}
-                            WHERE theme <> '' AND theme IS NOT NULL
+                            WHERE " . $DB->sql_isnotempty('cohort', 'theme', false, false) . "
                          GROUP BY theme
                             UNION
                            SELECT '{$categorylabel}' AS usagetype, theme, COUNT(theme) AS themecount
                              FROM {course_categories}
-                            WHERE theme <> '' AND theme IS NOT NULL
+                            WHERE " . $DB->sql_isnotempty('course_categories', 'theme', false, false) . "
                          GROUP BY theme
                         ) tuse ON tuse.theme={$sqlsubstring}")
             ->set_type(column::TYPE_TEXT)
