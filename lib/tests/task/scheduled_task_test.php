@@ -1035,4 +1035,39 @@ class scheduled_task_test extends \advanced_testcase {
         $this->assertEquals(1, $task->get_hour());
         $this->assertEquals(false, $task->has_default_configuration());
     }
+
+    /**
+     * Test send messages when a task reaches the max fail delay time.
+     *
+     * @covers ::scheduled_task_failed
+     * @covers ::send_failed_task_max_delay_message
+     */
+    public function test_message_max_fail_delay(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Get an example task to use for testing. Task is set to run every minute by default.
+        $taskname = '\core\task\send_new_user_passwords_task';
+
+        $cronlockfactory = \core\lock\lock_config::get_lock_factory('cron');
+        $task = manager::get_scheduled_task($taskname);
+        $task->set_fail_delay(86400);   // 86400 is the max fail delay.
+
+        $lock = $cronlockfactory->get_lock('\\' . get_class($task), 10);
+        $task->set_lock($lock);
+
+        // Catch the message.
+        $messagesink = $this->redirectMessages();
+        manager::scheduled_task_failed($task);
+        $messages = $messagesink->get_messages();
+        $this->assertCount(1, $messages);
+        $messagesink->close();
+
+        // Catch emails in sink.
+        $mailsink = $this->redirectEmails();
+        manager::scheduled_task_failed($task);
+        $messagesemail = $mailsink->get_messages();
+        $this->assertCount(1, $messagesemail);
+        $mailsink->close();
+    }
 }
