@@ -1124,7 +1124,7 @@ class manager {
         }
 
         // Max of 24 hour delay.
-        if ($delay > 86400) {
+        if ($delay >= 86400) {
             $delay = 86400;
 
             // Dispatch hook when max fail delay has reached.

@@ -873,6 +873,9 @@ class adhoc_task_test extends \advanced_testcase {
         $this->resetAfterTest();
         $this->setAdminUser();
 
+        // Redirect messages.
+        $messagesink = $this->redirectMessages();
+
         // Create an adhoc task.
         $task = new adhoc_test_task();
         manager::queue_adhoc_task($task);
@@ -885,11 +888,9 @@ class adhoc_task_test extends \advanced_testcase {
         $task->execute();
 
         // Catch the message. The task has not reach the max time delay yet.
-        $messagesink = $this->redirectMessages();
         manager::adhoc_task_failed($task);
         $messages = $messagesink->get_messages();
         $this->assertCount(0, $messages);
-        $messagesink->close();
 
         // Should get the adhoc task immediately.
         $task = manager::get_adhoc_task($taskid);
@@ -899,10 +900,33 @@ class adhoc_task_test extends \advanced_testcase {
         $task->execute();
 
         // Catch the message.
-        $messagesink = $this->redirectMessages();
         manager::adhoc_task_failed($task);
         $messages = $messagesink->get_messages();
         $this->assertCount(1, $messages);
+
+        // Get the task and execute it second time.
+        $task = manager::get_adhoc_task($taskid);
+        // Set the fail delay to 12 hours.
+        $task->set_fail_delay(43200);
+        $task->execute();
+        manager::adhoc_task_failed($task);
+
+        // Catch the message.
+        $messages = $messagesink->get_messages();
+        $this->assertCount(2, $messages);
+
+        // Get the task and execute it third time.
+        $task = manager::get_adhoc_task($taskid);
+        // Set the fail delay to 48 hours.
+        $task->set_fail_delay(172800);
+        $task->execute();
+        manager::adhoc_task_failed($task);
+
+        // Catch the message.
+        $messages = $messagesink->get_messages();
+        $this->assertCount(3, $messages);
+
+        // Close sink,
         $messagesink->close();
     }
 }
