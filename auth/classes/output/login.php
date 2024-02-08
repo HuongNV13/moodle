@@ -136,9 +136,9 @@ class login implements renderable, templatable {
         }
 
         // Toggle password visibility icon.
-        $this->togglepassword = get_config('core', 'loginpasswordtoggle') === '1' ||
-            get_config('core', 'loginpasswordtoggle') === '2';
-        $this->smallscreensonly = get_config('core', 'loginpasswordtoggle') === '2';
+        $this->togglepassword = get_config('core', 'loginpasswordtoggle') == VISIBILITY_TOGGLE_ENABLED ||
+            get_config('core', 'loginpasswordtoggle') == VISIBILITY_TOGGLE_SMALL_SCREENS_ONLY;
+        $this->smallscreensonly = get_config('core', 'loginpasswordtoggle') == VISIBILITY_TOGGLE_SMALL_SCREENS_ONLY;
     }
 
     /**

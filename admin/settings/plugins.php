@@ -139,11 +139,11 @@ if ($hassiteconfig) {
     $temp->add(new admin_setting_configselect('loginpasswordtoggle',
         new lang_string('auth_loginpasswordtoggle', 'auth'),
         new lang_string('auth_loginpasswordtoggle_desc', 'auth'),
-        2,
+        VISIBILITY_TOGGLE_SMALL_SCREENS_ONLY,
         [
-            new lang_string('disabled', 'admin'),
-            new lang_string('enabled', 'admin'),
-            new lang_string('smallscreensonly', 'admin'),
+            VISIBILITY_TOGGLE_DISABLED => get_string('disabled', 'admin'),
+            VISIBILITY_TOGGLE_ENABLED => get_string('enabled', 'admin'),
+            VISIBILITY_TOGGLE_SMALL_SCREENS_ONLY => get_string('smallscreensonly', 'admin'),
         ],
     ));
 

@@ -595,6 +595,21 @@ define('CONTACT_SUPPORT_ANYONE', 2);
  */
 define('MAX_PASSWORD_CHARACTERS', 128);
 
+/**
+ * Toggle visibility feature is disabled. Used for passwords, tokens, keys, etc.
+ */
+define('VISIBILITY_TOGGLE_DISABLED', 0);
+
+/**
+ * Toggle visibility feature is enabled. Used for passwords, tokens, keys, etc.
+ */
+define('VISIBILITY_TOGGLE_ENABLED', 1);
+
+/**
+ * Toggle visibility feature is enabled for small screens only. Used for passwords, tokens, keys, etc.
+ */
+define('VISIBILITY_TOGGLE_SMALL_SCREENS_ONLY', 2);
+
 // PARAMETER HANDLING.
 
 /**
