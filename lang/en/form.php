@@ -84,6 +84,7 @@ $string['showless'] = 'Show less...';
 $string['showmore'] = 'Show more...';
 $string['somefieldsrequired'] = '{$a} Required';
 $string['suggestions'] = 'Suggestions';
+$string['togglevisibility'] = 'Toggle visibility';
 $string['time'] = 'Time';
 $string['timeunit'] = 'Time unit';
 $string['timing'] = 'Timing';

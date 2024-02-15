@@ -530,5 +530,8 @@ textarea[data-auto-rows] {
         .form-control-lg:not(:last-child) {
             @include border-radius($input-border-radius-lg);
         }
+        .input-group-append .toggle-visibility-btn {
+            display: none;
+        }
     }
 }

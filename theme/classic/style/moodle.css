@@ -33368,6 +33368,9 @@ textarea[data-auto-rows] {
   .toggle-sensitive-wrapper.small-screens-only.input-group:not(.has-validation) > .form-control-lg:not(:last-child) {
     border-radius: 0.3rem;
   }
+  .toggle-sensitive-wrapper.small-screens-only.input-group:not(.has-validation) > .input-group-append .toggle-visibility-btn {
+    display: none;
+  }
 }
 .pagelayout-login #region-main {
   border: 0;
