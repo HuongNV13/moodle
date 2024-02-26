@@ -2703,27 +2703,16 @@ class core_course_external extends external_api {
             $options = array('offset' => $offset, 'limit' => $params['perpage']);
         }
 
+        $options['limittoenrolled'] = $limittoenrolled;
+
         // Search the courses.
         $courses = core_course_category::search_courses($searchcriteria, $options, $params['requiredcapabilities']);
         $totalcount = core_course_category::search_courses_count($searchcriteria, $options, $params['requiredcapabilities']);
-
-        if (!empty($limittoenrolled)) {
-            // Get the courses where the current user has access.
-            $enrolled = enrol_get_my_courses(array('id', 'cacherev'));
-        }
 
         $finalcourses = array();
         $categoriescache = array();
 
         foreach ($courses as $course) {
-            if (!empty($limittoenrolled)) {
-                // Filter out not enrolled courses.
-                if (!isset($enrolled[$course->id])) {
-                    $totalcount--;
-                    continue;
-                }
-            }
-
             $coursecontext = context_course::instance($course->id);
 
             $finalcourses[] = self::get_course_public_information($course, $coursecontext);
