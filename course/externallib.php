@@ -2696,14 +2696,15 @@ class core_course_external extends external_api {
         if ($params['onlywithcompletion']) {
             $searchcriteria['onlywithcompletion'] = true;
         }
+        if ($params['limittoenrolled']) {
+            $searchcriteria['limittoenrolled'] = true;
+        }
 
         $options = array();
         if ($params['perpage'] != 0) {
             $offset = $params['page'] * $params['perpage'];
             $options = array('offset' => $offset, 'limit' => $params['perpage']);
         }
-
-        $options['limittoenrolled'] = $limittoenrolled;
 
         // Search the courses.
         $courses = core_course_category::search_courses($searchcriteria, $options, $params['requiredcapabilities']);

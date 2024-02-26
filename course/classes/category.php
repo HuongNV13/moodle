@@ -1573,9 +1573,9 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
      *     - modulelist - name of module (if we are searching for courses containing specific module
      *     - tagid - id of tag
      *     - onlywithcompletion - set to true if we only need courses with completion enabled
+     *     - limittoenrolled - set to true if we only need courses where user is enrolled
      * @param array $options display options, same as in get_courses() except 'recursive' is ignored -
-     *                       search is always category-independent and 'limittoenrolled' only returns
-     *                       courses the user is enrolled to
+     *                       search is always category-independent
      * @param array $requiredcapabilities List of capabilities required to see return course.
      * @return core_course_list_element[]
      */
@@ -1584,16 +1584,12 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
         $offset = !empty($options['offset']) ? $options['offset'] : 0;
         $limit = !empty($options['limit']) ? $options['limit'] : null;
         $sortfields = !empty($options['sort']) ? $options['sort'] : array('sortorder' => 1);
-        $limittoenrolled = !empty($options['limittoenrolled']);
 
         $coursecatcache = cache::make('core', 'coursecat');
         $cachekey = 's-'. serialize(
-            $search +
-            ['sort' => $sortfields] +
-            ['requiredcapabilities' => $requiredcapabilities] +
-            ['limittoenrolled' => $limittoenrolled]
+            $search + array('sort' => $sortfields) + array('requiredcapabilities' => $requiredcapabilities)
         );
-        $cntcachekey = 'scnt-'. serialize($search) . serialize($requiredcapabilities) . $limittoenrolled;
+        $cntcachekey = 'scnt-'. serialize($search);
 
         $ids = $coursecatcache->get($cachekey);
         if ($ids !== false) {
@@ -1637,7 +1633,7 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
         $courseidsearch = '';
         $courseidparams = [];
 
-        if ($limittoenrolled) {
+        if (!empty($search['limittoenrolled'])) {
             $enrolled = enrol_get_my_courses(['id']);
             list($sql, $courseidparams) = $DB->get_in_or_equal(array_keys($enrolled), SQL_PARAMS_NAMED, 'courseid', true, 0);
             $courseidsearch = "c.id " . $sql;
@@ -1750,16 +1746,14 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
      * perform extra DB queries.
      *
      * @param array $search search criteria, see method search_courses() for more details
-     * @param array $options display options. 'limittoenrolled' only counts courses the user is
-     *                       enrolled to. Other options do not affect the result but the 'sort'
-     *                       property is used in cache key for storing list of course ids
+     * @param array $options display options. They do not affect the result but
+     *     the 'sort' property is used in cache key for storing list of course ids
      * @param array $requiredcapabilities List of capabilities required to see return course.
      * @return int
      */
     public static function search_courses_count($search, $options = array(), $requiredcapabilities = array()) {
         $coursecatcache = cache::make('core', 'coursecat');
-        $limittoenrolled = !empty($options['limittoenrolled']);
-        $cntcachekey = 'scnt-'. serialize($search) . serialize($requiredcapabilities) . $limittoenrolled;
+        $cntcachekey = 'scnt-'. serialize($search) . serialize($requiredcapabilities);
         if (($cnt = $coursecatcache->get($cntcachekey)) === false) {
             // Cached value not found. Retrieve ALL courses and return their count.
             unset($options['offset']);

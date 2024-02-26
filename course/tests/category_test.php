@@ -592,9 +592,15 @@ class category_test extends \advanced_testcase {
         $this->assertEquals(2, core_course_category::search_courses_count(array('search' => 'test'), array(), $reqcaps));
 
         // We should get no courses here as user is not enrolled to any courses.
-        $res = core_course_category::search_courses(['search' => ''], ['limittoenrolled' => 1], []);
+        $res = core_course_category::search_courses([
+            'search' => '',
+            'limittoenrolled' => 1,
+        ]);
         $this->assertEquals([], $res);
-        $this->assertEquals(0, core_course_category::search_courses_count(['search' => ''], ['limittoenrolled' => 1], []));
+        $this->assertEquals(0, core_course_category::search_courses_count([
+            'search' => '',
+            'limittoenrolled' => 1,
+        ]));
 
         $manual = enrol_get_plugin('manual');
         $teacherrole = $DB->get_record('role', ['shortname' => 'editingteacher']);
@@ -605,9 +611,15 @@ class category_test extends \advanced_testcase {
         \cache::make('core', 'coursecat')->purge();
 
         // As the user is now enrolled, we should get this one course.
-        $res = core_course_category::search_courses(['search' => ''], ['limittoenrolled' => 1], []);
+        $res = core_course_category::search_courses([
+            'search' => '',
+            'limittoenrolled' => 1,
+        ]);
         $this->assertEquals([$c5->id], array_keys($res));
-        $this->assertEquals(1, core_course_category::search_courses_count(['search' => ''], ['limittoenrolled' => 1], []));
+        $this->assertEquals(1, core_course_category::search_courses_count([
+            'search' => '',
+            'limittoenrolled' => 1,
+        ]));
     }
 
     public function test_course_contacts() {
