@@ -851,7 +851,21 @@ class stateactions {
             $this->validate_sections($course, $ids, __FUNCTION__);
         }
         $format = course_get_format($course->id);
-        $format->set_sections_preference('contentcollapsed', $ids);
+        $format->set_sections_preference('contentcollapsed', $ids, true);
+    }
+
+    public function section_content_expanded(
+        stateupdates $updates,
+        stdClass $course,
+        array $ids = [],
+        ?int $targetsectionid = null,
+        ?int $targetcmid = null
+    ): void {
+        if (!empty($ids)) {
+            $this->validate_sections($course, $ids, __FUNCTION__);
+        }
+        $format = course_get_format($course->id);
+        $format->set_sections_preference('contentcollapsed', $ids, false);
     }
 
     /**

@@ -54,7 +54,7 @@ export default class Component extends BaseComponent {
             SECTION_CMLIST: `[data-for='cmlist']`,
             COURSE_SECTIONLIST: `[data-for='course_sectionlist']`,
             CM: `[data-for='cmitem']`,
-            TOGGLER: `[data-action="togglecoursecontentsection"]`,
+            TOGGLER: `[data-for="sectiontoggler"]`,
             COLLAPSE: `[data-toggle="collapse"]`,
             TOGGLEALL: `[data-toggle="toggleall"]`,
             // Formats can override the activity tag but a default one is needed to create new elements.
@@ -175,16 +175,24 @@ export default class Component extends BaseComponent {
         if (sectionlink || isChevron) {
 
             const section = event.target.closest(this.selectors.SECTION);
-            const toggler = section.querySelector(this.selectors.COLLAPSE);
+            const toggler = section.querySelector(this.selectors.TOGGLER);
             const isCollapsed = toggler?.classList.contains(this.classes.COLLAPSED) ?? false;
+            window.console.log(isCollapsed);
 
-            if (isChevron || isCollapsed) {
-                // Update the state.
-                const sectionId = section.getAttribute('data-id');
+            const sectionId = section.getAttribute('data-id');
+            if (isCollapsed) {
+                // Expanding.
                 this.reactive.dispatch(
-                    'sectionContentCollapsed',
+                    'collapseSection',
                     [sectionId],
-                    !isCollapsed
+                    false,
+                );
+            } else {
+                // Collapsing.
+                this.reactive.dispatch(
+                    'collapseSection',
+                    [sectionId],
+                    true,
                 );
             }
         }

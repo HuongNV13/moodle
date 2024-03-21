@@ -607,6 +607,33 @@ export default class {
         await this._callEditWebservice('section_content_collapsed', course.id, collapsedIds);
     }
 
+    async collapseSection(stateManager, sectionIds, value){
+        const affectedIds = [];
+        stateManager.setReadOnly(false);
+        // Check if we need to update preferences.
+        sectionIds.forEach((sectionId) => {
+            const section = stateManager.get('section', sectionId);
+            if (section === undefined) {
+                return null;
+            }
+            const newValue = value ?? section['contentcollapsed'];
+            if (section['contentcollapsed'] != newValue) {
+                section['contentcollapsed'] = newValue;
+                affectedIds.push(section.id);
+            }
+        });
+        stateManager.setReadOnly(true);
+
+        const course = stateManager.get('course');
+        if (value) {
+            window.console.log('Calling section_content_collapsed with ', affectedIds);
+            await this._callEditWebservice('section_content_collapsed', course.id, affectedIds);
+        } else {
+            window.console.log('Calling section_content_expanded with ', affectedIds);
+            await this._callEditWebservice('section_content_expanded', course.id, affectedIds);
+        }
+    }
+
     /**
      * Private batch update for a section preference attribute.
      *

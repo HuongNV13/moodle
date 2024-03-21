@@ -727,7 +727,8 @@ abstract class base {
         $course = $this->get_course();
         try {
             $sectionpreferences = (array) json_decode(
-                get_user_preferences("coursesectionspreferences_{$course->id}", '', $USER->id)
+                get_user_preferences("coursesectionspreferences_{$course->id}", '', $USER->id),
+                true,
             );
             if (empty($sectionpreferences)) {
                 $sectionpreferences = [];
@@ -745,11 +746,32 @@ abstract class base {
      * @param int[] $sectionids affected section ids
      *
      */
-    public function set_sections_preference(string $preferencename, array $sectionids) {
+    public function set_sections_preference(
+        string $preferencename,
+        array $sectionids,
+        bool $value = true,
+    ) {
         global $USER;
         $course = $this->get_course();
         $sectionpreferences = $this->get_sections_preferences_by_preference();
-        $sectionpreferences[$preferencename] = $sectionids;
+        if (!isset($sectionpreferences[$preferencename])) {
+            $sectionpreferences[$preferencename] = [];
+        }
+        foreach ($sectionids as $sectionid) {
+            if ($value) {
+                // Collapsing.
+                if (!in_array($sectionid, $sectionpreferences[$preferencename])) {
+                    $sectionpreferences[$preferencename][] = $sectionid;
+                }
+            } else {
+                // Expanding.
+                if (in_array($sectionid, $sectionpreferences[$preferencename])) {
+                    if (($key = array_search($sectionid, $sectionpreferences[$preferencename])) !== false) {
+                        unset($sectionpreferences[$preferencename][$key]);
+                    }
+                }
+            }
+        }
         set_user_preference('coursesectionspreferences_' . $course->id, json_encode($sectionpreferences), $USER->id);
         // Invalidate section preferences cache.
         $coursesectionscache = cache::make('core', 'coursesectionspreferences');
