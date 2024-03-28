@@ -3597,7 +3597,7 @@ abstract class enrol_plugin {
      *
      * @param int $sendoption send email from constant ENROL_SEND_EMAIL_FROM_*
      * @param context $context where the user will be fetched from.
-     * @return mixed|stdClass the contact user object.
+     * @return null|stdClass the contact user object.
      */
     public function get_welcome_message_contact(
         int $sendoption,

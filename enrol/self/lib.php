@@ -1180,13 +1180,12 @@ class enrol_self_plugin extends enrol_plugin {
      * @param $context context where the user will be fetched
      * @return mixed|stdClass the contact user object.
      * @deprecated since Moodle 4.4
+     * @see \enrol_plugin::get_welcome_message_contact()
+     * @todo MDL-81185 Final deprecation in Moodle 4.8.
      */
+    #[\core\attribute\deprecated('enrol_self_plugin::get_welcome_email_contact()', since: '4.4', mdl: 'MDL-81185')]
     public function get_welcome_email_contact($sendoption, $context) {
-        debugging(
-            message: __FUNCTION__ .
-            '() is deprecated. Please use the "enrol_plugin::send_course_welcome_message_to_user" module instead.',
-            level: DEBUG_DEVELOPER
-        );
+        \core\deprecation::emit_deprecation_if_present(__FUNCTION__);
         return $this->get_welcome_message_contact(
             sendoption: $sendoption,
             context: $context,
