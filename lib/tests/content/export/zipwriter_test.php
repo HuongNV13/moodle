@@ -70,7 +70,9 @@ class zipwriter_test extends advanced_testcase {
         $this->assertTrue($opened);
 
         $pathinzip = $zipwriter->get_context_path($context, $pathinfolder);
-        $this->assertEquals($storedfile->get_content(), $zip->getFromName($pathinzip));
+        $zipcontent = $zip->getFromName($pathinzip);
+        $zip->close();
+        $this->assertEquals($storedfile->get_content(), $zipcontent);
     }
 
     /**
@@ -92,7 +94,9 @@ class zipwriter_test extends advanced_testcase {
         $this->assertTrue($opened);
 
         $pathinzip = ltrim($zipwriter->get_context_path($context, $pathinfolder), '/');
-        $this->assertEquals($mycontent, $zip->getFromName($pathinzip));
+        $zipcontent = $zip->getFromName($pathinzip);
+        $zip->close();
+        $this->assertEquals($mycontent, $zipcontent);
     }
 
     /**
