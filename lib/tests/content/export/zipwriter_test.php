@@ -88,6 +88,8 @@ class zipwriter_test extends advanced_testcase {
         $zipwriter->add_file_from_string($context, $pathinfolder, $mycontent);
 
         $zipfilepath = $zipwriter->get_file_path();
+        var_dump($zipfilepath);
+        var_dump($zipwriter->get_context_path($context, $pathinfolder));
         $pathinzip = ltrim($zipwriter->get_context_path($context, $pathinfolder), '/');
         $zipwriter->finish();
         $zip = new ZipArchive();
