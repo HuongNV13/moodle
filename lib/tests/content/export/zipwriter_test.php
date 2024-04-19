@@ -86,7 +86,6 @@ class zipwriter_test extends advanced_testcase {
 
         $zipwriter = zipwriter::get_file_writer('test.zip');
         $zipwriter->add_file_from_string($context, $pathinfolder, $mycontent);
-        $zipwriter->finish();
 
         $zipfilepath = $zipwriter->get_file_path();
         $zip = new ZipArchive();
@@ -94,6 +93,7 @@ class zipwriter_test extends advanced_testcase {
         $this->assertTrue($opened);
 
         $pathinzip = ltrim($zipwriter->get_context_path($context, $pathinfolder), '/');
+        $zipwriter->finish();
         $zipcontent = $zip->getFromName($pathinzip);
         $zip->close();
         $this->assertEquals($mycontent, $zipcontent);
