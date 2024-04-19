@@ -88,12 +88,12 @@ class zipwriter_test extends advanced_testcase {
         $zipwriter->add_file_from_string($context, $pathinfolder, $mycontent);
 
         $zipfilepath = $zipwriter->get_file_path();
+        $pathinzip = ltrim($zipwriter->get_context_path($context, $pathinfolder), '/');
+        $zipwriter->finish();
         $zip = new ZipArchive();
         $opened = $zip->open($zipfilepath);
         $this->assertTrue($opened);
 
-        $pathinzip = ltrim($zipwriter->get_context_path($context, $pathinfolder), '/');
-        $zipwriter->finish();
         $zipcontent = $zip->getFromName($pathinzip);
         $zip->close();
         $this->assertEquals($mycontent, $zipcontent);
