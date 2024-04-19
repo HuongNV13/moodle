@@ -81,7 +81,11 @@ class zipwriter_test extends advanced_testcase {
     public function test_add_file_from_string(): void {
         $context = context_system::instance();
 
-        $pathinfolder = "/path/to/my/file.txt";
+        $pathinfolder = DIRECTORY_SEPARATOR .
+            "path" . DIRECTORY_SEPARATOR .
+            "to" . DIRECTORY_SEPARATOR .
+            "my" . DIRECTORY_SEPARATOR .
+            "file.txt";
         $mycontent = "Zippidy do dah";
 
         $zipwriter = zipwriter::get_file_writer('test.zip');
@@ -90,7 +94,7 @@ class zipwriter_test extends advanced_testcase {
         $zipfilepath = $zipwriter->get_file_path();
         var_dump($zipfilepath);
         var_dump($zipwriter->get_context_path($context, $pathinfolder));
-        $pathinzip = ltrim($zipwriter->get_context_path($context, $pathinfolder), '/');
+        $pathinzip = ltrim($zipwriter->get_context_path($context, $pathinfolder), DIRECTORY_SEPARATOR);
         $zipwriter->finish();
         $zip = new ZipArchive();
         $opened = $zip->open($zipfilepath);
