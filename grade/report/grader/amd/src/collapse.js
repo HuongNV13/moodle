@@ -218,8 +218,7 @@ export default class ColumnSearch extends search_combobox {
 
             await this.prefcountpipe();
 
-            this.nodesUpdate(e.target.closest(selectors.colVal)?.dataset.col);
-            this.nodesUpdate(e.target.closest(selectors.colVal)?.dataset.itemid);
+            this.nodesUpdate(desiredToHide);
         }
     }
 
@@ -402,7 +401,8 @@ export default class ColumnSearch extends search_combobox {
      * With an array of nodes, switch their classes and values.
      */
     updateDisplay() {
-        this.nodes.forEach((element) => {
+        const pendingPromise = new Pending('updateDisplay');
+        this.nodes.forEach((element, idx) => {
             const content = element.querySelector(selectors.content);
             const sort = element.querySelector(selectors.sort);
             const expandButton = element.querySelector(selectors.expandbutton);
@@ -450,6 +450,9 @@ export default class ColumnSearch extends search_combobox {
                     expandButton?.classList.remove('d-none');
                     expandButton?.setAttribute('aria-hidden', 'false');
                 }
+            }
+            if (idx === this.nodes.length - 1) {
+                pendingPromise.resolve();
             }
         });
     }
