@@ -81,9 +81,9 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
         // Update $allowedtypes to account for capabilities.
         $audioallowed = $allowedtypes === 'audio' || $allowedtypes === 'both';
         $videoallowed = $allowedtypes === 'video' || $allowedtypes === 'both';
-        $allowedpausing = (bool)get_config('tiny_recordrtc', 'allowedpausing');
         $audioallowed = $audioallowed && has_capability('tiny/recordrtc:recordaudio', $context);
         $videoallowed = $videoallowed && has_capability('tiny/recordrtc:recordvideo', $context);
+        $allowedpausing = (bool) get_config('tiny_recordrtc', 'allowedpausing');
         if ($audioallowed && $videoallowed) {
             $allowedtypes = 'both';
         } else if ($audioallowed) {
@@ -107,7 +107,6 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
             'audiotimelimit' => $audiotimelimit,
             'videotimelimit' => $videotimelimit,
             'maxrecsize' => $maxrecsize,
-            'allowedpausing' => $allowedpausing,
         ];
 
         $data = [
@@ -119,6 +118,7 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
             'data' => $data,
             'videoAllowed' => $videoallowed,
             'audioAllowed' => $audioallowed,
+            'pausingAllowed' => $allowedpausing,
         ];
     }
 }
