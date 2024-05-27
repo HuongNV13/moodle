@@ -1,0 +1,8 @@
+issueNumber: MDL-81991
+notes:
+  core:
+    - message: >
+        The context::reload_if_dirty() now accepts an optional `userid`
+        parameter, which can be used to check and reload the capabilities for
+        that user if the user is marked as dirty.
+      type: changed

@@ -1010,9 +1010,13 @@ abstract class context extends stdClass implements IteratorAggregate {
 
     /**
      * Reset all cached permissions and definitions if the necessary.
+     * By default, it reloads all the information of the current user.
+     * If the optional userid parameter is provided, it reloads the information of the specified user.
+     *
+     * @param int|null $userid optional user id that needs to be reloaded
      * @return void
      */
-    public function reload_if_dirty() {
+    public function reload_if_dirty(?int $userid = null): void {
         global $ACCESSLIB_PRIVATE, $USER;
 
         // Load dirty contexts list if needed.
@@ -1051,6 +1055,15 @@ abstract class context extends stdClass implements IteratorAggregate {
                     $dirty = true;
                     break;
                 }
+            }
+        }
+
+        // User specific reload.
+        if ($userid) {
+            $specificuser = \core_user::get_user($userid);
+            if (get_cache_flag('accesslib/dirtyusers', $userid, $specificuser->lastaccess)) {
+                // User is marked as dirty.
+                $dirty = true;
             }
         }
 
