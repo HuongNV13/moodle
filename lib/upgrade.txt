@@ -1,6 +1,10 @@
 This files describes API changes in core libraries and APIs,
 information provided here is intended especially for developers.
 
+=== 4.4.1 ===
+* The context::reload_if_dirty() now accepts an optional `userid` parameter,
+  which can be used to check and reload the capabilities for that user if the user is marked as dirty.
+
 === 4.4 ===
 
 * New modinfo methods related to delegated sections (sections controlled by a component):
