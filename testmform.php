@@ -25,6 +25,7 @@ class test_form extends moodleform {
 
         // Test field
         $mform->addElement('text', 'some_text', 'My text');
+        $mform->setType('some_text', PARAM_TEXT);
         $mform->hideIf('some_text', 'some_radios', 'neq', '1');
 
         $mform->addElement('editor', 'some_editor2', 'My editor2');
