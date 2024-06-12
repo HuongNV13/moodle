@@ -21,10 +21,10 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import Modal from 'core/modal';
-import Templates from 'core/templates';
 import {getString} from 'core/str';
 import Notification from 'core/notification';
+import RegradeModal from 'quiz_overview/regrade_modal_type';
+import * as ModalEvents from 'core/modal_events';
 
 /**
  * @type {Object} selectors used in this code.
@@ -55,41 +55,30 @@ const showModal = async(e) => {
         document.querySelectorAll(SELECTORS.reportTableSelectedAttempts).forEach((selectedAttempt) => {
             hiddenInputs.push({'name': selectedAttempt.name, 'value': selectedAttempt.value});
         });
-        const modal = await Modal.create({
-            title: getString('regrade', 'quiz_overview'),
-            body: Templates.render('quiz_overview/regrade_modal_body', {
+        const modalConfig = {
+            templateContext: {
                 'actionurl': document.querySelector(SELECTORS.mainTableForm).action,
                 'hasselectedattempts': document.querySelector(SELECTORS.reportTableSelectedAttempts) !== null,
                 'questions': JSON.parse(document.getElementById(SELECTORS.regradeAttemptsButtonId).dataset.slots),
                 'hiddeninputs': hiddenInputs,
-            }),
-            isVerticallyCentered: true,
-            removeOnClose: true,
-            show: true,
+                'regradehelp': {text: await getString('regrade_help', 'quiz_overview')},
+            },
+        };
+        const modalPromise = RegradeModal.create(modalConfig);
+        modalPromise.then((modal) => {
+            modal.getRoot().on(ModalEvents.shown, () => {
+                const $modal = modal.getModal();
+                const modalElement = $modal[0];
+                modalElement.querySelector('form').addEventListener('change', updateButtonStates);
+                updateButtonStates();
+            });
+
+            modal.show();
+            return modal;
         });
-        initModal(modal);
     } catch (ex) {
         await Notification.exception(ex);
     }
-};
-
-/**
- * Initialize and add the event for the regrade form.
- *
- * @param {Object} modal The modal object.
- */
-const initModal = (modal) => {
-    modal.getTitlePromise().then((title) => {
-        title.append(' ' + document.getElementById(SELECTORS.regradeAttemptsButtonId).dataset.helpIcon);
-        title[0].querySelector('a').classList.add('align-baseline'); // Slightly sad this is needed.
-        return title[0];
-    }).catch(Notification.exception);
-
-    modal.getBodyPromise().then((body) => {
-        updateButtonStates();
-        body[0].querySelector('form').addEventListener('change', updateButtonStates);
-        return body[0];
-    }).catch(Notification.exception);
 };
 
 /**

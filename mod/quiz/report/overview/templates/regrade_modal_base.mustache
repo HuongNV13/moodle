@@ -1,0 +1,47 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template quiz_overview/regrade_modal_base
+    Modal to regrade
+    Example context (json):
+    {
+
+    }
+}}
+<div class="modal moodle-has-zindex" data-region="modal-container" aria-hidden="true" role="dialog">
+    <div class="modal-dialog quiz_overview-regrade-dialog" role="document" data-region="modal" aria-labelledby="{{uniqid}}-quiz_overview-regrade-modal-title" tabindex="0">
+        <div class="modal-content">
+            <div class="modal-header {{$headerclasses}}{{headerclasses}}{{/headerclasses}}" data-region="header">
+                {{$header}}
+                    <h5 id="{{uniqid}}-quiz_overview-regrade-modal-title" class="modal-title" data-region="title">
+                        {{#str}} regrade, quiz_overview {{/str}}
+                        {{#regradehelp}}
+                            {{> core/help_icon }}
+                        {{/regradehelp}}
+                    </h5>
+                {{/header}}
+                <button type="button" class="close" data-action="hide" aria-label="{{#cleanstr}}closebuttontitle{{/cleanstr}}">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" data-region="body">
+                {{> quiz_overview/regrade_modal_body }}
+            </div>
+            <div class="modal-footer" data-region="footer">
+                <input type="submit" class="btn btn-primary" id="regradebutton" name="regrade" value="{{#str}} regrade_regradenow, quiz_overview {{/str}}">
+                <input type="submit" class="btn btn-primary" id="dryrunbutton" name="dryrunregrade" value="{{#str}} regrade_dryrun, quiz_overview {{/str}}">
+            </div>
+        </div>
+    </div>
+</div>
