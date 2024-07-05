@@ -72,6 +72,7 @@ export default class ColumnSearch extends search_combobox {
     gradeStrings = null;
     userStrings = null;
     stringMap = [];
+    pendingPromise = null;
 
     static init(userID, courseID, defaultSort) {
         return new ColumnSearch(userID, courseID, defaultSort);
@@ -402,50 +403,63 @@ export default class ColumnSearch extends search_combobox {
      * With an array of nodes, switch their classes and values.
      */
     updateDisplay() {
+        const pendingPromise = new Pending('gradereport_grader/updateDisplay');
+        let promises = [];
         this.nodes.forEach((element) => {
-            const content = element.querySelector(selectors.content);
-            const sort = element.querySelector(selectors.sort);
-            const expandButton = element.querySelector(selectors.expandbutton);
-            const rangeRowCell = element.querySelector(selectors.rangerowcell);
-            const avgRowCell = element.querySelector(selectors.avgrowcell);
-            const nodeSet = [
-                element.querySelector(selectors.menu),
-                element.querySelector(selectors.icons),
-                content
-            ];
-
-            // This can be further improved to reduce redundant similar calls.
-            if (element.classList.contains('cell')) {
-                // The column is actively being sorted, lets reset that and reload the page.
-                if (sort !== null) {
-                    window.location = this.defaultSort;
-                }
-                if (content === null) {
-                    // If it's not a content cell, it must be an overall average or a range cell.
-                    const rowCell = avgRowCell ?? rangeRowCell;
-
-                    rowCell?.classList.toggle('d-none');
-                } else if (content.classList.contains('d-none')) {
-                    // We should always have content but some cells do not contain menus or other actions.
-                    element.classList.remove('collapsed');
-                    // If there are many nodes, apply the following.
-                    if (content.childNodes.length > 1) {
-                        content.classList.add('d-flex');
-                    }
-                    nodeSet.forEach(node => {
-                        node?.classList.remove('d-none');
-                    });
-                    expandButton?.classList.add('d-none');
-                } else {
-                    element.classList.add('collapsed');
-                    content.classList.remove('d-flex');
-                    nodeSet.forEach(node => {
-                        node?.classList.add('d-none');
-                    });
-                    expandButton?.classList.remove('d-none');
-                }
-            }
+            promises.push(this.updateDisplayForGivenNode(element));
         });
+        Promise.all(promises).then(() => {
+            pendingPromise.resolve();
+        });
+    }
+
+    /**
+     * Switch classes and values for given node.
+     * @param {HTMLElement} element Element to switch classes and values.
+     */
+    updateDisplayForGivenNode(element) {
+        const content = element.querySelector(selectors.content);
+        const sort = element.querySelector(selectors.sort);
+        const expandButton = element.querySelector(selectors.expandbutton);
+        const rangeRowCell = element.querySelector(selectors.rangerowcell);
+        const avgRowCell = element.querySelector(selectors.avgrowcell);
+        const nodeSet = [
+            element.querySelector(selectors.menu),
+            element.querySelector(selectors.icons),
+            content
+        ];
+
+        // This can be further improved to reduce redundant similar calls.
+        if (element.classList.contains('cell')) {
+            // The column is actively being sorted, lets reset that and reload the page.
+            if (sort !== null) {
+                window.location = this.defaultSort;
+            }
+            if (content === null) {
+                // If it's not a content cell, it must be an overall average or a range cell.
+                const rowCell = avgRowCell ?? rangeRowCell;
+
+                rowCell?.classList.toggle('d-none');
+            } else if (content.classList.contains('d-none')) {
+                // We should always have content but some cells do not contain menus or other actions.
+                element.classList.remove('collapsed');
+                // If there are many nodes, apply the following.
+                if (content.childNodes.length > 1) {
+                    content.classList.add('d-flex');
+                }
+                nodeSet.forEach(node => {
+                    node?.classList.remove('d-none');
+                });
+                expandButton?.classList.add('d-none');
+            } else {
+                element.classList.add('collapsed');
+                content.classList.remove('d-flex');
+                nodeSet.forEach(node => {
+                    node?.classList.add('d-none');
+                });
+                expandButton?.classList.remove('d-none');
+            }
+        }
     }
 
     /**
