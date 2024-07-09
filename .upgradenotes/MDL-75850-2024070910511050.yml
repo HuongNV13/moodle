@@ -1,0 +1,9 @@
+issueNumber: MDL-75850
+notes:
+  core:
+    - message: |+
+        A new Hook `\core\hook\filestorage\after_file_created` has been created
+         - This Hook will be triggered after the file has been created
+         - The `after_file_created` callbacks have been migrated to this Hook
+
+      type: changed
