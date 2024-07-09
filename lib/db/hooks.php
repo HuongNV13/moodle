@@ -107,7 +107,7 @@ $callbacks = [
         'callback' => core\task\failed_task_callbacks::class . '::send_failed_task_max_delay_message',
     ],
     [
-        'hook' => \core\hook\filestorage\before_file_created::class,
-        'callback' => \core\fileredact\hook_listener::class . '::redact_before_file_created',
+        'hook' => \core\hook\filestorage\after_file_created::class,
+        'callback' => \core\fileredact\hook_listener::class . '::redact_after_file_created',
     ],
 ];

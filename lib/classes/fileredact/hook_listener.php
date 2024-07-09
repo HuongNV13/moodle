@@ -16,7 +16,7 @@
 
 namespace core\fileredact;
 
-use core\hook\filestorage\before_file_created;
+use core\hook\filestorage\after_file_created;
 
 /**
  * Allow the plugin to call as soon as possible before the file is created.
@@ -27,20 +27,19 @@ use core\hook\filestorage\before_file_created;
  */
 class hook_listener {
     /**
-     * Execute the available services before creating the file.
+     * Execute the available services after creating the file.
      *
-     * @param before_file_created $hook
+     * @param after_file_created $hook
      */
-    public static function redact_before_file_created(before_file_created $hook): void {
-        $filerecord = $hook->filerecord;
-        $extra = $hook->extra;
+    public static function redact_after_file_created(after_file_created $hook): void {
+        $storedfile = $hook->storedfile;
 
-        // The file mime-type and the pathname must be present. Otherwise, bypass the process.
-        if (!isset($filerecord->mimetype) || !isset($extra['pathname'])) {
+        // The file mime-type must be present. Otherwise, bypass the process.
+        if (empty($storedfile->get_mimetype())) {
             return;
         }
 
-        $manager = new manager($filerecord, $extra);
+        $manager = new manager($storedfile);
         $manager->execute();
 
         // Iterates through the errors returned by the manager and outputs each error message.

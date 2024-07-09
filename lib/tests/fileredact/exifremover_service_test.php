@@ -16,6 +16,9 @@
 
 namespace core\fileredact;
 
+use file_storage;
+use stored_file;
+
 /**
  * Tests for the EXIF remover service.
  *
@@ -32,19 +35,65 @@ namespace core\fileredact;
  */
 final class exifremover_service_test extends \advanced_testcase {
 
-    /** @var \stdClass File record */
-    private $filerecord;
+    /** @var file_storage File storage. */
+    private file_storage $fs;
 
     /**
      * Set up the test environment.
      */
     public function setUp(): void {
         parent::setUp();
-        $this->resetAfterTest(true);
-        // Set dummy file record.
-        $this->filerecord = new \stdClass;
-        $this->filerecord->filename = 'test.jpg';
-        $this->filerecord->mimetype = 'image/jpeg';
+        $this->resetAfterTest();
+        // Disable the EXIF remover by default. We will test the service with both PHP GD and ExifTool.
+        set_config('exifremoverenabled', 0, 'core_fileredact');
+        $this->fs = get_file_storage();
+    }
+
+    /**
+     * Creates a temporary file for testing purposes.
+     * @return stored_file The stored file.
+     */
+    private function create_test_file(): stored_file {
+        $filename = 'dummy.jpg';
+        $path = __DIR__ . '/../fixtures/fileredact/' . $filename;
+        $filerecord = (object) [
+            'contextid' => \context_user::instance(get_admin()->id)->id,
+            'component' => 'user',
+            'filearea' => 'unittest',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => $filename,
+        ];
+        $file = $this->fs->get_file($filerecord->contextid, $filerecord->component, $filerecord->filearea, $filerecord->itemid,
+            $filerecord->filepath, $filerecord->filename);
+        if ($file) {
+            $file->delete();
+        }
+
+        return $this->fs->create_file_from_pathname($filerecord, $path);
+    }
+
+    /**
+     * Creates a temporary invalid file for testing purposes.
+     * @return stored_file The stored file.
+     */
+    private function create_invalid_test_file(): stored_file {
+        $filename = 'dummy_invalid.jpg';
+        $filerecord = (object) [
+            'contextid' => \context_user::instance(get_admin()->id)->id,
+            'component' => 'user',
+            'filearea' => 'unittest',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => $filename,
+        ];
+        $file = $this->fs->get_file($filerecord->contextid, $filerecord->component, $filerecord->filearea, $filerecord->itemid,
+            $filerecord->filepath, $filerecord->filename);
+        if ($file) {
+            $file->delete();
+        }
+
+        return $this->fs->create_file_from_string($filerecord, 'Dummy content');
     }
 
     /**
@@ -57,18 +106,17 @@ final class exifremover_service_test extends \advanced_testcase {
      * @return void
      */
     public function test_exifremover_service_with_gd(): void {
-        // Remove All tags.
-        $tmpfilepath = $this->create_temporary_file();
+        $file = $this->create_test_file();
         // Get the EXIF data from the new file.
-        $currentexif = $this->get_new_exif($tmpfilepath);
+        $currentexif = $this->get_new_exif($file->get_content());
         $this->assertStringContainsString('GPSLatitude', $currentexif);
         $this->assertStringContainsString('GPSLongitude', $currentexif);
         $this->assertStringContainsString('Orientation', $currentexif);
 
-        $exifremoverservice = new services\exifremover_service($this->filerecord, ['pathname' => $tmpfilepath]);
+        $exifremoverservice = new services\exifremover_service($file);
         $exifremoverservice->execute();
         // Get the EXIF data from the new file.
-        $newexif = $this->get_new_exif($tmpfilepath);
+        $newexif = $this->get_new_exif($file->get_content());
 
         // Removing the "all" tags will result in removing all existing tags.
         $this->assertStringNotContainsString('GPSLatitude', $newexif);
@@ -94,11 +142,11 @@ final class exifremover_service_test extends \advanced_testcase {
 
         // Remove All tags.
         set_config('exifremoverremovetags', 'all', 'core_fileredact');
-        $tmpfilepath = $this->create_temporary_file();
-        $exifremoverservice = new services\exifremover_service($this->filerecord, ['pathname' => $tmpfilepath]);
+        $file1 = $this->create_test_file();
+        $exifremoverservice = new services\exifremover_service($file1);
         $exifremoverservice->execute();
         // Get the EXIF data from the new file.
-        $newexif = $this->get_new_exif($tmpfilepath);
+        $newexif = $this->get_new_exif($file1->get_content());
         // Removing the "all" tags will result in removing all existing tags.
         $this->assertStringNotContainsString('GPSLatitude', $newexif);
         $this->assertStringNotContainsString('GPSLongitude', $newexif);
@@ -108,11 +156,11 @@ final class exifremover_service_test extends \advanced_testcase {
 
         // Remove the GPS tag only.
         set_config('exifremoverremovetags', 'gps', 'core_fileredact');
-        $tmpfilepath = $this->create_temporary_file();
-        $exifremoverservice = new services\exifremover_service($this->filerecord, ['pathname' => $tmpfilepath]);
+        $file2 = $this->create_test_file();
+        $exifremoverservice = new services\exifremover_service($file2);
         $exifremoverservice->execute();
         // Get the EXIF data from the new file.
-        $newexif = $this->get_new_exif($tmpfilepath);
+        $newexif = $this->get_new_exif($file2->get_content());
         // The GPS tag only removal will remove the tag containing "GPS" keyword.
         $this->assertStringNotContainsString('GPSLatitude', $newexif);
         $this->assertStringNotContainsString('GPSLongitude', $newexif);
@@ -130,8 +178,9 @@ final class exifremover_service_test extends \advanced_testcase {
      * MIME types are supported for EXIF removal using both PHP GD and ExifTool.
      */
     public function test_exifremover_service_is_mimetype_supported(): void {
-        // Init the service.
-        $exifremoverservice = new services\exifremover_service($this->filerecord, ['pathname' => '']);
+        $file = $this->create_test_file();
+        // Init uals(false, $resultthe service.
+        $exifremoverservice = new services\exifremover_service($file);
 
         // Test using PHP GD.
         $rc = new \ReflectionClass(services\exifremover_service::class);
@@ -167,8 +216,9 @@ final class exifremover_service_test extends \advanced_testcase {
      * @param string $expected The expected result after cleaning the filename.
      */
     public function test_exifremover_service_cleanfilename($filename, $expected): void {
+        $file = $this->create_test_file();
         // Init the service.
-        $exifremoverservice = new services\exifremover_service($this->filerecord, ['pathname' => '']);
+        $exifremoverservice = new services\exifremover_service($file);
 
         $rc = new \ReflectionClass(services\exifremover_service::class);
         $rccleanfilename = $rc->getMethod('cleanfilename');
@@ -182,33 +232,12 @@ final class exifremover_service_test extends \advanced_testcase {
      * when a new file is created from the original.
      */
     public function test_exifremover_contenthash(): void {
-        global $CFG;
-
-        // Since the test will modify the original file,
-        // a temporary file is created and then used for the testing.
-        $filepath = $CFG->dirroot . '/lib/filestorage/tests/fixtures/testimage.jpg';
-        $tmpfilename = 'tmp_' . basename($filepath);
-        $tmpfilepath = make_request_directory() . DIRECTORY_SEPARATOR . $tmpfilename;
-        copy($filepath, $tmpfilepath);
-
-        $syscontext = \context_system::instance();
-        $filerecord = [
-            'contextid' => $syscontext->id,
-            'component' => 'core',
-            'filearea'  => 'unittest',
-            'itemid'    => 0,
-            'filepath'  => '/images/',
-            'filename'  => $tmpfilename,
-        ];
-
-        $fs = get_file_storage();
-        $file = $fs->create_file_from_pathname($filerecord, $tmpfilepath);
-
-        $filerecord['filename'] = 'file2_' . $tmpfilename;
-        $file2 = $fs->create_file_from_pathname($filerecord, $tmpfilepath);
-        // When the EXIF remover service is enabled,
-        // then the content hash of an original file and the new file will not go to the same.
-        $this->assertNotSame($file->get_contenthash(), $file2->get_contenthash());
+        $file = $this->create_test_file();
+        $beforehash = $file->get_contenthash();
+        $exifremoverservice = new services\exifremover_service($file);
+        $exifremoverservice->execute();
+        $afterhash = $file->get_contenthash();
+        $this->assertNotSame($beforehash, $afterhash);
     }
 
     /**
@@ -221,8 +250,8 @@ final class exifremover_service_test extends \advanced_testcase {
             "Example: define('TEST_PATH_TO_EXIFTOOL', '/usr/bin/exiftool');");
         }
         set_config('exifremovertoolpath', TEST_PATH_TO_EXIFTOOL, 'core_fileredact');
-        $tmpfilepath = 'unknown.jpg';
-        $exifremoverservice = new services\exifremover_service($this->filerecord, ['pathname' => $tmpfilepath]);
+        $invalidfile = $this->create_invalid_test_file();
+        $exifremoverservice = new services\exifremover_service($invalidfile);
         $this->expectException(\Exception::class);
         $exifremoverservice->execute();
     }
@@ -232,8 +261,8 @@ final class exifremover_service_test extends \advanced_testcase {
      */
     public function test_exiftool_notfound_filename_unknown(): void {
         set_config('exifremovertoolpath', 'fakeexiftool', 'core_fileredact');
-        $tmpfilepath = 'unknown.jpg';
-        $exifremoverservice = new services\exifremover_service($this->filerecord, ['pathname' => $tmpfilepath]);
+        $invalidfile = $this->create_invalid_test_file();
+        $exifremoverservice = new services\exifremover_service($invalidfile);
         $this->expectException(\moodle_exception::class);
         $this->expectExceptionMessage(get_string('fileredact:exifremover:failedprocessgd', 'core_files'));
         $exifremoverservice->execute();
@@ -245,8 +274,10 @@ final class exifremover_service_test extends \advanced_testcase {
      * @param string $pathname the full path to the file.
      * @return string The EXIF metadata as a string.
      */
-    private function get_new_exif(string $pathname): string {
-        $exif = exif_read_data($pathname);
+    private function get_new_exif(string $content): string {
+        $logpath = make_request_directory() . '/temp.jpg';
+        file_put_contents($logpath, $content);
+        $exif = exif_read_data($logpath);
         $string = "";
         foreach ($exif as $key => $value) {
             if (is_array($value)) {
@@ -258,20 +289,6 @@ final class exifremover_service_test extends \advanced_testcase {
             }
         }
         return $string;
-    }
-
-    /**
-     * Creates a temporary file for testing purposes.
-     *
-     * @return string The path to the created temporary file.
-     */
-    private function create_temporary_file(): string {
-        $tmpfiledirectory = make_request_directory();
-        $filepath = __DIR__ . '/../fixtures/fileredact/dummy.jpg';
-        $filename = basename($filepath);
-        $tmpfilepath = $tmpfiledirectory . DIRECTORY_SEPARATOR . $filename;
-        copy($filepath, $tmpfilepath);
-        return $tmpfilepath;
     }
 
     /**

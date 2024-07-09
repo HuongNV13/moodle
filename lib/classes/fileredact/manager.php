@@ -16,6 +16,8 @@
 
 namespace core\fileredact;
 
+use stored_file;
+
 /**
  * Fileredact manager.
  *
@@ -33,14 +35,11 @@ class manager {
     /**
      * Constructor.
      *
-     * @param \stdClass|null $filerecord The file record as a stdClass object, or null if not available.
-     * @param array $extra Additional data.
+     * @param stored_file $storedfile The stored file.
      */
     public function __construct(
-        /** @var \stdClass|null $filerecord File record. */
-        private readonly ?\stdClass $filerecord,
-        /** @var array $extra Extra information (pathname and content) from the hook. */
-        private readonly array $extra = [],
+        /** @var stored_file $storedfile The stored file. */
+        private readonly stored_file $storedfile,
     ) {
     }
 
@@ -53,9 +52,9 @@ class manager {
         foreach ($services as $serviceclass) {
             try {
                 if (class_exists($serviceclass)) {
-                    $service = new $serviceclass($this->filerecord, $this->extra);
+                    $service = new $serviceclass($this->storedfile);
                     // For the given service, execute them if they are enabled, and the given mime type is supported.
-                    if ($service->is_enabled() && $service->is_mimetype_supported($this->filerecord->mimetype)) {
+                    if ($service->is_enabled() && $service->is_mimetype_supported($this->storedfile->get_mimetype())) {
                         $service->execute();
                     }
                 }

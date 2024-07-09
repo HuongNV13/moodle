@@ -1069,19 +1069,19 @@ class file_storage {
      * Add new file record to database and handle callbacks.
      *
      * @param stdClass $newrecord
+     * @param bool $notify Notify the hook about the new file or not
      */
-    protected function create_file($newrecord) {
+    protected function create_file($newrecord, bool $notify = true) {
         global $DB;
         $newrecord->id = $DB->insert_record('files', $newrecord);
 
         if ($newrecord->filename !== '.') {
-            // Callback for file created.
-            if ($pluginsfunction = get_plugins_with_function('after_file_created')) {
-                foreach ($pluginsfunction as $plugintype => $plugins) {
-                    foreach ($plugins as $pluginfunction) {
-                        $pluginfunction($newrecord);
-                    }
-                }
+            if ($notify) {
+                $fileinstance = $this->get_file_instance($newrecord);
+                // Dispatch the new Hook implementation immediately after the legacy callback.
+                $hook = new \core\hook\filestorage\after_file_created($fileinstance, $newrecord);
+                \core\di::get(\core\hook\manager::class)->dispatch($hook);
+                $hook->process_legacy_callbacks();
             }
         }
     }
@@ -1091,9 +1091,10 @@ class file_storage {
      *
      * @param stdClass|array $filerecord object or array describing changes
      * @param stored_file|int $fileorid id or stored_file instance of the existing local file
+     * @param bool $notify Notify the hook about the new file or not
      * @return stored_file instance of newly created file
      */
-    public function create_file_from_storedfile($filerecord, $fileorid) {
+    public function create_file_from_storedfile($filerecord, $fileorid, bool $notify = true) {
         global $DB;
 
         if ($fileorid instanceof stored_file) {
@@ -1200,7 +1201,7 @@ class file_storage {
         }
 
         try {
-            $this->create_file($newrecord);
+            $this->create_file($newrecord, $notify);
         } catch (dml_exception $e) {
             throw new stored_file_creation_exception($newrecord->contextid, $newrecord->component, $newrecord->filearea, $newrecord->itemid,
                                                      $newrecord->filepath, $newrecord->filename, $e->debuginfo);
@@ -1272,9 +1273,10 @@ class file_storage {
      *
      * @param stdClass|array $filerecord object or array describing file
      * @param string $pathname path to file or content of file
+     * @param bool $notify Notify the hook about the new file or not
      * @return stored_file
      */
-    public function create_file_from_pathname($filerecord, $pathname) {
+    public function create_file_from_pathname($filerecord, $pathname, bool $notify = true) {
         global $DB;
 
         $filerecord = (array)$filerecord;  // Do not modify the submitted record, this cast unlinks objects.
@@ -1368,7 +1370,7 @@ class file_storage {
         $newrecord->pathnamehash = $this->get_pathname_hash($newrecord->contextid, $newrecord->component, $newrecord->filearea, $newrecord->itemid, $newrecord->filepath, $newrecord->filename);
 
         try {
-            $this->create_file($newrecord);
+            $this->create_file($newrecord, $notify);
         } catch (dml_exception $e) {
             if ($newfile) {
                 $this->filesystem->remove_file($newrecord->contenthash);
@@ -1387,9 +1389,10 @@ class file_storage {
      *
      * @param stdClass|array $filerecord object or array describing file
      * @param string $content content of file
+     * @param bool $notify Notify the hook about the new file or not
      * @return stored_file
      */
-    public function create_file_from_string($filerecord, $content) {
+    public function create_file_from_string($filerecord, $content, bool $notify = true) {
         global $DB;
 
         $filerecord = (array)$filerecord;  // Do not modify the submitted record, this cast unlinks objects.
@@ -1487,7 +1490,7 @@ class file_storage {
         $newrecord->pathnamehash = $this->get_pathname_hash($newrecord->contextid, $newrecord->component, $newrecord->filearea, $newrecord->itemid, $newrecord->filepath, $newrecord->filename);
 
         try {
-            $this->create_file($newrecord);
+            $this->create_file($newrecord, $notify);
         } catch (dml_exception $e) {
             if ($newfile) {
                 $this->filesystem->remove_file($newrecord->contenthash);
@@ -1862,9 +1865,6 @@ class file_storage {
                 $pluginfunction($newrecord, ['pathname' => $pathname, 'content' => $content]);
             }
         }
-        // Dispatch the new Hook implementation immediately after the legacy callback.
-        $hook = new \core\hook\filestorage\before_file_created($newrecord, ['pathname' => $pathname, 'content' => $content]);
-        \core\di::get(\core\hook\manager::class)->dispatch($hook);
     }
 
     /**

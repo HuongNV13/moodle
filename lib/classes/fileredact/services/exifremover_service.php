@@ -16,6 +16,8 @@
 
 namespace core\fileredact\services;
 
+use stored_file;
+
 /**
  * Remove exif data from supported image files using ExifTool.
  *
@@ -53,16 +55,13 @@ class exifremover_service extends service {
     /**
      * Class constructor.
      *
-     * @param \stdClass|null $filerecord The file record object, or null if not available.
-     * @param array $extra Additional data.
+     * @param stored_file $storedfile The stored file.
      */
     public function __construct(
-        /** @var \stdClass|null $filerecord File record. */
-        private readonly ?\stdClass $filerecord,
-        /** @var array $extra Extra information (pathname and content) from the hook. */
-        private readonly array $extra = [],
+        /** @var stored_file $storedfile The stored file. */
+        private readonly stored_file $storedfile,
     ) {
-        parent::__construct($filerecord, $extra);
+        parent::__construct($storedfile);
 
         // To decide whether to use ExifTool or PHP GD, check the ExifTool path.
         if (!empty($this->get_exiftool_path())) {
@@ -74,31 +73,29 @@ class exifremover_service extends service {
      * Performs redaction on the specified file.
      */
     public function execute(): void {
-        $originalfile = $this->extra['pathname'];
         if ($this->useexiftool) {
             // Use the ExifTool executable to remove the desired EXIF tags.
-            $this->execute_exiftool($originalfile);
+            $this->execute_exiftool();
         } else {
             // Use PHP GD lib to remove all EXIF tags.
-            $this->execute_gd($originalfile);
+            $this->execute_gd();
         }
     }
 
     /**
      * Executes ExifTool to remove metadata from the original file.
      *
-     * @param string $originalfile The path to the original file.
      * @throws \moodle_exception If the ExifTool process fails or the destination file is not created.
      */
-    private function execute_exiftool(string $originalfile): void {
+    private function execute_exiftool(): void {
         $tmpfilepath = make_request_directory();
-        $filerecordname = $this->cleanfilename($this->filerecord->filename);
+        $filerecordname = $this->cleanfilename($this->storedfile->get_filename());
         $neworiginalfile = $tmpfilepath . DIRECTORY_SEPARATOR . 'new_' . $filerecordname;
         $destinationfile = $tmpfilepath . DIRECTORY_SEPARATOR . $filerecordname;
 
         // Copy the original file to a new file.
         try {
-            copy($originalfile, $neworiginalfile);
+            $this->storedfile->copy_content_to($neworiginalfile);
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
@@ -117,16 +114,14 @@ class exifremover_service extends service {
             );
         }
         // Replacing the EXIF processed file to the original file.
-        rename($destinationfile, $originalfile);
+        $this->persist_redacted_file(file_get_contents($destinationfile));
     }
 
     /**
      * Executes GD library to remove metadata from the original file.
-     *
-     * @param string $originalfile The path to the original file.
      */
-    private function execute_gd(string $originalfile): void {
-        $imagedata = $this->recreate_image_gd($originalfile);
+    private function execute_gd(): void {
+        $imagedata = $this->recreate_image_gd();
         if (!$imagedata) {
             throw new \moodle_exception(
                 errorcode: 'fileredact:exifremover:failedprocessgd',
@@ -135,7 +130,7 @@ class exifremover_service extends service {
             );
         }
         // Put the image string object data to the original file.
-        file_put_contents($originalfile, $imagedata);
+        $this->persist_redacted_file($imagedata);
     }
     /**
      * Gets the ExifTool command to strip the file of EXIF data.
@@ -151,6 +146,7 @@ class exifremover_service extends service {
         $tempsource = escapeshellarg($source);
         $preservetagsoption = "-tagsfromfile @ " . self::PRESERVE_TAGS;
         $command = "$exiftoolexec $removetags $preservetagsoption -o $tempdestination -- $tempsource";
+        $command .= " 2> /dev/null"; // Do not output any errors.
         return $command;
     }
 
@@ -183,21 +179,16 @@ class exifremover_service extends service {
 
     /**
      * Recreate the image using PHP GD library to strip all EXIF data.
-     *
-     * @param string $filepath The path to the image file.
-     * @return string|false The recreated image data as a string if successful, false otherwise.
      */
-    private function recreate_image_gd(string $filepath): string|false {
-        if (empty($filepath)) {
-            return false;
-        }
+    private function recreate_image_gd(): string|false {
+        $content = $this->storedfile->get_content();
         // Fetch the image information for this image.
-        $imageinfo = @getimagesize($filepath);
+        $imageinfo = @getimagesizefromstring($content);
         if (empty($imageinfo)) {
             return false;
         }
         // Create a new image from the file.
-        $image = @imagecreatefromstring(file_get_contents($filepath));
+        $image = @imagecreatefromstring($content);
 
         // Capture the image as a string object, rather than straight to file.
         ob_start();
@@ -229,6 +220,36 @@ class exifremover_service extends service {
             $filename = preg_replace($pattern, '', $filename);
         }
         return clean_param($filename, PARAM_PATH);
+    }
+
+    /**
+     * Persists the redacted file to the file storage.
+     *
+     * @param string $content File content.
+     */
+    private function persist_redacted_file(string $content): void {
+        $filerecord = (object) [
+            'contextid' => $this->storedfile->get_contextid(),
+            'component' => $this->storedfile->get_component(),
+            'filearea'  => $this->storedfile->get_filearea(),
+            'itemid'    => $this->storedfile->get_itemid(),
+            'filepath'  => $this->storedfile->get_filepath(),
+            'filename'  => $this->storedfile->get_filename(),
+        ];
+        $fs = get_file_storage();
+        $existingfile = $fs->get_file(
+            $filerecord->contextid,
+            $filerecord->component,
+            $filerecord->filearea,
+            $filerecord->itemid,
+            $filerecord->filepath,
+            $filerecord->filename
+        );
+        if ($existingfile) {
+            $existingfile->delete();
+        }
+        $redactedfile = $fs->create_file_from_string($filerecord, $content, false);
+        $this->storedfile->replace_file_with($redactedfile);
     }
 
     /**

@@ -16,6 +16,8 @@
 
 namespace core\fileredact;
 
+use stored_file;
+
 /**
  * Tests for fileredact manager class.
  *
@@ -25,24 +27,26 @@ namespace core\fileredact;
  *
  * @covers \core\fileredact\manager
  */
-final class manager_test extends \basic_testcase {
+final class manager_test extends \advanced_testcase {
 
-    /** @var \stdClass File record */
-    private $filerecord;
-
-    /** @var array Additional options (path, contents) provided from the before_file_created hook */
-    private $extra;
+    /** @var stored_file Stored file object. */
+    private stored_file $stored_file;
 
     public function setUp(): void {
         parent::setUp();
-        // Set dummy file record.
-        $this->filerecord = new \stdClass;
-        $this->filerecord->filename = 'test.jpg';
-        $this->filerecord->mimetype = 'image/jpeg';
+        $this->resetAfterTest();
 
-        // Set dummy extra information.
-        $this->extra = [];
-        $this->extra['pathname'] = '/tmp/pathname';
+        $file = new \stdClass;
+        $file->contextid = \context_user::instance(get_admin()->id)->id;
+        $file->component = 'user';
+        $file->filearea  = 'private';
+        $file->itemid    = 0;
+        $file->filepath  = '/';
+        $file->filename  = 'test.jpg';
+        $file->source    = 'test';
+
+        $fs = get_file_storage();
+        $this->stored_file = $fs->create_file_from_string($file, 'file1 content');
     }
 
     /**
@@ -52,7 +56,7 @@ final class manager_test extends \basic_testcase {
      */
     public function test_get_services(): void {
         // Init the manager.
-        $manager = new \core\fileredact\manager($this->filerecord, $this->extra);
+        $manager = new \core\fileredact\manager($this->stored_file);
 
         $rc = new \ReflectionClass(\core\fileredact\manager::class);
         $rcm = $rc->getMethod('get_services');
@@ -71,7 +75,7 @@ final class manager_test extends \basic_testcase {
     public function test_execute(): void {
         $managermock = $this->getMockBuilder(\core\fileredact\manager::class)
             ->onlyMethods(['get_services'])
-            ->setConstructorArgs([$this->filerecord, $this->extra])
+            ->setConstructorArgs([$this->stored_file])
             ->getMock();
 
         $managermock->expects($this->once())

@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace core\fileredact\services;
+use stored_file;
+
 /**
  * The interface of the redaction service outlines the necessary methods for each redaction blueprint.
  *
@@ -26,14 +28,11 @@ abstract class service {
     /**
      * Class constructor.
      *
-     * @param \stdClass|null $filerecord The file record object, or null if not available.
-     * @param array $extra Additional data.
+     * @param stored_file $storedfile The stored file.
      */
     public function __construct(
-        /** @var \stdClass|null $filerecord File record. */
-        private readonly ?\stdClass $filerecord,
-        /** @var array $extra Extra information (pathname and content) from the hook. */
-        private readonly array $extra = [],
+        /** @var stored_file $storedfile The stored file. */
+        private readonly stored_file $storedfile,
     ) {
     }
 
