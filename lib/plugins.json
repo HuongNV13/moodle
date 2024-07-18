@@ -3,6 +3,9 @@
         "aiplacement": [
             "tinymce"
         ],
+        "aiprovider": [
+            "openai"
+        ],
         "antivirus": [
             "clamav"
         ],
