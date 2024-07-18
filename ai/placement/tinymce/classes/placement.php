@@ -32,8 +32,8 @@ class placement extends \core_ai\placement{
      */
     public function get_action_list(): array {
         return [
-                'generate_text',
-                'generate_image',
+            \core_ai\aiactions\generate_text::class,
+            \core_ai\aiactions\generate_image::class,
         ];
     }
 
