@@ -27,6 +27,17 @@ use GuzzleHttp\Psr7\Response;
  */
 class provider_test extends \advanced_testcase {
 
+    /** Test get_action_list */
+    public function test_get_action_list(): void {
+        $provider = new \aiprovider_openai\provider();
+        $actionlist = $provider->get_action_list();
+        $this->assertIsArray($actionlist);
+        $this->assertEquals(3, count($actionlist));
+        $this->assertContains('core_ai\\aiactions\\generate_text', $actionlist);
+        $this->assertContains('core_ai\\aiactions\\generate_image', $actionlist);
+        $this->assertContains('core_ai\\aiactions\\summarise_text', $actionlist);
+    }
+
     /**
      * Test generate_userid.
      */

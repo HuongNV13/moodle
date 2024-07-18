@@ -76,9 +76,9 @@ class provider extends \core_ai\provider {
      */
     public function get_action_list(): array {
         return [
-            'generate_text',
-            'generate_image',
-            'summarise_text',
+            \core_ai\aiactions\generate_text::class,
+            \core_ai\aiactions\generate_image::class,
+            \core_ai\aiactions\summarise_text::class,
         ];
     }
 
