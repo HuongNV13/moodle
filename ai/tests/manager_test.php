@@ -190,7 +190,7 @@ class manager_test extends \advanced_testcase {
         $this->resetAfterTest();
         global $DB;
 
-        $action = new generate_image(1);
+        $action = new generate_image();
         $contextid = 1;
         $userid = 1;
         $prompttext = 'This is a test prompt';
@@ -234,5 +234,38 @@ class manager_test extends \advanced_testcase {
         $this->assertEquals($actionresponse->get_errormessage(), $record->errormessage);
         $this->assertEquals($action->get_configuration('timecreated'), $record->timecreated);
         $this->assertEquals($actionresponse->get_timecreated(), $record->timecompleted);
+    }
+
+    /**
+     * Test call_action_provider.
+     */
+    public function test_call_action_provider(): void {
+        $action = new generate_image();
+        $contextid = 1;
+        $userid = 1;
+        $prompttext = 'This is a test prompt';
+        $aspectratio = 'square';
+        $quality = 'hd';
+        $numimages = 1;
+        $style = 'vivid';
+        $action->configure(
+                contextid: $contextid,
+                userid: $userid,
+                prompttext: $prompttext,
+                quality: $quality,
+                aspectratio: $aspectratio,
+                numimages: $numimages,
+                style: $style);
+
+        $provider = new \aiprovider_openai\provider();
+
+        $manager = new manager();
+
+        // We're working with a private method here, so we need to use reflection.
+        $method = new \ReflectionMethod($manager, 'call_action_provider');
+        $actionresult = $method->invoke($manager, $provider, $action);
+
+        // Assert the result was of the correct type.
+        $this->assertInstanceOf(\core_ai\aiactions\responses\response_generate_image::class, $actionresult);
     }
 }

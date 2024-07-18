@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 use aiprovider_openai\process_generate_image;
+use core_ai\aiactions\base;
+use core_ai\provider;
 use GuzzleHttp\Psr7\Response;
 
 /**
@@ -29,19 +31,27 @@ class process_generate_image_test extends \advanced_testcase {
     /** @var string A successful response in JSON format. */
     protected string $responsebodyjson;
 
+    /** @var provider The provider that will process the action. */
+    protected provider $provider;
+
+    /** @var base The action to process. */
+    protected base $action;
+
     /**
      * Set up the test.
      */
     protected function setUp(): void {
         // Load a response body from a file.
         $this->responsebodyjson = file_get_contents(__DIR__ . '/fixtures/image_request_success.json');
+        $this->provider = new \aiprovider_openai\provider();
+        $this->action = new \core_ai\aiactions\generate_image();
     }
 
     /**
      * Test calculate_size.
      */
     public function test_calculate_size(): void {
-        $processor = new process_generate_image();
+        $processor = new process_generate_image($this->provider, $this->action);
 
         // We're working with a private method here, so we need to use reflection.
         $method = new \ReflectionMethod($processor, 'calculate_size');
@@ -63,7 +73,6 @@ class process_generate_image_test extends \advanced_testcase {
      * Test create_request_object
      */
     public function test_create_request_object(): void {
-        $action = new \core_ai\aiactions\generate_image();
         $contextid = 1;
         $userid = 1;
         $prompttext = 'This is a test prompt';
@@ -71,7 +80,7 @@ class process_generate_image_test extends \advanced_testcase {
         $quality = 'hd';
         $numimages = 1;
         $style = 'vivid';
-        $action->configure(
+        $this->action->configure(
                 contextid: $contextid,
                 userid: $userid,
                 prompttext: $prompttext,
@@ -80,12 +89,11 @@ class process_generate_image_test extends \advanced_testcase {
                 numimages: $numimages,
                 style: $style);
 
-        $processor = new process_generate_image();
-
+        $processor = new process_generate_image($this->provider, $this->action);
 
         // We're working with a private method here, so we need to use reflection.
         $method = new \ReflectionMethod($processor, 'create_request_object');
-        $request = $method->invoke($processor, $action, $userid);
+        $request = $method->invoke($processor, $this->action, $userid);
 
         $this->assertEquals($prompttext, $request->prompt);
         $this->assertEquals('dall-e-3', $request->model);
@@ -111,7 +119,7 @@ class process_generate_image_test extends \advanced_testcase {
                         '{"error": {"message": "Rate limit reached for requests"}}'),
         ];
 
-        $processor = new process_generate_image();
+        $processor = new process_generate_image($this->provider, $this->action);
         $method = new ReflectionMethod($processor, 'handle_api_error');
 
         foreach($responses as $status => $response) {
@@ -139,7 +147,7 @@ class process_generate_image_test extends \advanced_testcase {
         );
 
         // We're testing a private method, so we need to setup reflector magic.
-        $processor = new process_generate_image();
+        $processor = new process_generate_image($this->provider, $this->action);
         $method = new ReflectionMethod($processor, 'handle_api_success');
 
         $result = $method->invoke($processor, $response);
@@ -172,7 +180,7 @@ class process_generate_image_test extends \advanced_testcase {
         $requestobj->style = 'vivid';
         $requestobj->user = 't3464h89dftjltestudfaser';
 
-        $processor = new process_generate_image();
+        $processor = new process_generate_image($this->provider, $this->action);
         $method = new ReflectionMethod($processor, 'query_ai_api');
         $result = $method->invoke($processor, $client, $requestobj);
 
@@ -184,7 +192,7 @@ class process_generate_image_test extends \advanced_testcase {
      * Test prepare_response success.
      */
     public function test_prepare_response_success(): void {
-        $processor = new process_generate_image();
+        $processor = new process_generate_image($this->provider, $this->action);
 
         // We're working with a private method here, so we need to use reflection.
         $method = new \ReflectionMethod($processor, 'prepare_response');
@@ -208,7 +216,7 @@ class process_generate_image_test extends \advanced_testcase {
      * Test prepare_response error.
      */
     public function test_prepare_response_error(): void {
-        $processor = new process_generate_image();
+        $processor = new process_generate_image($this->provider, $this->action);
 
         // We're working with a private method here, so we need to use reflection.
         $method = new \ReflectionMethod($processor, 'prepare_response');
@@ -236,7 +244,7 @@ class process_generate_image_test extends \advanced_testcase {
         // Log in user.
         $this->setUser($this->getDataGenerator()->create_user());
 
-        $processor = new process_generate_image();
+        $processor = new process_generate_image($this->provider, $this->action);
         // We're working with a private method here, so we need to use reflection.
         $method = new \ReflectionMethod($processor, 'url_to_file');
 
@@ -254,16 +262,17 @@ class process_generate_image_test extends \advanced_testcase {
         $this->resetAfterTest();
         // Log in user.
         $this->setUser($this->getDataGenerator()->create_user());
+
         // Mock the http client to return a successful response.
         $url = $this->getExternalTestFileUrl('/test.html', false);
 
         $responsebodyjson = json_encode([
                 'created' => 1719140500,
                 'data' => [
-                   (object)[
-                      'revised_prompt' => 'An image that represents the concept of a \'test\'.',
-                      'url' => $url,
-                    ]
+                        (object)[
+                                'revised_prompt' => 'An image that represents the concept of a \'test\'.',
+                                'url' => $url,
+                        ]
                 ]
         ]);
 
@@ -272,11 +281,18 @@ class process_generate_image_test extends \advanced_testcase {
                 ['Content-Type' => 'application/json'],
                 $responsebodyjson
         );
-        $client = $this->createMock(\core\http_client::class);
-        $client->method('request')->willReturn($response);
+
+        $mockHttpClient = $this->createMock(\core\http_client::class);
+        $mockHttpClient->method('request')->willReturn($response);
+
+        // Mock the provider to return the mocked http client.
+        $mockProvider = $this->getMockBuilder(\aiprovider_openai\provider::class)
+                ->onlyMethods(['create_http_client'])
+                ->getMock();
+
+        $mockProvider->method('create_http_client')->willReturn($mockHttpClient);
 
         // Create a request object.
-        $action = new \core_ai\aiactions\generate_image();
         $contextid = 1;
         $userid = 1;
         $prompttext = 'This is a test prompt';
@@ -284,17 +300,18 @@ class process_generate_image_test extends \advanced_testcase {
         $quality = 'hd';
         $numimages = 1;
         $style = 'vivid';
-        $action->configure(
+        $this->action->configure(
                 contextid: $contextid,
                 userid: $userid,
                 prompttext: $prompttext,
                 quality: $quality,
                 aspectratio: $aspectratio,
                 numimages: $numimages,
-                style: $style);
+                style: $style
+        );
 
-        $processor = new process_generate_image();
-        $result = $processor->process($client, $action, $userid);
+        $processor = new process_generate_image($mockProvider, $this->action);
+        $result = $processor->process();
 
         $this->assertInstanceOf(\core_ai\aiactions\responses\response_base::class, $result);
         $this->assertTrue($result->get_success());

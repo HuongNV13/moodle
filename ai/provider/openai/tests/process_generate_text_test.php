@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 use aiprovider_openai\process_generate_text;
+use core_ai\aiactions\base;
+use core_ai\provider;
 use GuzzleHttp\Psr7\Response;
 
 /**
@@ -29,32 +31,39 @@ class process_generate_text_test extends \advanced_testcase {
     /** @var string A successful response in JSON format. */
     protected string $responsebodyjson;
 
+    /** @var provider The provider that will process the action. */
+    protected provider $provider;
+
+    /** @var base The action to process. */
+    protected base $action;
+
     /**
      * Set up the test.
      */
     protected function setUp(): void {
         // Load a response body from a file.
         $this->responsebodyjson = file_get_contents(__DIR__ . '/fixtures/text_request_success.json');
+        $this->provider = new \aiprovider_openai\provider();
+        $this->action = new \core_ai\aiactions\generate_text();
     }
 
     /**
      * Test create_request_object
      */
     public function test_create_request_object(): void {
-        $action = new \core_ai\aiactions\generate_text();
         $contextid = 1;
         $userid = 1;
         $prompttext = 'This is a test prompt';
-        $action->configure(
+        $this->action->configure(
                 contextid: $contextid,
                 userid: $userid,
                 prompttext: $prompttext);
 
-        $processor = new process_generate_text();
+        $processor = new process_generate_text($this->provider, $this->action);
 
         // We're working with a private method here, so we need to use reflection.
         $method = new \ReflectionMethod($processor, 'create_request_object');
-        $request = $method->invoke($processor, $action, $userid);
+        $request = $method->invoke($processor, $this->action, $userid);
 
         $this->assertEquals($prompttext, $request->messages[0]->content);
         $this->assertEquals('user', $request->messages[0]->role);
@@ -76,7 +85,7 @@ class process_generate_text_test extends \advanced_testcase {
                         '{"error": {"message": "Rate limit reached for requests"}}'),
         ];
 
-        $processor = new process_generate_text();
+        $processor = new process_generate_text($this->provider, $this->action);
         $method = new ReflectionMethod($processor, 'handle_api_error');
 
         foreach ($responses as $status => $response) {
@@ -104,7 +113,7 @@ class process_generate_text_test extends \advanced_testcase {
         );
 
         // We're testing a private method, so we need to setup reflector magic.
-        $processor = new process_generate_text();
+        $processor = new process_generate_text($this->provider, $this->action);
         $method = new ReflectionMethod($processor, 'handle_api_success');
 
         $result = $method->invoke($processor, $response);
@@ -143,7 +152,7 @@ class process_generate_text_test extends \advanced_testcase {
 
         $requestobj->messages = [$userobj];
 
-        $processor = new process_generate_text();
+        $processor = new process_generate_text($this->provider, $this->action);
         $method = new ReflectionMethod($processor, 'query_ai_api');
         $result = $method->invoke($processor, $client, $requestobj);
 
@@ -160,7 +169,7 @@ class process_generate_text_test extends \advanced_testcase {
      * Test prepare_response success.
      */
     public function test_prepare_response_success(): void {
-        $processor = new process_generate_text();
+        $processor = new process_generate_text($this->provider, $this->action);
 
         // We're working with a private method here, so we need to use reflection.
         $method = new \ReflectionMethod($processor, 'prepare_response');
@@ -188,7 +197,7 @@ class process_generate_text_test extends \advanced_testcase {
      * Test prepare_response error.
      */
     public function test_prepare_response_error(): void {
-        $processor = new process_generate_text();
+        $processor = new process_generate_text($this->provider, $this->action);
 
         // We're working with a private method here, so we need to use reflection.
         $method = new \ReflectionMethod($processor, 'prepare_response');

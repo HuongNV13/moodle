@@ -20,6 +20,7 @@ use core\http_client;
 use core_ai\aiactions\responses\response_base;
 use core_ai\aiactions\responses\response_generate_image;
 use core_ai\aiactions;
+use core_ai\process_base;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
 
@@ -32,7 +33,7 @@ require_once($CFG->libdir . '/filelib.php');
  * @copyright  2024 Matt Porritt <matt.porritt@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class process_generate_image {
+class process_generate_image extends process_base {
     /** @var string The API endpoint to make requests against */
     private string $aiendpoint = 'https://api.openai.com/v1/images/generations';
 
@@ -48,14 +49,25 @@ class process_generate_image {
     /**
      * Process the AI request.
      *
-     * @param http_client $client The http client.
-     * @param aiactions\base $action The action to process.
-     * @param string $userid The user id.
      * @return response_base The result of the action.
      */
-    public function process(http_client $client, aiactions\base $action, string $userid): response_base {
+    public function process(): response_base {
+        // Check the rate limiter.
+        $ratelimitcheck = $this->provider->is_request_allowed($this->action);
+        if ($ratelimitcheck !== true) {
+            return new response_generate_image(
+                    success: false,
+                    actionname: 'generate_image',
+                    errorcode: $ratelimitcheck['errorcode'],
+                    errormessage: $ratelimitcheck['errormessage']
+            );
+        }
+
+        $userid = $this->provider->generate_userid($this->action->get_configuration('userid'));
+        $client = $this->provider->create_http_client($this->aiendpoint);
+
         // Create the request object.
-        $requestobj = $this->create_request_object($action, $userid);
+        $requestobj = $this->create_request_object($this->action, $userid);
 
         // Make the request to the OpenAI API.
         $response = $this->query_ai_api($client, $requestobj);
@@ -63,7 +75,7 @@ class process_generate_image {
         // If the request was successful, save the URL to a file.
         if ($response['success']) {
             $fileobj = $this->url_to_file(
-                    $action->get_configuration('userid'),
+                    $this->action->get_configuration('userid'),
                     $response['sourceurl']
             );
             // Add the file to the response, so the calling placement can do whatever they want with it.

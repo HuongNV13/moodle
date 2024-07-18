@@ -83,101 +83,6 @@ class provider extends \core_ai\provider {
     }
 
     /**
-     * Process the generate_text action.
-     * Handles communication with the OpenAI API and returning the result.
-     *
-     * @param aiactions\base $action The action to process.
-     * @return \core_ai\aiactions\responses\response_base The result of the action.
-     */
-    public function process_action_generate_image(aiactions\base $action): aiactions\responses\response_base {
-        // Check the rate limiter.
-        $ratelimitcheck = $this->is_request_allowed($action);
-        if ($ratelimitcheck !== true) {
-            return new response_generate_image(
-                    success: false,
-                    actionname: 'generate_image',
-                    errorcode: $ratelimitcheck['errorcode'],
-                    errormessage: $ratelimitcheck['errormessage']
-            );
-        }
-
-        $imagegenerator = new process_generate_image();
-
-        // Create the HTTP client.
-        $url = $imagegenerator->get_apiendpoint();
-        $client = $this->create_http_client($url);
-
-        // Generate the user id.
-        $this->userid = $this->generate_userid($action->get_configuration('userid'));
-
-        // Make the request to the OpenAI API.
-        return $imagegenerator->process($client, $action, $this->userid);
-    }
-
-    /**
-     * Process the generate_text action.
-     * Handles communication with the OpenAI API and returning the result.
-     *
-     * @param aiactions\base $action The action to process.
-     * @return \core_ai\aiactions\responses\response_base The result of the action.
-     */
-    public function process_action_generate_text(aiactions\base $action): aiactions\responses\response_base {
-        // Check the rate limiter.
-        $ratelimitcheck = $this->is_request_allowed($action);
-        if ($ratelimitcheck !== true) {
-            return new response_generate_text(
-                    success: false,
-                    actionname: 'generate_text',
-                    errorcode: $ratelimitcheck['errorcode'],
-                    errormessage: $ratelimitcheck['errormessage']
-            );
-        }
-
-        $textgenerator = new process_generate_text();
-
-        // Create the HTTP client.
-        $url = $textgenerator->get_apiendpoint();
-        $client = $this->create_http_client($url);
-
-        // Generate the user id.
-        $this->userid = $this->generate_userid($action->get_configuration('userid'));
-
-        // Make the request to the OpenAI API.
-        return $textgenerator->process($client, $action, $this->userid);
-    }
-
-    /**
-     * Process the summarise_text action.
-     * Handles communication with the OpenAI API and returning the result.
-     *
-     * @param aiactions\base $action The action to process.
-     * @return \core_ai\aiactions\responses\response_base The result of the action.
-     */
-    public function process_action_summarise_text(aiactions\base $action): aiactions\responses\response_base {
-        $ratelimitcheck = $this->is_request_allowed($action);
-        if ($ratelimitcheck !== true) {
-            return new response_summarise_text(
-                    success: false,
-                    actionname: 'generate_text',
-                    errorcode: $ratelimitcheck['errorcode'],
-                    errormessage: $ratelimitcheck['errormessage']
-            );
-        }
-
-        $textsummary = new process_summarise_text();
-
-        // Create the HTTP client.
-        $url = $textsummary->get_apiendpoint();
-        $client = $this->create_http_client($url);
-
-        // Generate the user id.
-        $this->userid = $this->generate_userid($action->get_configuration('userid'));
-
-        // Make the request to the OpenAI API.
-        return $textsummary->process($client, $action, $this->userid);
-    }
-
-    /**
      * Generate a user id.
      * This is a hash of the site id and user id,
      * this means we can determine who made the request
@@ -186,7 +91,7 @@ class provider extends \core_ai\provider {
      * @param string $userid The user id.
      * @return string The generated user id.
      */
-    private function generate_userid($userid): string {
+    public function generate_userid($userid): string {
         global $CFG;
         return hash('sha256', $CFG->siteidentifier . $userid);
     }
@@ -197,7 +102,7 @@ class provider extends \core_ai\provider {
      * @param string $apiendpoint The API endpoint.
      * @return http_client The HTTP client used to make requests.
      */
-    private function create_http_client(string $apiendpoint): http_client {
+    public function create_http_client(string $apiendpoint): http_client {
         return new http_client([
                 'base_uri' => $apiendpoint,
                 'headers' => [
@@ -214,7 +119,7 @@ class provider extends \core_ai\provider {
      * @param aiactions\base $action The action to check.
      * @return array|bool True on success, array of error details on failure.
      */
-    private function is_request_allowed(aiactions\base $action): array|bool {
+    public function is_request_allowed(aiactions\base $action): array|bool {
         $ratelimiter = ratelimiter::get_instance();
         $component = explode('\\', get_class($this))[0];
 

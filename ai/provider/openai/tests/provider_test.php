@@ -43,11 +43,7 @@ class provider_test extends \advanced_testcase {
      */
     public function test_generate_userid(): void {
         $provider = new \aiprovider_openai\provider();
-
-        // We're working with a private method here, so we need to use reflection.
-        $method = new \ReflectionMethod($provider, 'generate_userid');
-
-        $userid = $method->invoke($provider, '1');
+        $userid = $provider->generate_userid(1);
 
         //assert that the generated userid is a string of proper length.
         $this->assertIsString($userid);
@@ -60,10 +56,7 @@ class provider_test extends \advanced_testcase {
     public function test_create_http_client(): void {
         $provider = new \aiprovider_openai\provider();
         $url = 'https://api.openai.com/v1/images/generations';
-
-        // We're working with a private method here, so we need to use reflection.
-        $method = new \ReflectionMethod($provider, 'create_http_client');
-        $client = $method->invoke($provider, $url);
+        $client = $provider->create_http_client($url);
 
         $this->assertInstanceOf(\core\http_client::class, $client);
     }
@@ -99,16 +92,13 @@ class provider_test extends \advanced_testcase {
                 style: $style);
         $provider = new \aiprovider_openai\provider();
 
-        // We're working with a private method here, so we need to use reflection.
-        $method = new \ReflectionMethod($provider, 'is_request_allowed');
-
         // Make 3 requests, all should be allowed.
         for ($i = 0; $i < 3; $i++) {
-            $this->assertTrue($method->invoke($provider, $action));
+            $this->assertTrue($provider->is_request_allowed($action));
         }
 
         // The 4th request for the same user should be denied.
-        $result = $method->invoke($provider, $action);
+        $result = $provider->is_request_allowed($action);
         $this->assertFalse($result['success']);
         $this->assertEquals('User rate limit exceeded', $result['errormessage']);
 
@@ -121,13 +111,13 @@ class provider_test extends \advanced_testcase {
                 aspectratio: $aspectratio,
                 numimages: $numimages,
                 style: $style);
-        $this->assertTrue($method->invoke($provider, $action));
+        $this->assertTrue($provider->is_request_allowed($action));
 
         // Make a 5th request for the global rate limit, it should be allowed.
-        $this->assertTrue($method->invoke($provider, $action));
+        $this->assertTrue($provider->is_request_allowed($action));
 
         // The 6th request should be denied.
-        $result = $method->invoke($provider, $action);
+        $result = $provider->is_request_allowed($action);
         $this->assertFalse($result['success']);
         $this->assertEquals('Global rate limit exceeded', $result['errormessage']);
     }

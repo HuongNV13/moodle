@@ -107,16 +107,16 @@ class manager {
      * The named provider will process the action and return the result.
      *
      * @param provider $provider The provider to call.
-     * @param string $methodname The method to call on the provider for the action.
      * @param base $action The action to process.
      * @return \core_ai\aiactions\responses\response_base The result of the action.
      */
-    protected function call_action_provider(
-            provider $provider,
-            string $methodname,
-            base $action
-    ): responses\response_base {
-        return $provider->$methodname($action);
+    protected function call_action_provider(provider $provider, base $action): responses\response_base {
+        $classname = 'process_' . $action->get_basename();
+        $classpath = substr($provider::class, 0, strpos($provider::class, '\\') + 1);
+        $processclass = $classpath . $classname;
+        $processor = new $processclass($provider, $action);
+
+        return $processor->process($action);
     }
 
     /**
@@ -129,16 +129,15 @@ class manager {
      */
     public function process_action(base $action): responses\response_base {
         // Get the action response_base name.
-        $actionname = $action->get_basename();
-        $methodname = 'process_action_' . $actionname;
-        $responseclassname = 'responses\response_' . $actionname;
+        $actionname = $action::class;
+        $responseclassname = 'responses\response_' . $action->get_basename();
 
         // Get the providers that support the action.
         $providers = self::get_providers_for_actions([$actionname], true);
 
         // Loop through the providers and process the action.
         foreach ($providers[$actionname] as $provider) {
-            $result = $this->call_action_provider($provider, $methodname, $action);
+            $result = $this->call_action_provider($provider, $action);
 
             // Store the result (success or failure).
             $this->store_action_result($provider, $action, $result);

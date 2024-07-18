@@ -20,6 +20,7 @@ use core\http_client;
 use core_ai\aiactions\responses\response_base;
 use core_ai\aiactions\responses\response_summarise_text;
 use core_ai\aiactions;
+use core_ai\process_base;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
 
@@ -30,7 +31,7 @@ use Psr\Http\Message\ResponseInterface;
  * @copyright  2024 Matt Porritt <matt.porritt@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class process_summarise_text {
+class process_summarise_text extends process_base {
     /** @var string The API endpoint to make requests against */
     private string $aiendpoint = 'https://api.openai.com/v1/chat/completions';
 
@@ -45,9 +46,23 @@ class process_summarise_text {
      * @param string $userid The user id.
      * @return response_base The result of the action.
      */
-    public function process(http_client $client, aiactions\base $action, string $userid): response_base {
+    public function process(): response_base {
+        // Check the rate limiter.
+        $ratelimitcheck = $this->provider->is_request_allowed($this->action);
+        if ($ratelimitcheck !== true) {
+            return new response_summarise_text(
+                    success: false,
+                    actionname: 'generate_text',
+                    errorcode: $ratelimitcheck['errorcode'],
+                    errormessage: $ratelimitcheck['errormessage']
+            );
+        }
+
+        $userid = $this->provider->generate_userid($this->action->get_configuration('userid'));
+        $client = $this->provider->create_http_client($this->aiendpoint);
+
         // Create the request object.
-        $requestobj = $this->create_request_object($action, $userid);
+        $requestobj = $this->create_request_object($this->action, $userid);
 
         // Make the request to the OpenAI API.
         $response = $this->query_ai_api($client, $requestobj);

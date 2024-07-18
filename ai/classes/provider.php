@@ -16,6 +16,8 @@
 
 namespace core_ai;
 
+use core_ai\aiactions\responses;
+
 /**
  * Class provider.
  *
@@ -24,7 +26,12 @@ namespace core_ai;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class provider {
-
+    /**
+     * Get the actions that this provider supports.
+     * Returns an array of action class names.
+     *
+     * @return array An array of action class names.
+     */
     abstract protected function get_action_list(): array;
 
     /**
