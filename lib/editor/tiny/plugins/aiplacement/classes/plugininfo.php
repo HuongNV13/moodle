@@ -83,9 +83,17 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
             ?editor $editor = null
     ): array {
         global $USER;
+
+        $textallowed = (bool) get_config('aiplacement_tinymce', 'generatetext')
+            && has_capability('tiny/aiplacement:generatetext', $context);
+        $imageallowed = (bool) get_config('aiplacement_tinymce', 'generateimage')
+            && has_capability('tiny/aiplacement:generateimage', $context);
+
         return [
             'contextid' => $context->id,
-            'userid' => (int)$USER->id,
+            'userid' => (int) $USER->id,
+            'textallowed' => $textallowed,
+            'imageallowed' => $imageallowed,
         ];
     }
 }

@@ -109,7 +109,7 @@ class manager {
      * @param provider $provider The provider to call.
      * @param string $methodname The method to call on the provider for the action.
      * @param base $action The action to process.
-     * @return responses\response_base The result of the action.
+     * @return \core_ai\aiactions\responses\response_base The result of the action.
      */
     protected function call_action_provider(
             provider $provider,
@@ -169,7 +169,7 @@ class manager {
      *
      * @param provider $provider The provider that processed the action.
      * @param base $action The action that was processed.
-     * @param responses\response_base $response The result of the action.
+     * @param \core_ai\aiactions\responses\response_base $response The result of the action.
      * @return int The id of the stored action result.
      */
     private function store_action_result(

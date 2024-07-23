@@ -50,13 +50,13 @@ if ($hassiteconfig) {
             new lang_string('placementactionsettings_desc', 'core_ai')));
 
     // Get the list of actions that this placement supports.
-    $actions = \core_ai\manager::get_supported_actions('aiplacement_tinymce');
-    // Load the setting table of actions that this provider supports.
-    $settings->add(new \core_ai\admin\admin_setting_action_manager(
-            'aiplacement_tinymce',
-            $actions,
-            \core_ai\table\aiplacement_action_management_table::class,
-            'manageaiplacements',
-            new lang_string('manageaiproviders', 'core_ai'),
-    ));
+    //$actions = \core_ai\manager::get_supported_actions('aiplacement_tinymce');
+    //// Load the setting table of actions that this provider supports.
+    //$settings->add(new \core_ai\admin\admin_setting_action_manager(
+    //        'aiplacement_tinymce',
+    //        $actions,
+    //        \core_ai\table\aiplacement_action_management_table::class,
+    //        'manageaiplacements',
+    //        new lang_string('manageaiproviders', 'core_ai'),
+    //));
 }
