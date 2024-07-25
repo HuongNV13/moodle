@@ -109,7 +109,8 @@ class provider extends \core_ai\provider {
                         'Content-Type' => 'application/json',
                         'Authorization' => 'Bearer ' . $this->apikey,
                         'OpenAI-Organization' => $this->orgid,
-                ]
+                ],
+            'http_errors' => false,
         ]);
     }
 

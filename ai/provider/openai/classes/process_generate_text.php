@@ -36,7 +36,8 @@ class process_generate_text extends process_base {
     private string $aiendpoint = 'https://api.openai.com/v1/chat/completions';
 
     /** @var string The API model to use */
-    private string $model = 'gpt-4o';
+    //private string $model = 'gpt-4o';
+    private string $model = 'gpt-4o-mini';
 
 
     /**

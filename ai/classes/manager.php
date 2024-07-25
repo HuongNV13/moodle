@@ -97,9 +97,7 @@ class manager {
      * @return base
      */
     public static function get_action(string $actionname): base {
-        $classname = '\\core_ai\\aiactions\\' . $actionname;
-
-        return new $classname();
+        return new $actionname();
     }
 
     /**
