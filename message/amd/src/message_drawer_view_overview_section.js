@@ -131,14 +131,17 @@ function(
 
         // Replace the current placeholder (loading spinner) with some nicer placeholders that
         // better represent the content.
+        const pendingPromise = new Pending('core_message:renderTotalCount');
         Templates.render(TEMPLATES.CONVERSATIONS_LIST_ITEMS_PLACEHOLDER, {placeholders: placeholders})
             .then(function(html) {
                 var placeholderContainer = root.find(SELECTORS.PLACEHOLDER_CONTAINER);
                 placeholderContainer.html(html);
+                pendingPromise.resolve();
                 return;
             })
             .catch(function() {
                 // Silently ignore. Doesn't matter if we can't render the placeholders.
+                pendingPromise.resolve();
             });
     };
 
@@ -791,13 +794,18 @@ function(
             if (isVisible(root)) {
                 setExpanded(root);
                 var listRoot = LazyLoadList.getRoot(root);
+                const pendingPromise = new Pending('core_message:show');
                 LazyLoadList.show(listRoot, loadCallback, function(contentContainer, conversations, userId) {
                     return render(conversations, userId)
                         .then(function(html) {
                             contentContainer.append(html);
+                            pendingPromise.resolve();
                             return html;
                         })
-                        .catch(Notification.exception);
+                        .catch((e) => {
+                            pendingPromise.resolve();
+                            Notification.exception(e);
+                        });
                 });
             }
 
