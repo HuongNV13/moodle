@@ -357,6 +357,7 @@ function(
         }
 
         return function(root, userId) {
+            const pendingPromise = new Pending('core/core_message:messageDrawerLoading');
             return MessageRepository.getConversations(
                     userId,
                     type,
@@ -376,13 +377,19 @@ function(
 
                     offset = offset + LOAD_LIMIT;
 
-                    conversations.forEach(function(conversation) {
+                    conversations.forEach(function(conversation, idx, array) {
                         loadedConversationsById[conversation.id] = conversation;
+                        if (idx === array.length - 1) {
+                            pendingPromise.resolve();
+                        }
                     });
 
                     return conversations;
                 })
-                .catch(Notification.exception);
+                .catch(function(error) {
+                    pendingPromise.resolve();
+                    Notification.exception(error);
+                });
         };
     };
 
