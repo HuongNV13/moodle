@@ -27,70 +27,53 @@ defined('MOODLE_INTERNAL') || die();
 if ($hassiteconfig) {
     // Provider specific settings heading.
     $settings = new admin_settingpage('aiprovider_openai',
-            new lang_string('pluginname', 'aiprovider_openai'), 'moodle/site:config', true);
+        new lang_string('pluginname', 'aiprovider_openai'), 'moodle/site:config', true);
 
     $settings->add(new admin_setting_heading('aiprovider_openai/general',
-            new lang_string('providersettings', 'core_ai'),
-            new lang_string('providersettings_desc', 'core_ai')));
+        new lang_string('providersettings', 'core_ai'),
+        new lang_string('providersettings_desc', 'core_ai')));
 
     // Setting to store OpenAI API key.
     $settings->add(new admin_setting_configpasswordunmask('aiprovider_openai/apikey',
-            new lang_string('apikey', 'aiprovider_openai'),
-            new lang_string('apikey_desc', 'aiprovider_openai'),
-            ''));
+        new lang_string('apikey', 'aiprovider_openai'),
+        new lang_string('apikey_desc', 'aiprovider_openai'),
+        ''));
 
     // Setting to store OpenAI organization ID.
     $settings->add(new admin_setting_configtext('aiprovider_openai/orgid',
-            new lang_string('orgid', 'aiprovider_openai'),
-            new lang_string('orgid_desc', 'aiprovider_openai'),
-            '',
-            PARAM_TEXT));
+        new lang_string('orgid', 'aiprovider_openai'),
+        new lang_string('orgid_desc', 'aiprovider_openai'),
+        '',
+        PARAM_TEXT));
 
     // Setting to enable/disable global rate limiting.
     $settings->add(new admin_setting_configcheckbox('aiprovider_openai/enableglobalratelimit',
-            new lang_string('enableglobalratelimit', 'aiprovider_openai'),
-            new lang_string('enableglobalratelimit_desc', 'aiprovider_openai'),
-            0));
+        new lang_string('enableglobalratelimit', 'aiprovider_openai'),
+        new lang_string('enableglobalratelimit_desc', 'aiprovider_openai'),
+        0));
 
     // Setting to set how many requests per hour are allowed for the global rate limit.
     // Should only be enabled when global rate limiting is enabled.
     $settings->add(new admin_setting_configtext('aiprovider_openai/globalratelimit',
-            new lang_string('globalratelimit', 'aiprovider_openai'),
-            new lang_string('globalratelimit_desc', 'aiprovider_openai'),
-            100,
-            PARAM_INT));
+        new lang_string('globalratelimit', 'aiprovider_openai'),
+        new lang_string('globalratelimit_desc', 'aiprovider_openai'),
+        100,
+        PARAM_INT));
     new admin_settingdependency('aiprovider_openai/globalratelimit', 'aiprovider_openai/enableglobalratelimit', 'eq', 1);
 
     // Setting to enable/disable user rate limiting.
     $settings->add(new admin_setting_configcheckbox('aiprovider_openai/enableuserratelimit',
-            new lang_string('enableuserratelimit', 'aiprovider_openai'),
-            new lang_string('enableuserratelimit_desc', 'aiprovider_openai'),
-            0));
+        new lang_string('enableuserratelimit', 'aiprovider_openai'),
+        new lang_string('enableuserratelimit_desc', 'aiprovider_openai'),
+        0));
 
     // Setting to set how many requests per hour are allowed for the user rate limit.
     // Should only be enabled when user rate limiting is enabled.
     $settings->add(new admin_setting_configtext('aiprovider_openai/userratelimit',
-            new lang_string('userratelimit', 'aiprovider_openai'),
-            new lang_string('userratelimit_desc', 'aiprovider_openai'),
-            10,
-            PARAM_INT));
+        new lang_string('userratelimit', 'aiprovider_openai'),
+        new lang_string('userratelimit_desc', 'aiprovider_openai'),
+        10,
+        PARAM_INT));
     new admin_settingdependency('aiprovider_openai/userratelimit', 'aiprovider_openai/enableuserratelimit', 'eq', 1);
-
-    // Provider action settings heading.
-    $settings->add(new admin_setting_heading('aiprovider_openai/generals',
-            new lang_string('provideractionsettings', 'core_ai'),
-            new lang_string('provideractionsettings_desc', 'core_ai')));
-
-    // Get the list of actions that this provider supports.
-    $actions = \core_ai\manager::get_supported_actions('aiprovider_openai');
-    // Load the setting table of actions that this provider supports.
-    $settings->add(new \core_ai\admin\admin_setting_action_manager(
-            'aiprovider_openai',
-            $actions,
-            \core_ai\table\aiprovider_action_management_table::class,
-            'manageaiproviders',
-            new lang_string('manageaiproviders', 'core_ai'),
-    ));
-
 
 }
