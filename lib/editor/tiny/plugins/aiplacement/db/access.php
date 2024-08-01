@@ -15,20 +15,32 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Tiny media plugin version details.
+ * Tiny text editor AI placement plugin capabilities.
  *
  * @package    tiny_aiplacement
- * @copyright  2024 Matt Porritt <matt.porritt@moodle.com>
+ * @copyright  2024 Huong Nguyen <huongnv13@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'tiny_aiplacement';
-$plugin->version = 2024061901;
-$plugin->requires = 2024041600;
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->dependencies = [
-    'aiplacement_tinymce' => 2024061801,
-    'tiny_media' => 2024042200,
+$capabilities = [
+    // Capability to generate text using this plugin.
+    'tiny/aiplacement:generatetext' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => [
+            'editingteacher' => CAP_ALLOW,
+            'student' => CAP_ALLOW,
+        ],
+    ],
+    // Capability to generate image using this plugin.
+    'tiny/aiplacement:generateimage' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => [
+            'editingteacher' => CAP_ALLOW,
+            'student' => CAP_ALLOW,
+        ],
+    ],
 ];

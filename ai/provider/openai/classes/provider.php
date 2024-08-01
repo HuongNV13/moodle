@@ -97,12 +97,13 @@ class provider extends \core_ai\provider {
      */
     public function create_http_client(string $apiendpoint): http_client {
         return new http_client([
-                'base_uri' => $apiendpoint,
-                'headers' => [
-                        'Content-Type' => 'application/json',
-                        'Authorization' => 'Bearer ' . $this->apikey,
-                        'OpenAI-Organization' => $this->orgid,
-                ],
+            'base_uri' => $apiendpoint,
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $this->apikey,
+                'OpenAI-Organization' => $this->orgid,
+            ],
+            'http_errors' => false, // We want to handle errors ourselves.
         ]);
     }
 
