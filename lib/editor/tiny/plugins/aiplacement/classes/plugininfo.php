@@ -17,6 +17,9 @@
 namespace tiny_aiplacement;
 
 use context;
+use core_ai\aiactions\generate_image;
+use core_ai\aiactions\generate_text;
+use core_ai\manager;
 use editor_tiny\editor;
 use editor_tiny\plugin;
 use editor_tiny\plugin_with_buttons;
@@ -93,9 +96,36 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
             ?editor $editor = null
     ): array {
         global $USER;
+
+        $textallowed = false;
+        $imageallowed = false;
+
+        [$plugintype, $pluginname] = explode('_', \core_component::normalize_componentname('aiplacement_tinymce'), 2);
+        $manager = \core_plugin_manager::resolve_plugininfo_class($plugintype);
+        if ($manager::is_plugin_enabled($pluginname)) {
+            $providers = manager::get_providers_for_actions([
+                generate_text::class,
+                generate_image::class,
+            ], true);
+            if (get_config('aiplacement_tinymce', 'generatetext')
+                && has_capability('tiny/aiplacement:generatetext', $context)
+                && manager::is_action_enabled('aiplacement_tinymce', 'core_ai\\aiactions\\generate_text')
+                && !empty($providers[generate_text::class])) {
+                $textallowed = true;
+            }
+            if (get_config('aiplacement_tinymce', 'generateimage')
+                && has_capability('tiny/aiplacement:generateimage', $context)
+                && manager::is_action_enabled('aiplacement_tinymce', 'core_ai\\aiactions\\generate_image')
+                && !empty($providers[generate_image::class])) {
+                $imageallowed = true;
+            }
+        }
+
         return [
             'contextid' => $context->id,
-            'userid' => (int)$USER->id,
+            'userid' => (int) $USER->id,
+            'textallowed' => $textallowed,
+            'imageallowed' => $imageallowed,
         ];
     }
 }
