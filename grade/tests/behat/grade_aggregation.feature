@@ -50,14 +50,12 @@ Feature: We can use calculated grade totals
       | Test assignment nine  | student1 | 5.00  |
     And I am on the "Course 1" "grades > Grader report > View" page logged in as "teacher1"
     And I turn editing mode on
-    And I change window size to "large"
     And I set the following settings for grade item "Test assignment two":
       | Hidden | 1 |
     And I set the following settings for grade item "Test assignment five":
       | Hidden | 1 |
     And I set the following settings for grade item "Test assignment eight":
       | Hidden | 1 |
-    And I change window size to "medium"
     And I navigate to "Setup > Course grade settings" in the course gradebook
     And I set the field "Grade display type" to "Real (percentage)"
     And I press "Save changes"
@@ -247,7 +245,6 @@ Feature: We can use calculated grade totals
       | Aggregation                     | Natural |
       | Include outcomes in aggregation | 1       |
       | Exclude empty grades            | 0       |
-    And I change window size to "large"
     And I navigate to "View > Grader report" in the course gradebook
     And I give the grade "Excellent" to the user "Student 1" for the grade item "Test outcome item one"
     And I press "Save changes"
@@ -301,7 +298,6 @@ Feature: We can use calculated grade totals
     And I set the following settings for grade item "Test outcome item one":
      | Weight adjusted  | 1   |
      | aggregationcoef2 | 100 |
-    And I change window size to "large"
     And I navigate to "View > Grader report" in the course gradebook
     And I give the grade "Excellent" to the user "Student 1" for the grade item "Test outcome item one"
     And I press "Save changes"

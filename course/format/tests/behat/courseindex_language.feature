@@ -21,7 +21,6 @@ Feature: The course index language should change according to user preferences.
       | teacher1 | C1     | editingteacher |
     And the following "language pack" exists:
       | language | fr |
-    And I change window size to "large"
 
   @javascript
   Scenario Outline: Course index is refreshed when we change language.

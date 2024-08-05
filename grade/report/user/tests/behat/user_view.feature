@@ -37,7 +37,6 @@ Feature: View the user report as the student will see it
     And I hide the grade item "Sub category 2"
     And I navigate to "View > Grader report" in the course gradebook
     And I turn editing mode on
-    And I change window size to "large"
     And I give the grade "80.00" to the user "Student 1" for the grade item "Test assignment one"
     And I give the grade "35.00" to the user "Student 1" for the grade item "Test assignment two"
     And I give the grade "100.00" to the user "Student 1" for the grade item "Test assignment three"
@@ -45,7 +44,6 @@ Feature: View the user report as the student will see it
     And I give the grade "21.00" to the user "Student 1" for the grade item "Test assignment five"
     And I give the grade "97.00" to the user "Student 1" for the grade item "Test assignment six"
     And I press "Save changes"
-    And I change window size to "medium"
 
   Scenario: View the report as the teacher themselves
     When I navigate to "View > User report" in the course gradebook

@@ -23,8 +23,7 @@ Feature: Use the TinyMCE editor to upload an h5p package
 
   @javascript @external
   Scenario: TinyMCE can be used to embed an H5P activity
-    Given I change window size to "large"
-    And I am on the PageName1 "page activity editing" page logged in as admin
+    Given I am on the PageName1 "page activity editing" page logged in as admin
     And I click on the "Configure H5P content" button for the "Page content" TinyMCE editor
     And I set the field "H5P URL or file upload" to "https://moodle.h5p.com/content/1290772960722742119"
     And I click on "Insert H5P content" "button" in the "Insert H5P content" "dialogue"
@@ -38,7 +37,6 @@ Feature: Use the TinyMCE editor to upload an h5p package
     Given the following "user private file" exists:
       | user     | admin                                   |
       | filepath | h5p/tests/fixtures/guess-the-answer.h5p |
-    And I change window size to "large"
     And I am on the "PageName1" "page activity editing" page logged in as "admin"
     And I click on the "Configure H5P content" button for the "Page content" TinyMCE editor
     And I click on "Browse repositories..." "button" in the "Insert H5P content" "dialogue"
@@ -147,8 +145,7 @@ Feature: Use the TinyMCE editor to upload an h5p package
 
   @javascript @external
   Scenario: H5P options are ignored for H5P URLs
-    Given I change window size to "large"
-    And I am on the PageName1 "page activity editing" page logged in as admin
+    Given I am on the PageName1 "page activity editing" page logged in as admin
     And I click on the "Configure H5P content" button for the "Page content" TinyMCE editor
     And I set the field "H5P URL or file upload" to "https://moodle.h5p.com/content/1291366510035871129"
     And I click on "H5P options" "link"

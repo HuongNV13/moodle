@@ -58,7 +58,6 @@ Feature: Using the AJAX grading feature of Grader report to update grades and fe
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I navigate to "View > Grader report" in the course gradebook
-    And I change window size to "large"
     And I click on student "Student 2" for grade item "Item VU"
     Then I should see a grade field for "Student 2" and grade item "Item VU"
     And I should not see a feedback field for "Student 2" and grade item "Item VU"
@@ -113,7 +112,6 @@ Feature: Using the AJAX grading feature of Grader report to update grades and fe
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I navigate to "View > Grader report" in the course gradebook
-    And I change window size to "large"
     And I click on student "Student 2" for grade item "Item VU"
     Then I should see a grade field for "Student 2" and grade item "Item VU"
     And I should see a feedback field for "Student 2" and grade item "Item VU"
@@ -151,7 +149,6 @@ Feature: Using the AJAX grading feature of Grader report to update grades and fe
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I navigate to "View > Grader report" in the course gradebook
-    And I change window size to "large"
     And I click on student "Student 2" for grade item "Item VU"
     Then I should see a grade field for "Student 2" and grade item "Item VU"
     And I should see a feedback field for "Student 2" and grade item "Item VU"
@@ -204,7 +201,6 @@ Feature: Using the AJAX grading feature of Grader report to update grades and fe
     And I am on "Course 1" course homepage
     And I navigate to "View > Grader report" in the course gradebook
     And I turn editing mode on
-    And I change window size to "large"
     And I set "=[[i1]] + [[i3]] + [[gsc]]" calculation for grade item "Calc Item" with idnumbers:
       | Item 1        | i1  |
       | Item 3        | i3  |

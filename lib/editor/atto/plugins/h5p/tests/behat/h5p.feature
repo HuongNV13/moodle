@@ -21,8 +21,7 @@ Feature: Use the Atto editor to upload an h5p package
 
   @javascript @external
   Scenario: Insert an embedded h5p
-    Given I change window size to "large"
-    And I am on the PageName1 "page activity editing" page logged in as admin
+    Given I am on the PageName1 "page activity editing" page logged in as admin
     And I click on "Insert H5P" "button" in the "#fitem_id_page" "css_element"
     And I set the field with xpath "//input[@data-region='h5pfile']" to "https://moodle.h5p.com/content/1290772960722742119"
     And I click on "Insert H5P" "button" in the "Insert H5P" "dialogue"
@@ -51,8 +50,7 @@ Feature: Use the Atto editor to upload an h5p package
 
   @javascript
   Scenario: Test an invalid url
-    Given I change window size to "large"
-    And I am on the PageName1 "page activity editing" page logged in as admin
+    Given I am on the PageName1 "page activity editing" page logged in as admin
     And I click on "Insert H5P" "button" in the "#fitem_id_page" "css_element"
 #   This is not a real external URL, so this scenario shouldn't be labeled as external.
     And I set the field with xpath "//input[@data-region='h5pfile']" to "ftp://moodle.h5p.com/content/1290772960722742119"
@@ -181,8 +179,7 @@ Feature: Use the Atto editor to upload an h5p package
 
   @javascript @external
   Scenario: H5P options are ignored for H5P URLs
-    Given I change window size to "large"
-    And I am on the PageName1 "page activity editing" page logged in as admin
+    Given I am on the PageName1 "page activity editing" page logged in as admin
     And I click on "Insert H5P" "button" in the "#fitem_id_page" "css_element"
     And I set the field with xpath "//input[@data-region='h5pfile']" to "https://moodle.h5p.com/content/1291366510035871129"
     And I click on "H5P options" "link"

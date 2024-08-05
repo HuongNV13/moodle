@@ -38,7 +38,6 @@ Feature: Teacher can modify choices of the students
     And I should see "Your choice has been saved"
     And I log out
     And I log in as "teacher1"
-    And I change window size to "large"
     And I am on the "Choice name" "choice activity" page
     And I navigate to "Responses" in current page administration
     And I click on "Student 1 Option 1" "checkbox"
@@ -58,7 +57,6 @@ Feature: Teacher can modify choices of the students
     Then I should see "Your selection: Option 1"
     And I should see "Your choice has been saved"
     And I log out
-    And I change window size to "large"
     And I am on the "Choice name" "choice activity" page logged in as teacher1
     And I navigate to "Responses" in current page administration
     And I click on "Student 1 Option 1" "checkbox"
@@ -83,7 +81,6 @@ Feature: Teacher can modify choices of the students
     And I should see "Your selection: Option 1; Option 2"
     And I should see "Your choice has been saved"
     And I log out
-    And I change window size to "large"
     And I am on the "Choice name" "choice activity" page logged in as teacher1
     And I navigate to "Responses" in current page administration
     And I click on "Student 1 Option 2" "checkbox"
@@ -101,7 +98,6 @@ Feature: Teacher can modify choices of the students
     Then I should see "Your selection: Option 1"
     And I should see "Your choice has been saved"
     And I log out
-    And I change window size to "large"
     And I am on the "Choice name" "choice activity editing" page logged in as teacher1
     And I set the following fields to these values:
       | Publish results | Always show results to students |

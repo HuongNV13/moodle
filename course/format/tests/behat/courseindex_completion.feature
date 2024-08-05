@@ -22,8 +22,6 @@ Feature: Course index completion icons
       | user     | course | role           |
       | student1 | C1     | student        |
       | teacher1 | C1     | editingteacher |
-    # The course index is hidden by default in small devices.
-    And I change window size to "large"
 
   @javascript
   Scenario: Teacher does not see completion icons.

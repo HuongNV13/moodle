@@ -21,8 +21,7 @@ Feature: Manage custom report columns sorting
     And I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
 
   Scenario: Toggle column sorting in report
-    Given I change window size to "large"
-    And I click on "Show/hide 'Sorting'" "button"
+    Given I click on "Show/hide 'Sorting'" "button"
     # This will be the fallback sort after toggling lastname sorting.
     And I click on "Enable initial sorting for column First name" "checkbox"
     When I click on "Enable initial sorting for column Last name" "checkbox"
@@ -33,8 +32,7 @@ Feature: Manage custom report columns sorting
     And "user01" "table_row" should appear before "user02" "table_row"
 
   Scenario: Change column sort direction in report
-    Given I change window size to "large"
-    And I click on "Show/hide 'Sorting'" "button"
+    Given I click on "Show/hide 'Sorting'" "button"
     When I click on "Enable initial sorting for column Last name" "checkbox"
     And I click on "Sort column 'Last name' descending" "button"
     Then I should see "Updated sorting for column 'Last name'"
@@ -44,8 +42,7 @@ Feature: Manage custom report columns sorting
     And "user02" "table_row" should appear before "user01" "table_row"
 
   Scenario: Change column sort order in report
-    Given I change window size to "large"
-    And I click on "Show/hide 'Sorting'" "button"
+    Given I click on "Show/hide 'Sorting'" "button"
     When I click on "Enable initial sorting for column Last name" "checkbox"
     And I click on "Enable initial sorting for column First name" "checkbox"
     And I click on "Move sorting for column 'First name'" "button"
@@ -55,8 +52,7 @@ Feature: Manage custom report columns sorting
     And "user01" "table_row" should appear before "user02" "table_row"
 
   Scenario: Change column sorting for column sorted by multiple fields
-    Given I change window size to "large"
-    And I click on "Add column 'Full name'" "link"
+    Given I click on "Add column 'Full name'" "link"
     And I click on "Show/hide 'Sorting'" "button"
     When I click on "Enable initial sorting for column Full name" "checkbox"
     Then I should see "Updated sorting for column 'Full name'"
@@ -69,8 +65,7 @@ Feature: Manage custom report columns sorting
     And "user01" "table_row" should appear before "user03" "table_row"
 
   Scenario: Configured report sorting is always applied when editing
-    Given I change window size to "large"
-    And I click on "Show/hide 'Sorting'" "button"
+    Given I click on "Show/hide 'Sorting'" "button"
     # Sort by last name descending.
     When I click on "Enable initial sorting for column Last name" "checkbox"
     Then "user02" "table_row" should appear before "user01" "table_row"
@@ -85,14 +80,12 @@ Feature: Manage custom report columns sorting
     And "user02" "table_row" should appear before "user01" "table_row"
 
   Scenario: Sortable columns are updated when column is added to report
-    Given I change window size to "large"
-    And I click on "Show/hide 'Sorting'" "button"
+    Given I click on "Show/hide 'Sorting'" "button"
     When I click on "Add column 'Full name'" "link"
     Then I should see "Full name" in the "#settingssorting" "css_element"
 
   Scenario: Sortable columns are updated when column is deleted from report
-    Given I change window size to "large"
-    And I click on "Show/hide 'Sorting'" "button"
+    Given I click on "Show/hide 'Sorting'" "button"
     When I click on "Delete column 'Username'" "button"
     And I click on "Delete" "button" in the "Delete column 'Username'" "dialogue"
     Then I should not see "Username" in the "#settingssorting" "css_element"

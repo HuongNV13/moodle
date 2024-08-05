@@ -189,7 +189,6 @@ Feature: Register a platform with the tool
       | name |
       | My test platform |
     And I log in as "admin"
-    And I change window size to "large"
     And I navigate to "Plugins > Enrolments > Publish as LTI tool > Tool registration" in site administration
     When I click on "View platform details" "link" in the "My test platform" "table_row"
     And I follow "Tool details"

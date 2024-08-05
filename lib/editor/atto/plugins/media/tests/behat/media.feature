@@ -11,7 +11,6 @@ Feature: Add media to Atto
       | admin | lib/editor/atto/tests/fixtures/pretty-good-en.vtt |
       | admin | lib/editor/atto/tests/fixtures/pretty-good-sv.vtt |
     And I log in as "admin"
-    And I change window size to "large"
     And I follow "Profile" in the user menu
     And I follow "Blog entries"
     And I follow "Add a new entry"
