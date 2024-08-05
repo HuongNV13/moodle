@@ -6,7 +6,6 @@ Feature: OAuth2 settings test functionality
 
   Background:
     Given I log in as "admin"
-    And I change window size to "large"
 
   Scenario: Test oAuth2 authentication settings with no configured service.
     Given I navigate to "Plugins > Authentication > Manage authentication" in site administration

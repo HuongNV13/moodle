@@ -75,7 +75,6 @@ Feature: Add H5P activity
       | name            | Awesome H5P package                     |
       | displayoptions  | 6                                       |
       | packagefilepath | h5p/tests/fixtures/guess-the-answer.h5p |
-    And I change window size to "large"
     When I am on the "Awesome H5P package" "h5pactivity activity" page
     Then I switch to "h5p-player" class iframe
     And I switch to "h5p-iframe" class iframe

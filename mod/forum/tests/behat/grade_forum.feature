@@ -29,7 +29,6 @@ Feature: I can grade a students interaction across a forum
       | idnumber    | 0001         |
       | name        | Test Forum 1 |
     And I log in as "teacher1"
-    And I change window size to "large"
     And I am on "Course 1" course homepage with editing mode on
 
   Scenario: Ensure that forum grade settings do not leak to Ratings

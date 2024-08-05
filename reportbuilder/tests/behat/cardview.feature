@@ -19,8 +19,7 @@ Feature: Manage card view settings in the report editor
 
   Scenario: Edit card view settings form
     When I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
-    Then I change window size to "large"
-    And I click on "Show/hide 'Card view'" "button"
+    Then I click on "Show/hide 'Card view'" "button"
     # Check default values.
     And the following fields match these values:
       | Columns visible       | 1     |
@@ -45,7 +44,6 @@ Feature: Manage card view settings in the report editor
 
   Scenario: Show Card view
     When I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
-    And I change window size to "large"
     And I press "Switch to preview mode"
     And I change window size to "530x812"
     # Card view should just show user fullname while collapsed with default settings.
@@ -61,7 +59,6 @@ Feature: Manage card view settings in the report editor
     And "[data-cardtitle=\"Email address\"]" "css_element" should exist in the "reportbuilder-table" "table"
     And "[data-cardtitle=\"City/town\"]" "css_element" should exist in the "reportbuilder-table" "table"
     # Change 'Columns visible' to 3 and 'First column title' to yes.
-    And I change window size to "large"
     And I press "Switch to edit mode"
     And I click on "Show/hide 'Card view'" "button"
     And I set the following fields to these values:

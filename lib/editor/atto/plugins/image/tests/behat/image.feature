@@ -39,7 +39,6 @@ Feature: Add images to Atto
     And I take focus off "Height" "field"
     And the field "Width" matches value "123"
     And the field "Height" matches value "456"
-    And I change window size to "large"
     And I press "Save image"
     And I press "Update profile"
     And I click on "Edit profile" "link" in the "region-main" "region"
