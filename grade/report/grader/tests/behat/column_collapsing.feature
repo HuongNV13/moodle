@@ -40,7 +40,6 @@ Feature: Within the grader report, test that we can collapse columns
       | assign   | C1     | a4       | Test assignment four  |
     And the following config values are set as admin:
       | showuseridentity | idnumber,email,city,country,phone1,phone2,department,institution,profile_field_enduro |
-    And I change window size to "large"
     And I am on the "Course 1" "grades > Grader report > View" page logged in as "teacher1"
 
   Scenario: An admin collapses a user info column and then reloads the page to find the column still collapsed
@@ -55,7 +54,6 @@ Feature: Within the grader report, test that we can collapse columns
     Then "Email" "link" in the "First name / Last name" "table_row" should not be visible
     # Check that the collapsed column is only for the user that set it.
     And I am on the "Course 1" "Course" page logged in as "admin"
-    And I change window size to "large"
     And I navigate to "View > Grader report" in the course gradebook
     And "Email" "link" in the "First name / Last name" "table_row" should be visible
 

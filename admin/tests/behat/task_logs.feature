@@ -11,7 +11,6 @@ Feature: View task logs report and use its filters
   @javascript
   Scenario Outline: Filter task logs by name
     Given I log in as "admin"
-    And I change window size to "large"
     And I navigate to "Server > Tasks > Task logs" in site administration
     When I click on "Filters" "button"
     And I set the following fields in the "Class name" "core_reportbuilder > Filter" to these values:
@@ -34,7 +33,6 @@ Feature: View task logs report and use its filters
   # Task duration is dependent on many factors, we are asserting here that no task has a duration >2 minutes.
   Scenario Outline: Filter task logs by duration
     Given I log in as "admin"
-    And I change window size to "large"
     And I navigate to "Server > Tasks > Task logs" in site administration
     When I click on "Filters" "button"
     And I set the following fields in the "Duration" "core_reportbuilder > Filter" to these values:
@@ -52,7 +50,6 @@ Feature: View task logs report and use its filters
   @javascript
   Scenario: Reset task log filters
     Given I log in as "admin"
-    And I change window size to "large"
     And I navigate to "Server > Tasks > Task logs" in site administration
     When I click on "Filters" "button"
     And I set the following fields in the "Result" "core_reportbuilder > Filter" to these values:

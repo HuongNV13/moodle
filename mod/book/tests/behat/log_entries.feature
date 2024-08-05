@@ -48,7 +48,6 @@ Feature: In a book, verify log entries
     And I should see "Chapter created" in the "#report_log_r9_c5" "css_element"
     And I click on "Chapter viewed" "link" in the "#report_log_r4_c5" "css_element"
     And I switch to "action" window
-    And I change window size to "large"
     And I should see "1. First chapter edited" in the ".book_content" "css_element"
     And I switch to the main window
     And I click on "Chapter viewed" "link" in the "#report_log_r5_c5" "css_element"

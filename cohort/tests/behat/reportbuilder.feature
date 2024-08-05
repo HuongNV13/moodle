@@ -42,7 +42,6 @@ Feature: Manage custom reports for cohorts
 
   Scenario: Add condition to cohorts report
     Given I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
-    And I change window size to "large"
     When I click on "Show/hide 'Conditions'" "button"
     Then I should see "There are no conditions selected" in the "[data-region='settings-conditions']" "css_element"
     And I set the field "Select a condition" to "Category"
@@ -58,7 +57,6 @@ Feature: Manage custom reports for cohorts
 
   Scenario: Use filters in cohorts report
     Given I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
-    And I change window size to "large"
     When I click on "Show/hide 'Filters'" "button"
     Then I should see "There are no filters selected" in the "[data-region='settings-filters']" "css_element"
     And I set the field "Select a filter" to "Name"
@@ -81,7 +79,6 @@ Feature: Manage custom reports for cohorts
     Given the following "core_reportbuilder > Columns" exist:
       | report    | uniqueidentifier   |
       | My report | user:lastname      |
-    And I change window size to "large"
     And I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
     And I set the field "Rename column 'Last name'" to "Member count"
     And I set the "Last name" column aggregation to "Count"

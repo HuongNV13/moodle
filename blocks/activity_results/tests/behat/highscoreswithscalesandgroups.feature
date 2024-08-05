@@ -47,7 +47,6 @@ Feature: The activity results block displays student in group high scores as sca
     And the following "scales" exist:
       | name     | scale                                                                |
       | My Scale | Disappointing, Not good enough, Average, Good, Very good, Excellent! |
-    And I change window size to "large"
     And I am on the "Test assignment" "assign activity editing" page logged in as teacher1
     And I set the following fields to these values:
       | assignsubmission_file_enabled | 0 |
