@@ -785,12 +785,16 @@ trait behat_session_trait {
                 $height = 768;
                 break;
             case "medium":
-                $width = 1366;
-                $height = 768;
+                $width = 1920;
+                $height = 1080;
                 break;
             case "large":
                 $width = 2560;
                 $height = 1600;
+                break;
+            case "extralarge":
+                $width = 3840;
+                $height = 2160;
                 break;
             default:
                 preg_match('/^(\d+x\d+)$/', $windowsize, $matches);
