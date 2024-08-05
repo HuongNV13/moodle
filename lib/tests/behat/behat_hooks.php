@@ -476,7 +476,7 @@ EOF;
             return;
         }
 
-        // Run all test with medium (1024x768) screen size, to avoid responsive problems.
+        // Run all test with medium (1920x1080) screen size, to avoid responsive problems.
         $this->resize_window('medium');
     }
 
