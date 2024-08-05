@@ -25,9 +25,8 @@ Feature: I can create a bigbluebuttonbn instance with default server
     And I am on the "Test course" "course" page logged in as "admin"
 
   Scenario Outline: Add an activity using default server for the three types of instance types
-    When I change window size to "large"
-    And I add a bigbluebuttonbn activity to course "Test course" section "1"
-    And I select "<type>" from the "Instance type" singleselect
+    Given I add a bigbluebuttonbn activity to course "Test course" section "1"
+    When I select "<type>" from the "Instance type" singleselect
     Then I should see "Restrict access"
 
     Examples:

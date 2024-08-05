@@ -204,7 +204,6 @@ Feature: We can understand the gradebook user report
 
   @javascript @skip_chrome_zerosize
   Scenario: View user report with mixed aggregation methods
-    And I change window size to "large"
     And I set the following settings for grade item "Course 1" of type "course" on "setup" page:
       | Aggregation | Natural |
     And I set the following settings for grade item "Sub category" of type "category" on "setup" page:

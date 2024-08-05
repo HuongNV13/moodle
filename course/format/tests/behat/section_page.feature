@@ -93,9 +93,7 @@ Feature: Single section course page
 
   @javascript
   Scenario: Change the section name inline
-    # The course index is hidden by default in small devices.
-    Given I change window size to "large"
-    And I turn editing mode on
+    Given I turn editing mode on
     And I open section "1" edit menu
     And I click on "View" "link" in the "Section 1" "section"
     When I set the field "Edit section name" in the "page-header" "region" to "Custom section name"

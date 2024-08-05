@@ -19,7 +19,6 @@ Feature: Manage custom report conditions
 
   Scenario: Add condition to report
     Given I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
-    And I change window size to "large"
     When I click on "Show/hide 'Conditions'" "button"
     Then I should see "There are no conditions selected" in the "[data-region='settings-conditions']" "css_element"
     And I set the field "Select a condition" to "Email address"
@@ -65,7 +64,6 @@ Feature: Manage custom report conditions
       | report    | uniqueidentifier |
       | My report | user:email       |
     And I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
-    And I change window size to "large"
     When I click on "Show/hide 'Conditions'" "button"
     And I set the following fields in the "Email address" "core_reportbuilder > Condition" to these values:
       | Email address operator | Does not contain |
@@ -84,7 +82,6 @@ Feature: Manage custom report conditions
       | report    | uniqueidentifier |
       | My report | user:email       |
     And I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
-    And I change window size to "large"
     When I click on "Show/hide 'Conditions'" "button"
     And I set the following fields in the "Email address" "core_reportbuilder > Condition" to these values:
       | Email address operator | Does not contain |

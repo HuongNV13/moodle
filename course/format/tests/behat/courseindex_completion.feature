@@ -22,8 +22,6 @@ Feature: Course index completion icons
       | user     | course | role           |
       | student1 | C1     | student        |
       | teacher1 | C1     | editingteacher |
-    # The course index is hidden by default in small devices.
-    And I change window size to "large"
 
   @javascript
   Scenario: Teacher does not see completion icons.
@@ -152,9 +150,6 @@ Feature: Course index completion icons
       | completion               | 2                                                             |
       | completionscorerequired  | 90                                                            |
     Given I am on the "Music history" "scorm activity" page logged in as student1
-    # We need a little taller window because Firefox is, apparently, unable to auto-scroll within
-    # an iframe, so we need to ensure that the "Save changes" button is visible in the viewport.
-    And I change window size to "large"
     And I press "Enter"
     And I switch to the main frame
     And I click on "Par?" "list_item"

@@ -36,15 +36,13 @@ Feature: bigbluebuttonbn instance
     And I should see "Recordings"
 
   Scenario: Add a Recording Only activity and check that no live session settings are available for this instance type
-    When I change window size to "large"
-    And I add a bigbluebuttonbn activity to course "Test course" section "1"
-    And I select "Recordings only" from the "Instance type" singleselect
+    Given I add a bigbluebuttonbn activity to course "Test course" section "1"
+    When I select "Recordings only" from the "Instance type" singleselect
     Then I should not see "Lock settings"
 
   Scenario Outline: Add an activity and check that required settings are available for the three types of instance types
-    When I change window size to "large"
-    And I add a bigbluebuttonbn activity to course "Test course" section "1"
-    And I select "<type>" from the "Instance type" singleselect
+    Given I add a bigbluebuttonbn activity to course "Test course" section "1"
+    When I select "<type>" from the "Instance type" singleselect
     Then I should see "Restrict access"
 
     Examples:

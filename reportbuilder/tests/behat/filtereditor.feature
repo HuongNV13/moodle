@@ -126,7 +126,6 @@ Feature: Manage custom report filters
       | report    | uniqueidentifier |
       | My report | user:fullname    |
     And I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
-    And I change window size to "large"
     And I should see "user1@example.com" in the ".reportbuilder-table" "css_element"
     And I should see "user2@example.com" in the ".reportbuilder-table" "css_element"
     And I should see "user3@example.com" in the ".reportbuilder-table" "css_element"
@@ -171,7 +170,6 @@ Feature: Manage custom report filters
       | report           | My report  |
       | uniqueidentifier | user:email |
     And I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
-    And I change window size to "large"
     And I should see "user1@example.com" in the ".reportbuilder-table" "css_element"
     And I should see "user2@example.com" in the ".reportbuilder-table" "css_element"
     And I should see "user3@example.com" in the ".reportbuilder-table" "css_element"

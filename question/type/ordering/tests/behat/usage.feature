@@ -59,7 +59,6 @@ Feature: Complete an Ordering question attempt
     And I should see "Question 1" in the ".info" "css_element"
     And I should see "<state>" in the ".info" "css_element"
     And I should see "<mark>" in the ".info" "css_element"
-    And I change window size to "large"
     # Confirm that the grade details shows some of the formula as behat does not like /.
     And I should <expect> "<gradedetails>"
     And I should see "<correct>"
@@ -92,7 +91,6 @@ Feature: Complete an Ordering question attempt
       | ordering-003 | 1    | 2.00    |
     And I am on the "Quiz 2" "quiz activity" page logged in as "student1"
     When I click on "Attempt quiz" "button"
-    And I change window size to "large"
     And I wait until the page is ready
     And I drag "Environment" to space "1" in the ordering question
     And I drag "Learning" to space "2" in the ordering question
