@@ -74,9 +74,7 @@ Feature: Assignments correctly add feedback to the grade report when workflow an
     And I should see "Ready for release" in the "I'm the student's first submission" "table_row"
     And I choose the "Reveal student identities" item in the "Actions" action menu
     And I press "Continue"
-    And I change window size to "large"
     And I click on "Grade" "link" in the "Student 1" "table_row"
-    And I change window size to "medium"
     And I set the field "Marking workflow state" to "Released"
     And I press "Save changes"
     And I follow "View all submissions"

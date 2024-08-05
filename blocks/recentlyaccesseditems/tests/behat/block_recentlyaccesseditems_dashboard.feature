@@ -30,9 +30,8 @@ Feature: The recently accessed items block allows users to easily access their m
 
   @accessibility
   Scenario: User has accessed some items
-    Given I change window size to "large"
-    When I am on the "Test forum name" "forum activity" page
-    And I follow "Dashboard"
+    Given I am on the "Test forum name" "forum activity" page
+    When I follow "Dashboard"
     Then I should see "Test forum name" in the "Recently accessed items" "block"
     And I should not see "Show more items" in the "Recently accessed items" "block"
     And the page should meet accessibility standards
@@ -44,7 +43,6 @@ Feature: The recently accessed items block allows users to easily access their m
       | book       | Test book name         |                               | C1     | book1       |
       | choice     | Test choice name       | Test choice description       | C1     | choice1     |
       | data       | Test database name     | Test database description     | C1     | data1       |
-    And I change window size to "large"
     And I am on the "Test forum name" "forum activity" page
     And I am on the "Test database name" "data activity" page
     And I am on the "Test assignment name" "assign activity" page

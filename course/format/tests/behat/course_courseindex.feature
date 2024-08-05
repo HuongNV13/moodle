@@ -25,8 +25,6 @@ Feature: Course index depending on role
       | user     | course | role           |
       | student1 | C1     | student        |
       | teacher1 | C1     | editingteacher |
-    # The course index is hidden by default in small devices.
-    And I change window size to "large"
 
   @javascript
   Scenario: Course index is present on course pages.

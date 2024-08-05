@@ -104,7 +104,6 @@ Feature: Upload users
       | fullname | shortname | category |
       | Maths    | math102   | 0        |
     # We need to do a bit of setup here.
-    And I change window size to "large"
     And I log in as "admin"
     And I navigate to "Security > Site security settings" in site administration
     And I click on "Password policy" "checkbox"
@@ -137,7 +136,6 @@ Feature: Upload users
       | fullname | shortname | category |
       | Maths    | math102   | 0        |
     # We need to do a bit of setup here.
-    And I change window size to "large"
     And I log in as "admin"
     And I navigate to "Security > Site security settings" in site administration
     And I click on "Password policy" "checkbox"
@@ -161,7 +159,6 @@ Feature: Upload users
       | fullname | shortname | category |
       | Maths    | math102   | 0        |
     # Upload the users.
-    And I change window size to "large"
     And I log in as "admin"
     And I navigate to "Users > Accounts > Upload users" in site administration
     When I upload "lib/tests/fixtures/upload_users_enrol_date_period.csv" file to "File" filemanager

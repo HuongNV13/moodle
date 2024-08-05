@@ -36,7 +36,6 @@ Feature: Within the grader report, test that we can search for users
     And the following config values are set as admin:
       | showuseridentity | idnumber,email,city,country,phone1,phone2,department,institution |
     And I am on the "Course 1" "grades > Grader report > View" page logged in as "teacher1"
-    And I change window size to "large"
 
   Scenario: A teacher can view and trigger the user search
     # Check the placeholder text

@@ -107,9 +107,7 @@ Feature: Assignments settings can be changed
 
     When I am on the "Test assignment name" Activity page logged in as teacher1
     And I follow "View all submissions"
-    And I change window size to "large"
     And I click on "Grade" "link" in the "Student 3" "table_row"
-    And I change window size to "medium"
     And I set the field "Grade out of 100" to "40"
     And I set the field "Notify student" to "0"
     And I press "Save changes"
@@ -120,9 +118,7 @@ Feature: Assignments settings can be changed
 
     And I am on the "Test assignment name" Activity page logged in as teacher1
     And I follow "View all submissions"
-    And I change window size to "large"
     And I open the action menu in "Student 3" "table_row"
-    And I change window size to "medium"
     And I follow "Allow another attempt"
 
     And I am on the "Test assignment name" Activity page logged in as student3

@@ -20,7 +20,6 @@ Feature: Manage custom report columns aggregation
       | My report | user:lastname    |
       | My report | user:firstname   |
     And I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
-    And I change window size to "large"
     When I set the "First name" column aggregation to "<aggregation>"
     Then I should see "Aggregated column 'First name'"
     And I should see "<output>" in the "Richie" "table_row"
@@ -40,7 +39,6 @@ Feature: Manage custom report columns aggregation
       | My report | user:lastname    |
       | My report | user:fullname    |
     And I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
-    And I change window size to "large"
     When I set the "Full name" column aggregation to "<aggregation>"
     Then I should see "Aggregated column 'Full name'"
     And I should see "<output>" in the "Richie" "table_row"
@@ -60,7 +58,6 @@ Feature: Manage custom report columns aggregation
       | My report | user:lastname    |
       | My report | user:lastaccess  |
     And I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
-    And I change window size to "large"
     When I set the "Last access" column aggregation to "<aggregation>"
     Then I should see "Aggregated column 'Last access'"
     And I should see "<output>" in the "Richie" "table_row"
@@ -80,7 +77,6 @@ Feature: Manage custom report columns aggregation
       | My report | user:lastname    |
       | My report | user:confirmed   |
     And I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
-    And I change window size to "large"
     When I set the "Confirmed" column aggregation to "<aggregation>"
     Then I should see "Aggregated column 'Confirmed'"
     And I should see "<output>" in the "Richie" "table_row"
@@ -108,7 +104,6 @@ Feature: Manage custom report columns aggregation
       | My report | user:lastname    |
       | My report | user:confirmed   |
     And I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
-    And I change window size to "large"
     When I set the "Confirmed" column aggregation to "<aggregation>"
     Then I should see "Aggregated column 'Confirmed'"
     And I should see "<output>" in the "Richie" "table_row"
@@ -129,7 +124,6 @@ Feature: Manage custom report columns aggregation
       | My report | user:lastname    |
       | My report | user:firstname   |
     And I am on the "My report" "reportbuilder > Editor" page logged in as "admin"
-    And I change window size to "large"
     When I set the "First name" column aggregation to "<aggregation>"
     Then I should see "Aggregated column 'First name'"
     And I should see "<output>" in the "Richie" "table_row"

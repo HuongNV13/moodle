@@ -10,7 +10,6 @@ Feature: Manage custom reports
       | user1     | User      | 1        | 1         |
       | user2     | User      | 2        | 0         |
     And I log in as "admin"
-    And I change window size to "large"
     When I navigate to "Reports > Report builder > Custom reports" in site administration
     And I click on "New report" "button"
     And I set the following fields in the "New report" "dialogue" to these values:

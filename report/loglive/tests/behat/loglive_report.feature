@@ -37,8 +37,6 @@ Feature: In a report, admin can see loglive data
     And I follow "Course module created"
     And I switch to "action" window
     And I am on "Course 1" course homepage
-    And I change window size to "large"
-    And I reload the page
     And I add a data activity to course "Course 1" section "3" and I fill the form with:
       | Name | Test name2 |
       | Description | Test database description |

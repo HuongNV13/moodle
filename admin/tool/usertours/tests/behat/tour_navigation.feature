@@ -15,7 +15,6 @@ Feature: Steps can be navigated within a tour
     And I add steps to the "Calendar tour" tour:
       | targettype | Block    | Title           | id_content                 | Content type   |
       | Block      | Calendar | Calendar events | This is the calendar block | Manual |
-    And I change window size to "large"
     And I follow "Dashboard"
     And I wait until the page is ready
     And I should see "This is the calendar block"
@@ -34,7 +33,6 @@ Feature: Steps can be navigated within a tour
     And I add steps to the "Calendar tour" tour:
       | targettype | Block    | Title           | id_content                 | Content type   |
       | Block      | Calendar | Calendar events | This is the calendar block | Manual |
-    And I change window size to "large"
     And I follow "Dashboard"
     And I wait until the page is ready
     And I should see "This is the calendar block"
@@ -75,7 +73,6 @@ Feature: Steps can be navigated within a tour
     And I add steps to the "Calendar tour" tour:
       | targettype | Block    | Title           | id_content                 | Content type   |
       | Block      | Calendar | Calendar events | This is the calendar block | Manual |
-    And I change window size to "large"
     And I follow "Dashboard"
     And I wait until the page is ready
     And I should see "This is the calendar block"
@@ -93,7 +90,6 @@ Feature: Steps can be navigated within a tour
     And I add steps to the "Calendar tour" tour:
       | targettype | Block    | Title           | id_content                 | Content type   |
       | Block      | Calendar | Calendar events | This is the calendar block | Manual |
-    And I change window size to "large"
     And I follow "Dashboard"
     And I wait until the page is ready
     And I should see "This is the calendar block"

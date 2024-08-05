@@ -7,8 +7,6 @@ Feature: Viewing acceptances reports and accepting on behalf of other users
   Background:
     Given the following config values are set as admin:
       | sitepolicyhandler | tool_policy |
-    # This is required for now to prevent the overflow region affecting the action menus.
-    And I change window size to "large"
     And the following policies exist:
       | Name                | Revision | Content    | Summary     | Status   |
       | This site policy    |          | full text2 | short text2 | active   |

@@ -28,7 +28,6 @@ Feature: Within the User report, a teacher can search for users.
       | assign   | C1     | a1       | Test assignment one |
     And the following config values are set as admin:
       | showuseridentity | idnumber,email,city,country,phone1,phone2,department,institution |
-    And I change window size to "large"
     And I am on the "Course 1" "grades > User report > View" page logged in as "teacher1"
 
   Scenario: A teacher can view and trigger the user search

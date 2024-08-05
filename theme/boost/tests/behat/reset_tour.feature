@@ -18,9 +18,7 @@ Feature: Reset a tour for Boost
 
   @javascript
   Scenario: Reset the tour with desktop view
-    # Changing the window size to large so we will have the footer button.
-    Given I change window size to "large"
-    And I am on site homepage
+    Given I am on site homepage
     And I should see "Welcome"
     And I press "Got it"
     And I should not see "Welcome"

@@ -81,8 +81,6 @@ Feature: Users can view and search database entries
       | data1    | student1 | Student original entry untagged | Student original entry untagged 2 |                   |
     And I am on the "Test database name" "data activity" page logged in as student1
     And I click on "Add entry" "button"
-    # This is required for now to prevent the tag suggestion menu from overlapping over the Save & view button.
-    And I change window size to "large"
     And I set the following fields to these values:
       | Test field name   | Student original entry tagged   |
       | Test field 2 name | Student original entry tagged 2 |
