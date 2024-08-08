@@ -39,6 +39,7 @@ global $CFG;
 
 require_once($CFG->libdir . '/tablelib.php');
 require_once($CFG->dirroot . '/user/lib.php');
+require_once($CFG->dirroot . '/course/lib.php');
 
 /**
  * Class for the displaying the participants table.
@@ -119,6 +120,16 @@ class participants extends \table_sql implements dynamic_table {
      */
     public function out($pagesize, $useinitialsbar, $downloadhelpbutton = '') {
         global $CFG, $OUTPUT, $PAGE;
+
+        // Check if the user has the capability to access this table.
+        if (!$this->has_capability()) {
+            $viewparticipantscap = 'moodle/course:viewparticipants';
+            $context = $this->get_context();
+            if ($context->contextlevel == CONTEXT_SYSTEM) {
+                $viewparticipantscap = 'moodle/site:viewparticipants';
+            }
+            throw new \required_capability_exception($context, $viewparticipantscap, 'nopermissions', '');
+        };
 
         // Define the headers and columns.
         $headers = [];
@@ -480,5 +491,16 @@ class participants extends \table_sql implements dynamic_table {
      */
     public function get_context(): context {
         return $this->context;
+    }
+
+    /**
+     * Check if the user has the capability to access this table.
+     *
+     * Enforced by core_table\dynamic.
+     *
+     * @return bool Return true if capability check passed.
+     */
+    public function has_capability(): bool {
+        return course_can_view_participants($this->get_context());
     }
 }

@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace core_reportbuilder\table;
 
 use moodle_url;
+use core_reportbuilder\permission;
 
 /**
  * Custom report view dynamic table class
@@ -73,5 +74,17 @@ class custom_report_table_view extends custom_report_table {
         }
 
         return '';
+    }
+
+    /**
+     * Check if the user has the capability to access this table.
+     *
+     * Enforced by core_table\dynamic.
+     * Can be overridden in child class.
+     *
+     * @return bool Return true if capability check passed.
+     */
+    public function has_capability(): bool {
+        return permission::can_view_report($this->persistent);
     }
 }

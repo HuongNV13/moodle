@@ -43,6 +43,7 @@ class custom_report_exporter_test extends advanced_testcase {
         global $PAGE;
 
         $this->resetAfterTest();
+        $this->setAdminUser();
 
         /** @var core_reportbuilder_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('core_reportbuilder');
@@ -76,6 +77,7 @@ class custom_report_exporter_test extends advanced_testcase {
         global $PAGE;
 
         $this->resetAfterTest();
+        $this->setAdminUser();
 
         /** @var core_reportbuilder_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('core_reportbuilder');
@@ -112,6 +114,7 @@ class custom_report_exporter_test extends advanced_testcase {
         global $PAGE;
 
         $this->resetAfterTest();
+        $this->setAdminUser();
 
         /** @var core_reportbuilder_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('core_reportbuilder');
@@ -135,9 +138,7 @@ class custom_report_exporter_test extends advanced_testcase {
         global $PAGE;
 
         $this->resetAfterTest();
-
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
+        $this->setAdminUser();
 
         /** @var core_reportbuilder_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('core_reportbuilder');

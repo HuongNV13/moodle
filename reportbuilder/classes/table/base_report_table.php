@@ -29,6 +29,7 @@ use core_reportbuilder\local\filters\base;
 use core_reportbuilder\local\models\report;
 use core_reportbuilder\local\report\base as base_report;
 use core_reportbuilder\local\report\filter;
+use core_reportbuilder\permission;
 use core\output\notification;
 
 defined('MOODLE_INTERNAL') || die;
@@ -291,5 +292,17 @@ abstract class base_report_table extends table_sql implements dynamic, renderabl
 
         echo html_writer::start_tag('div');
         echo html_writer::start_tag('table', $this->attributes) . $this->render_caption();
+    }
+
+    /**
+     * Check if the user has the capability to access this table.
+     *
+     * Enforced by core_table\dynamic.
+     * Can be overridden in child class.
+     *
+     * @return bool Return true if capability check passed.
+     */
+    public function has_capability(): bool {
+        return permission::can_view_report($this->persistent);
     }
 }

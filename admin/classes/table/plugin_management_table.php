@@ -51,6 +51,11 @@ abstract class plugin_management_table extends flexible_table implements dynamic
     public function __construct() {
         global $CFG;
 
+        // Check if the user has the capability to access this table.
+        if (!$this->has_capability()) {
+            throw new \required_capability_exception($this->get_context(), 'moodle/site:config', 'nopermissions', '');
+        };
+
         parent::__construct($this->get_table_id());
         require_once($CFG->libdir . '/adminlib.php');
 
@@ -500,5 +505,17 @@ abstract class plugin_management_table extends flexible_table implements dynamic
      */
     protected function supports_ordering(): bool {
         return $this->plugininfoclass::plugintype_supports_ordering();
+    }
+
+    /**
+     * Check if the user has the capability to access this table.
+     *
+     * Enforced by core_table\dynamic.
+     * Can be overridden in child class.
+     *
+     * @return bool Return true if capability check passed.
+     */
+    public function has_capability(): bool {
+        return has_capability('moodle/site:config', $this->get_context());
     }
 }

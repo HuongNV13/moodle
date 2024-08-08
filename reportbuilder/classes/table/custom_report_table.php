@@ -28,6 +28,8 @@ use core_reportbuilder\local\models\report;
 use core_reportbuilder\local\report\column;
 use core_reportbuilder\output\column_aggregation_editable;
 use core_reportbuilder\output\column_heading_editable;
+use core_reportbuilder\permission;
+use core_reportbuilder\exception\report_access_exception;
 
 /**
  * Custom report dynamic table class
@@ -365,6 +367,11 @@ class custom_report_table extends base_report_table {
      * @param string $downloadhelpbutton
      */
     public function out($pagesize, $useinitialsbar, $downloadhelpbutton = '') {
+
+        if (!$this->has_capability()) {
+            throw new report_access_exception('errorreportview');
+        };
+
         $this->pagesize = $pagesize;
         $this->setup();
 
@@ -388,5 +395,17 @@ class custom_report_table extends base_report_table {
         global $CFG;
 
         return !empty($CFG->customreportsliveediting);
+    }
+
+    /**
+     * Check if the user has the capability to access this table.
+     *
+     * Enforced by core_table\dynamic.
+     * Can be overridden in child class.
+     *
+     * @return bool Return true if capability check passed.
+     */
+    public function has_capability(): bool {
+        return permission::can_edit_report($this->persistent);
     }
 }
