@@ -33,27 +33,34 @@
         "elementid": "exampleId"
     }
 }}
-<div id="{{elementid}}_tiny_aiplacement_blur" class="">
-    <form class="mform" id="{{uniqid}}">
-        <div id="{{elementid}}_tiny_aiplacement_overlay" class="tiny-aiplacement-overlay hidden"></div>
-            <div class="form-group">
-                <label for="{{elementid}}_tiny_aiplacement_textresponse" class="font-weight-bold">
-                    {{#str}} textresponse_label, tiny_aiplacement {{/str}}
+<div id="{{elementid}}_tiny_aiplacement_blur" class="" xmlns="http://www.w3.org/1999/html">
+    <div id="{{elementid}}_tiny_aiplacement_overlay" class="tiny-aiplacement-overlay hidden"></div>
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <div class="col-md-4">
+                <label for="{{elementid}}_tiny_aiplacement_textprompt" class="font-weight-bold">
+                    {{#str}} textprompt_label, tiny_aiplacement {{/str}}
                 </label>
                 <textarea
                         class="form-control"
-                        id="{{elementid}}_tiny_aiplacement_textresponse"
-                        rows="8"
-                        placeholder="{{#str}} textresponse_placeholder, tiny_aiplacement {{/str}}"
-                        disabled="disabled"></textarea>
-                <label for="{{elementid}}_tiny_aiplacement_textprompt" class="font-weight-bold">
-                {{#str}} textprompt_label, tiny_aiplacement {{/str}}
-                </label>
-                <textarea
-                    class="form-control"
-                    id="{{elementid}}_tiny_aiplacement_textprompt"
-                    rows="3"
-                    placeholder="{{#str}} textprompt_placeholder, tiny_aiplacement {{/str}}"></textarea>
+                        id="{{elementid}}_tiny_aiplacement_textprompt"
+                        autocomplete="off"
+                        rows="8">
+                </textarea>
             </div>
-    </form>
+            <div class="col-md-8">
+                <div class="tiny_aiplacement_textresponse_placeholder">
+                    &nbsp;
+                </div>
+                <div class="tiny_aiplacement_textresponse hidden">
+                <textarea
+                        class="form-control"
+                        id="{{elementid}}_tiny_aiplacement_textresponse"
+                        rows="10"
+                        placeholder="{{#str}} textresponse_placeholder, tiny_aiplacement {{/str}}">
+                </textarea>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

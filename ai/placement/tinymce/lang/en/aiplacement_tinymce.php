@@ -24,7 +24,7 @@
 
 
 $string['accept'] = 'Accept and continue';
-$string['cancelai'] = 'Don\'t use AI';
+$string['cancelai'] = 'Decline';
 $string['generatecontent'] = 'Generate AI Content';
 $string['generateimage'] = 'AI Generate Images';
 $string['generateimagesetting'] = 'Enable generate Images';

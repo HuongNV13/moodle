@@ -33,21 +33,41 @@
         "elementid": "exampleId"
     }
 }}
-<button type="button"
-        class="btn btn-secondary"
-        data-action="cancel">
-    {{#str}} cancel, moodle {{/str}}
-</button>
-<button id="{{elementid}}_tiny_aiplacement_generatebutton"
-        type="button"
-        class="btn btn-primary"
-        data-action="generate"
-        disabled="disabled">
-    {{#str}} generate, tiny_aiplacement{{/str}}
-</button>
-<button id="{{elementid}}_tiny_aiplacement_insertbutton"
-        type="button"
-        class="btn btn-primary hidden"
-        data-action="inserter">
-    {{#str}} insert, tiny_aiplacement{{/str}}
-</button>
+<div class="tiny-aiplacement-generate-text-footer">
+    <button type="button"
+            class="btn btn-secondary"
+            data-action="cancel">
+        {{#str}} cancel, moodle {{/str}}
+    </button>
+    <button id="{{elementid}}_tiny_aiplacement_generatebutton"
+            type="button"
+            class="btn btn-primary"
+            data-action="generate"
+            disabled="disabled">
+    <span class="d-inline-block">
+        {{#pix}} sparkles, tiny_aiplacement, {{#str}} generatetext, tiny_aiplacement{{/str}} {{/pix}}
+    </span>
+        <span class="d-inline-block">
+            {{#str}} generatetext, tiny_aiplacement{{/str}}
+        </span>
+    </button>
+    <button id="{{elementid}}_tiny_aiplacement_prevbutton"
+            type="button"
+            class="btn btn-primary hidden"
+            data-action="back">
+        <span class="d-inline-block">
+            {{#str}} back, tiny_aiplacement{{/str}}
+        </span>
+    </button>
+    <button id="{{elementid}}_tiny_aiplacement_insertbutton"
+            type="button"
+            class="btn btn-primary hidden"
+            data-action="inserter">
+    <span class="d-inline-block">
+        {{#str}} insert, tiny_aiplacement{{/str}}
+    </span>
+        <span class="d-inline-block">
+            {{#pix}} t/collapsedchevron, core, {{#str}} insert, tiny_aiplacement{{/str}} {{/pix}}
+        </span>
+    </button>
+</div>

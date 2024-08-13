@@ -15,9 +15,9 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template tiny_aiplacement/imagemodal
+    @template tiny_aiplacement/modalbodyerror
 
-    Modal to manage AI generated image content within the Tiny Editor.
+    Display the error for Tiny AI placement.
 
     Classes required for JS:
     * none
@@ -30,11 +30,20 @@
 
     Example context (json):
     {
+        "errorMessage": "ABC"
     }
 }}
 <div id="{{elementid}}_tiny_aiplacement_blur" class="">
     <div id="{{elementid}}_tiny_aiplacement_overlay" class="tiny-aiplacement-overlay hidden"></div>
-    <div class="ai-policy-display">
-        {{#str}} userpolicy, core_ai{{/str}}
+    <div class="tiny-aiplacement-error-display w-50">
+        <div class="font-weight-bold">
+            <i class="icon fa fa-info-circle m-0 text-danger" aria-hidden="true"></i>
+            <span class="d-inline-block">
+                {{#str}} generatefailtitle, tiny_aiplacement{{/str}}
+            </span>
+        </div>
+        <div>
+            {{errorMessage}}
+        </div>
     </div>
 </div>
