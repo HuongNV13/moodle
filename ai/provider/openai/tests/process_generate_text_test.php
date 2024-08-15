@@ -47,28 +47,24 @@ final class process_generate_text_test extends \advanced_testcase {
         // Load a response body from a file.
         $this->responsebodyjson = file_get_contents(__DIR__ . '/fixtures/text_request_success.json');
         $this->provider = new \aiprovider_openai\provider();
-        $this->action = new \core_ai\aiactions\generate_text();
+        $this->action = new \core_ai\aiactions\generate_text(
+            contextid: 1,
+            userid: 1,
+            prompttext: 'This is a test prompt',
+        );
     }
 
     /**
      * Test create_request_object
      */
     public function test_create_request_object(): void {
-        $contextid = 1;
-        $userid = 1;
-        $prompttext = 'This is a test prompt';
-        $this->action->configure(
-                contextid: $contextid,
-                userid: $userid,
-                prompttext: $prompttext);
-
         $processor = new process_generate_text($this->provider, $this->action);
 
         // We're working with a private method here, so we need to use reflection.
         $method = new \ReflectionMethod($processor, 'create_request_object');
-        $request = $method->invoke($processor, $this->action, $userid);
+        $request = $method->invoke($processor, $this->action, 1);
 
-        $this->assertEquals($prompttext, $request->messages[0]->content);
+        $this->assertEquals('This is a test prompt', $request->messages[0]->content);
         $this->assertEquals('user', $request->messages[0]->role);
     }
 
@@ -78,14 +74,14 @@ final class process_generate_text_test extends \advanced_testcase {
      */
     public function test_handle_api_error(): void {
         $responses = [
-                500 => new Response(500, ['Content-Type' => 'application/json']),
-                503 => new Response(503, ['Content-Type' => 'application/json']),
-                401 => new Response(401, ['Content-Type' => 'application/json'],
-                        '{"error": {"message": "Invalid Authentication"}}'),
-                404 => new Response(404, ['Content-Type' => 'application/json'],
-                        '{"error": {"message": "You must be a member of an organization to use the API"}}'),
-                429 => new Response(429, ['Content-Type' => 'application/json'],
-                        '{"error": {"message": "Rate limit reached for requests"}}'),
+            500 => new Response(500, ['Content-Type' => 'application/json']),
+            503 => new Response(503, ['Content-Type' => 'application/json']),
+            401 => new Response(401, ['Content-Type' => 'application/json'],
+                '{"error": {"message": "Invalid Authentication"}}'),
+            404 => new Response(404, ['Content-Type' => 'application/json'],
+                '{"error": {"message": "You must be a member of an organization to use the API"}}'),
+            429 => new Response(429, ['Content-Type' => 'application/json'],
+                '{"error": {"message": "Rate limit reached for requests"}}'),
         ];
 
         $processor = new process_generate_text($this->provider, $this->action);
@@ -110,9 +106,9 @@ final class process_generate_text_test extends \advanced_testcase {
      */
     public function test_handle_api_success(): void {
         $response = new Response(
-                200,
-                ['Content-Type' => 'application/json'],
-                $this->responsebodyjson
+            200,
+            ['Content-Type' => 'application/json'],
+            $this->responsebodyjson
         );
 
         // We're testing a private method, so we need to setup reflector magic.
@@ -137,9 +133,9 @@ final class process_generate_text_test extends \advanced_testcase {
     public function test_query_ai_api_success(): void {
         // Mock the http client to return a successful response.
         $response = new Response(
-                200,
-                ['Content-Type' => 'application/json'],
-                $this->responsebodyjson
+            200,
+            ['Content-Type' => 'application/json'],
+            $this->responsebodyjson
         );
         $client = $this->createMock(\core\http_client::class);
         $client->method('request')->willReturn($response);
@@ -178,13 +174,13 @@ final class process_generate_text_test extends \advanced_testcase {
         $method = new \ReflectionMethod($processor, 'prepare_response');
 
         $response = [
-                'success' => true,
-                'id' => 'chatcmpl-9lkwPWOIiQEvI3nfcGofJcmS5lPYo',
-                'fingerprint' => 'fp_c4e5b6fa31',
-                'generatedcontent' => 'Sure, here is some sample text',
-                'finishreason' => 'stop',
-                'prompttokens' => '11',
-                'completiontokens' => '568',
+            'success' => true,
+            'id' => 'chatcmpl-9lkwPWOIiQEvI3nfcGofJcmS5lPYo',
+            'fingerprint' => 'fp_c4e5b6fa31',
+            'generatedcontent' => 'Sure, here is some sample text',
+            'finishreason' => 'stop',
+            'prompttokens' => '11',
+            'completiontokens' => '568',
         ];
 
         $result = $method->invoke($processor, $response);
@@ -206,9 +202,9 @@ final class process_generate_text_test extends \advanced_testcase {
         $method = new \ReflectionMethod($processor, 'prepare_response');
 
         $response = [
-                'success' => false,
-                'errorcode' => 500,
-                'errormessage' => 'Internal server error.',
+            'success' => false,
+            'errorcode' => 500,
+            'errormessage' => 'Internal server error.',
         ];
 
         $result = $method->invoke($processor, $response);
@@ -219,5 +215,4 @@ final class process_generate_text_test extends \advanced_testcase {
         $this->assertEquals($response['errorcode'], $result->get_errorcode());
         $this->assertEquals($response['errormessage'], $result->get_errormessage());
     }
-
 }

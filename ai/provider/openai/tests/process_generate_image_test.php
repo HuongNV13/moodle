@@ -46,7 +46,15 @@ final class process_generate_image_test extends \advanced_testcase {
         // Load a response body from a file.
         $this->responsebodyjson = file_get_contents(__DIR__ . '/fixtures/image_request_success.json');
         $this->provider = new \aiprovider_openai\provider();
-        $this->action = new \core_ai\aiactions\generate_image();
+        $this->action = new \core_ai\aiactions\generate_image(
+            contextid: 1,
+            userid: 1,
+            prompttext: 'This is a test prompt',
+            quality: 'hd',
+            aspectratio: 'square',
+            numimages: 1,
+            style: 'vivid',
+        );
     }
 
     /**
@@ -75,32 +83,16 @@ final class process_generate_image_test extends \advanced_testcase {
      * Test create_request_object
      */
     public function test_create_request_object(): void {
-        $contextid = 1;
-        $userid = 1;
-        $prompttext = 'This is a test prompt';
-        $aspectratio = 'square';
-        $quality = 'hd';
-        $numimages = 1;
-        $style = 'vivid';
-        $this->action->configure(
-                contextid: $contextid,
-                userid: $userid,
-                prompttext: $prompttext,
-                quality: $quality,
-                aspectratio: $aspectratio,
-                numimages: $numimages,
-                style: $style);
-
         $processor = new process_generate_image($this->provider, $this->action);
 
         // We're working with a private method here, so we need to use reflection.
         $method = new \ReflectionMethod($processor, 'create_request_object');
-        $request = $method->invoke($processor, $this->action, $userid);
+        $request = $method->invoke($processor, $this->action, 1);
 
-        $this->assertEquals($prompttext, $request->prompt);
+        $this->assertEquals('This is a test prompt', $request->prompt);
         $this->assertEquals('dall-e-3', $request->model);
         $this->assertEquals('1', $request->n);
-        $this->assertEquals($quality, $request->quality);
+        $this->assertEquals('hd', $request->quality);
         $this->assertEquals('url', $request->response_format);
         $this->assertEquals('1024x1024', $request->size);
     }
@@ -111,14 +103,14 @@ final class process_generate_image_test extends \advanced_testcase {
      */
     public function test_handle_api_error(): void {
         $responses = [
-                500 => new Response(500, ['Content-Type' => 'application/json']),
-                503 => new Response(503, ['Content-Type' => 'application/json']),
-                401 => new Response(401, ['Content-Type' => 'application/json'],
-                        '{"error": {"message": "Invalid Authentication"}}'),
-                404 => new Response(404, ['Content-Type' => 'application/json'],
-                        '{"error": {"message": "You must be a member of an organization to use the API"}}'),
-                429 => new Response(429, ['Content-Type' => 'application/json'],
-                        '{"error": {"message": "Rate limit reached for requests"}}'),
+            500 => new Response(500, ['Content-Type' => 'application/json']),
+            503 => new Response(503, ['Content-Type' => 'application/json']),
+            401 => new Response(401, ['Content-Type' => 'application/json'],
+                '{"error": {"message": "Invalid Authentication"}}'),
+            404 => new Response(404, ['Content-Type' => 'application/json'],
+                '{"error": {"message": "You must be a member of an organization to use the API"}}'),
+            429 => new Response(429, ['Content-Type' => 'application/json'],
+                '{"error": {"message": "Rate limit reached for requests"}}'),
         ];
 
         $processor = new process_generate_image($this->provider, $this->action);
@@ -143,9 +135,9 @@ final class process_generate_image_test extends \advanced_testcase {
      */
     public function test_handle_api_success(): void {
         $response = new Response(
-                200,
-                ['Content-Type' => 'application/json'],
-                $this->responsebodyjson
+            200,
+            ['Content-Type' => 'application/json'],
+            $this->responsebodyjson
         );
 
         // We're testing a private method, so we need to setup reflector magic.
@@ -164,9 +156,9 @@ final class process_generate_image_test extends \advanced_testcase {
     public function test_query_ai_api_success(): void {
         // Mock the http client to return a successful response.
         $response = new Response(
-                200,
-                ['Content-Type' => 'application/json'],
-                $this->responsebodyjson
+            200,
+            ['Content-Type' => 'application/json'],
+            $this->responsebodyjson
         );
         $client = $this->createMock(\core\http_client::class);
         $client->method('request')->willReturn($response);
@@ -200,10 +192,10 @@ final class process_generate_image_test extends \advanced_testcase {
         $method = new \ReflectionMethod($processor, 'prepare_response');
 
         $response = [
-                'success' => true,
-                    'revisedprompt' => 'An image that represents the concept of a \'test\'.',
-                    'imageurl' => 'oaidalleapiprodscus.blob.core.windows.net',
-                ];
+            'success' => true,
+            'revisedprompt' => 'An image that represents the concept of a \'test\'.',
+            'imageurl' => 'oaidalleapiprodscus.blob.core.windows.net',
+        ];
 
         $result = $method->invoke($processor, $response);
 
@@ -224,9 +216,9 @@ final class process_generate_image_test extends \advanced_testcase {
         $method = new \ReflectionMethod($processor, 'prepare_response');
 
         $response = [
-                'success' => false,
-                'errorcode' => 500,
-                'errormessage' => 'Internal server error.',
+            'success' => false,
+            'errorcode' => 500,
+            'errormessage' => 'Internal server error.',
         ];
 
         $result = $method->invoke($processor, $response);
@@ -269,19 +261,19 @@ final class process_generate_image_test extends \advanced_testcase {
         $url = $this->getExternalTestFileUrl('/test.html', false);
 
         $responsebodyjson = json_encode([
-                'created' => 1719140500,
-                'data' => [
-                        (object) [
-                                'revised_prompt' => 'An image that represents the concept of a \'test\'.',
-                                'url' => $url,
-                        ],
+            'created' => 1719140500,
+            'data' => [
+                (object) [
+                    'revised_prompt' => 'An image that represents the concept of a \'test\'.',
+                    'url' => $url,
                 ],
+            ],
         ]);
 
         $response = new Response(
-                200,
-                ['Content-Type' => 'application/json'],
-                $responsebodyjson,
+            200,
+            ['Content-Type' => 'application/json'],
+            $responsebodyjson,
         );
 
         $mockhttpclient = $this->createMock(\core\http_client::class);
@@ -302,14 +294,14 @@ final class process_generate_image_test extends \advanced_testcase {
         $quality = 'hd';
         $numimages = 1;
         $style = 'vivid';
-        $this->action->configure(
-                contextid: $contextid,
-                userid: $userid,
-                prompttext: $prompttext,
-                quality: $quality,
-                aspectratio: $aspectratio,
-                numimages: $numimages,
-                style: $style
+        $this->action = new \core_ai\aiactions\generate_image(
+            contextid: $contextid,
+            userid: $userid,
+            prompttext: $prompttext,
+            quality: $quality,
+            aspectratio: $aspectratio,
+            numimages: $numimages,
+            style: $style
         );
 
         $processor = new process_generate_image($mockprovider, $this->action);

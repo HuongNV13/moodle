@@ -36,17 +36,17 @@ class process_summarise_text extends process_generate_text {
     private function prepare_response(array $response): response_summarise_text {
         if ($response['success']) {
             $generatedtext = new response_summarise_text(
-                    success: true,
-                    actionname: 'summarise_text',
+                success: true,
+                actionname: 'summarise_text',
             );
             $generatedtext->set_response($response);
             return $generatedtext;
         } else {
             return new response_summarise_text(
-                    success: false,
-                    actionname: 'summarise_text',
-                    errorcode: $response['errorcode'],
-                    errormessage: $response['errormessage']
+                success: false,
+                actionname: 'summarise_text',
+                errorcode: $response['errorcode'],
+                errormessage: $response['errormessage'],
             );
         }
     }

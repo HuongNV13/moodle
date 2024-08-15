@@ -32,13 +32,13 @@ require_once($CFG->libdir . '/filelib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class process_generate_image extends process_generate_text {
-    /** @var string The API endpoint to make requests against */
+    /** @var string The API endpoint to make requests against. */
     private string $aiendpoint = 'https://api.openai.com/v1/images/generations';
 
-    /** @var string The API model to use */
+    /** @var string The API model to use. */
     private string $model = 'dall-e-3';
 
-    /** @var int The number of images to generate dall-e-3 only supports 1 */
+    /** @var int The number of images to generate dall-e-3 only supports 1. */
     private int $numberimages = 1;
 
     /** @var string Response format: url or b64_json. */
@@ -54,10 +54,10 @@ class process_generate_image extends process_generate_text {
         $ratelimitcheck = $this->provider->is_request_allowed($this->action);
         if ($ratelimitcheck !== true) {
             return new response_generate_image(
-                    success: false,
-                    actionname: 'generate_image',
-                    errorcode: $ratelimitcheck['errorcode'],
-                    errormessage: $ratelimitcheck['errormessage']
+                success: false,
+                actionname: 'generate_image',
+                errorcode: $ratelimitcheck['errorcode'],
+                errormessage: $ratelimitcheck['errormessage'],
             );
         }
 
@@ -73,8 +73,8 @@ class process_generate_image extends process_generate_text {
         // If the request was successful, save the URL to a file.
         if ($response['success']) {
             $fileobj = $this->url_to_file(
-                    $this->action->get_configuration('userid'),
-                    $response['sourceurl']
+                $this->action->get_configuration('userid'),
+                $response['sourceurl']
             );
             // Add the file to the response, so the calling placement can do whatever they want with it.
             $response['draftfile'] = $fileobj;
@@ -93,11 +93,11 @@ class process_generate_image extends process_generate_text {
      * @throws \coding_exception
      */
     private function calculate_size(string $ratio): string {
-        if ($ratio == 'square') {
+        if ($ratio === 'square') {
             $size = '1024x1024';
-        } else if ($ratio == 'landscape') {
+        } else if ($ratio === 'landscape') {
             $size = '1792x1024';
-        } else if ($ratio == 'portrait') {
+        } else if ($ratio === 'portrait') {
             $size = '1024x1792';
         } else {
             throw new \coding_exception('Invalid aspect ratio: ' . $ratio);
@@ -139,9 +139,9 @@ class process_generate_image extends process_generate_text {
         $bodyobj = json_decode($responsebody->getContents());
 
         return [
-                'success' => true,
-                'sourceurl' => $bodyobj->data[0]->url,
-                'revisedprompt' => $bodyobj->data[0]->revised_prompt,
+            'success' => true,
+            'sourceurl' => $bodyobj->data[0]->url,
+            'revisedprompt' => $bodyobj->data[0]->revised_prompt,
         ];
     }
 
@@ -155,17 +155,17 @@ class process_generate_image extends process_generate_text {
     private function prepare_response(array $response): response_generate_image {
         if ($response['success']) {
             $generatedimage = new response_generate_image(
-                    success: true,
-                    actionname: 'generate_image',
+                success: true,
+                actionname: 'generate_image',
             );
             $generatedimage->set_response($response);
             return $generatedimage;
         } else {
             return new response_generate_image(
-                    success: false,
-                    actionname: 'generate_image',
-                    errorcode: $response['errorcode'],
-                    errormessage: $response['errormessage']
+                success: false,
+                actionname: 'generate_image',
+                errorcode: $response['errorcode'],
+                errormessage: $response['errormessage'],
             );
         }
     }
@@ -189,11 +189,11 @@ class process_generate_image extends process_generate_text {
         // Placements (on behalf of the user) can then move it to the correct location.
         $fileinfo = new \stdClass();
         $fileinfo->contextid = \context_user::instance($userid)->id;
-        $fileinfo->filearea  = 'draft';
+        $fileinfo->filearea = 'draft';
         $fileinfo->component = 'user';
-        $fileinfo->itemid    = file_get_unused_draft_itemid();
-        $fileinfo->filepath  = '/';
-        $fileinfo->filename  = $filename;
+        $fileinfo->itemid = file_get_unused_draft_itemid();
+        $fileinfo->filepath = '/';
+        $fileinfo->filename = $filename;
 
         $fs = get_file_storage();
         return $fs->create_file_from_url($fileinfo, $url);

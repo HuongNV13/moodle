@@ -84,7 +84,7 @@ class provider extends \core_ai\provider {
      * @param string $userid The user id.
      * @return string The generated user id.
      */
-    public function generate_userid($userid): string {
+    public function generate_userid(string $userid): string {
         global $CFG;
         return hash('sha256', $CFG->siteidentifier . $userid);
     }
@@ -97,12 +97,12 @@ class provider extends \core_ai\provider {
      */
     public function create_http_client(string $apiendpoint): http_client {
         return new http_client([
-                'base_uri' => $apiendpoint,
-                'headers' => [
-                        'Content-Type' => 'application/json',
-                        'Authorization' => 'Bearer ' . $this->apikey,
-                        'OpenAI-Organization' => $this->orgid,
-                ],
+            'base_uri' => $apiendpoint,
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $this->apikey,
+                'OpenAI-Organization' => $this->orgid,
+            ],
         ]);
     }
 
@@ -124,9 +124,9 @@ class provider extends \core_ai\provider {
                     userid: $action->get_configuration('userid')
             )) {
                 return [
-                        'success' => false,
-                        'errorcode' => 429,
-                        'errormessage' => 'User rate limit exceeded',
+                    'success' => false,
+                    'errorcode' => 429,
+                    'errormessage' => 'User rate limit exceeded',
                 ];
             }
         }

@@ -31,12 +31,11 @@ use Psr\Http\Message\ResponseInterface;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class process_generate_text extends process_base {
-    /** @var string The API endpoint to make requests against */
+    /** @var string The API endpoint to make requests against. */
     private string $aiendpoint = 'https://api.openai.com/v1/chat/completions';
 
-    /** @var string The API model to use */
+    /** @var string The API model to use. */
     private string $model = 'gpt-4o';
-
 
     /**
      * Process the AI request.
@@ -48,10 +47,10 @@ class process_generate_text extends process_base {
         $ratelimitcheck = $this->provider->is_request_allowed($this->action);
         if ($ratelimitcheck !== true) {
             return new response_generate_text(
-                    success: false,
-                    actionname: 'generate_text',
-                    errorcode: $ratelimitcheck['errorcode'],
-                    errormessage: $ratelimitcheck['errormessage']
+                success: false,
+                actionname: 'generate_text',
+                errorcode: $ratelimitcheck['errorcode'],
+                errormessage: $ratelimitcheck['errormessage'],
             );
         }
 
@@ -81,7 +80,7 @@ class process_generate_text extends process_base {
         try {
             // Call the external AI service.
             $response = $client->request('POST', '', [
-                    'body' => $requestjson,
+                'body' => $requestjson,
             ]);
 
             // Double-check the response codes, in case of a non 200 that didn't throw an error.
@@ -94,9 +93,9 @@ class process_generate_text extends process_base {
         } catch (RequestException $e) {
             // Handle any exceptions.
             return [
-                    'success' => false,
-                    'errorcode' => $e->getCode(),
-                    'errormessage' => $e->getMessage(),
+                'success' => false,
+                'errorcode' => $e->getCode(),
+                'errormessage' => $e->getMessage(),
             ];
         }
 
@@ -145,8 +144,8 @@ class process_generate_text extends process_base {
      */
     protected function handle_api_error(int $status, ResponseInterface $response): array {
         $responsearr = [
-                'success' => false,
-                'errorcode' => $status,
+            'success' => false,
+            'errorcode' => $status,
         ];
 
         if ($status == 500) {
@@ -173,13 +172,13 @@ class process_generate_text extends process_base {
         $bodyobj = json_decode($responsebody->getContents());
 
         return [
-                'success' => true,
-                'id' => $bodyobj->id,
-                'fingerprint' => $bodyobj->system_fingerprint,
-                'generatedcontent' => $bodyobj->choices[0]->message->content,
-                'finishreason' => $bodyobj->choices[0]->finish_reason,
-                'prompttokens' => $bodyobj->usage->prompt_tokens,
-                'completiontokens' => $bodyobj->usage->completion_tokens,
+            'success' => true,
+            'id' => $bodyobj->id,
+            'fingerprint' => $bodyobj->system_fingerprint,
+            'generatedcontent' => $bodyobj->choices[0]->message->content,
+            'finishreason' => $bodyobj->choices[0]->finish_reason,
+            'prompttokens' => $bodyobj->usage->prompt_tokens,
+            'completiontokens' => $bodyobj->usage->completion_tokens,
         ];
     }
 
@@ -193,17 +192,17 @@ class process_generate_text extends process_base {
     private function prepare_response(array $response): response_generate_text {
         if ($response['success']) {
             $generatedtext = new response_generate_text(
-                    success: true,
-                    actionname: 'generate_text',
+                success: true,
+                actionname: 'generate_text',
             );
             $generatedtext->set_response($response);
             return $generatedtext;
         } else {
             return new response_generate_text(
-                    success: false,
-                    actionname: 'generate_text',
-                    errorcode: $response['errorcode'],
-                    errormessage: $response['errormessage']
+                success: false,
+                actionname: 'generate_text',
+                errorcode: $response['errorcode'],
+                errormessage: $response['errormessage'],
             );
         }
     }

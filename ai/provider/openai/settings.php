@@ -22,11 +22,13 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use core_ai\admin\admin_settingspage_provider;
+
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
     // Provider specific settings heading.
-    $settings = new admin_settingpage('aiprovider_openai',
+    $settings = new admin_settingspage_provider('aiprovider_openai',
             new lang_string('pluginname', 'aiprovider_openai'), 'moodle/site:config', true);
 
     $settings->add(new admin_setting_heading('aiprovider_openai/general',
@@ -59,7 +61,7 @@ if ($hassiteconfig) {
             new lang_string('globalratelimit_desc', 'aiprovider_openai'),
             100,
             PARAM_INT));
-    new admin_settingdependency('aiprovider_openai/globalratelimit', 'aiprovider_openai/enableglobalratelimit', 'eq', 1);
+    $settings->hide_if('aiprovider_openai/globalratelimit', 'aiprovider_openai/enableglobalratelimit', 'eq', 0);
 
     // Setting to enable/disable user rate limiting.
     $settings->add(new admin_setting_configcheckbox('aiprovider_openai/enableuserratelimit',
@@ -74,5 +76,5 @@ if ($hassiteconfig) {
             new lang_string('userratelimit_desc', 'aiprovider_openai'),
             10,
             PARAM_INT));
-    new admin_settingdependency('aiprovider_openai/userratelimit', 'aiprovider_openai/enableuserratelimit', 'eq', 1);
+    $settings->hide_if('aiprovider_openai/userratelimit', 'aiprovider_openai/enableuserratelimit', 'eq', 0);
 }

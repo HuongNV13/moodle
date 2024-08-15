@@ -17,14 +17,13 @@
 namespace aiprovider_openai\privacy;
 
 use core_privacy\local\metadata\collection;
-use core_privacy\local\metadata\null_provider;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\contextlist;
 use core_privacy\local\request\userlist;
 
 /**
- * Privacy Subsystem for OpenAI provider implementing null_provider.
+ * Privacy provider implementation for OpenAI provider
  *
  * @package    aiprovider_openai
  * @copyright  2024 Matt Porritt <matt.porritt@moodle.com>
@@ -59,8 +58,7 @@ class provider implements
      * @return  contextlist $contextlist The contextlist containing the list of contexts used in this plugin.
      */
     public static function get_contexts_for_userid(int $userid): contextlist {
-        $contextlist = new contextlist();
-        return $contextlist;
+        return new contextlist();
     }
 
     /**
