@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
     // Placement specific settings.
-    $settings = new admin_settingpage('aiplacement_tinymce',
+    $settings = new \core_ai\admin\admin_settingspage_provider('aiplacement_tinymce',
             new lang_string('pluginname', 'aiplacement_tinymce'), 'moodle/site:config', true);
 
     $settings->add(new admin_setting_heading('aiplacement_tinymce/general',

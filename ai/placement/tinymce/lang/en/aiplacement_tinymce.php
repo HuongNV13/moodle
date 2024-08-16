@@ -26,7 +26,7 @@
 $string['accept'] = 'Accept and continue';
 $string['cancelai'] = 'Decline';
 $string['generatecontent'] = 'Generate AI Content';
-$string['generateimage'] = 'AI Generate Images';
+$string['generateimage'] = 'AI Generate Image';
 $string['generateimagesetting'] = 'Enable generate Images';
 $string['generateimagesetting_desc'] = 'Enable or disable the generation of images from a text prompt.';
 $string['generatetext'] = 'AI Generate Text';
@@ -36,4 +36,3 @@ $string['pluginname'] = 'TinyMCE Editor Placement';
 $string['privacy:metadata'] = 'The TinyMCE editor placement plugin does not store any personal data.';
 $string['tinymce:generate_image'] = 'Generate AI Images in TinyMCE';
 $string['tinymce:generate_text'] = 'Generate AI Text in TinyMCE';
-

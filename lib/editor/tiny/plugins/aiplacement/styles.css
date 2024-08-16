@@ -1,11 +1,11 @@
 .tiny-aiplacement-overlay {
     position: absolute;
-    background: rgba(255, 255, 255, .5);
+    background: rgba(255, 255, 255, 1);
     top: 0;
     bottom: 0;
     right: 0;
     left: 0;
-    z-index: 1;
+    z-index: 2;
 }
 
 .tiny-aiplacement-blur {
@@ -56,15 +56,23 @@
     height: 100%;
 }
 
-.tiny-aiplacement-fa-image {
-    height: 100px;
-    width: 100%;
+.tiny_aiplacement_textresponse textarea:disabled {
+    background-color: unset;
 }
 
-.tiny-aiplacement-fa-image img.icon {
-    margin: 0;
-    max-height: 100px;
-    max-width: 100px;
+.tiny_aiplacement_modal {
+    min-height: 500px;
+}
+
+.tiny-aiplacement-fa-image {
+    height: 100%;
+    width: 100%;
+    background-image: url('[[pix:tiny_aiplacement|sparkles-image]]');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: rgba(255, 255, 255, 0.5);
+    background-blend-mode: lighten;
+    background-size: 100px 100px;
 }
 
 .tiny-aiplacement-toggle-container {
@@ -167,6 +175,8 @@
     background-image: url('[[pix:tiny_aiplacement|sparkles-text]]');
     background-repeat: no-repeat;
     background-position: center;
+    background-color: rgba(255, 255, 255, 0.5);
+    background-blend-mode: lighten;
     background-size: 100px 100px;
 }
 

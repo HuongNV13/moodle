@@ -26,39 +26,42 @@ use core\exception\moodle_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class ai_image {
+    /** @var array Image information. */
     private array $imageinfo;
-    private string $imagepath;
+    /** @var false|\GdImage|resource Image object. */
     private $imgobject;
+    /** @var int Image's width. */
     private int $width;
+    /** @var int Image's height. */
     private int $height;
 
-    function __construct(
-        string $imagepath,
+    public function __construct(
+        /** @var string Image path. */
+        private string $imagepath,
     ) {
         ini_set('gd.jpeg_ignore_warning', 1);
         if (!function_exists('imagecreatefrompng') && !function_exists('imagecreatefromjpeg')) {
             throw new moodle_exception('gdnotexist');
         }
 
-        if(!file_exists($imagepath) || !is_readable($imagepath)) {
+        if (!file_exists($imagepath) || !is_readable($imagepath)) {
             throw new moodle_exception('invalidfile');
         }
 
-        $this->imagepath = $imagepath;
-        $this->imageinfo = getimagesize($this->imagepath);
+        $this->imageinfo = getimagesize($imagepath);
         if (empty($this->imageinfo)) {
             throw new moodle_exception('invalidfile');
         }
 
         switch ($this->imageinfo['mime']) {
             case 'image/jpeg':
-                $this->imgobject = imagecreatefromjpeg($this->imagepath);
+                $this->imgobject = imagecreatefromjpeg($imagepath);
                 break;
             case 'image/png':
-                $this->imgobject = imagecreatefrompng($this->imagepath);
+                $this->imgobject = imagecreatefrompng($imagepath);
                 break;
             case 'image/gif':
-                $this->imgobject = imagecreatefromgif($this->imagepath);
+                $this->imgobject = imagecreatefromgif($imagepath);
                 break;
             default:
                 break;
@@ -92,20 +95,37 @@ class ai_image {
                 'ttf' => true,
             ];
         }
-        $text = iconv('ISO-8859-8', 'UTF-8', $watermark);
-        $clr = imagecolorallocate($this->imgobject, 255, 255, 255);
+        $text = iconv(
+            from_encoding: 'ISO-8859-8',
+            to_encoding: 'UTF-8',
+            string: $watermark
+        );
+        $clr = imagecolorallocate(
+            image: $this->imgobject,
+            red: 255,
+            green: 255,
+            blue: 255,
+        );
         if (!empty($options['ttf'])) {
-            imagettftext($this->imgobject,
-                $options['fontsize'],
-                $options['angle'],
-                $pos[0],
-                $this->height - ($pos[1] + $options['fontsize']),
-                $clr,
-                $options['font'],
-                $text,
+            imagettftext(
+                image: $this->imgobject,
+                size: $options['fontsize'],
+                angle: $options['angle'],
+                x: $pos[0],
+                y: $this->height - ($pos[1] + $options['fontsize']),
+                color: $clr,
+                font_filename: $options['font'],
+                text: $text,
             );
         } else {
-            imagestring($this->imgobject, $options['fontsize'], $pos[0], $pos[1], $text, $clr);
+            imagestring(
+                image: $this->imgobject,
+                font: $options['fontsize'],
+                x: $pos[0],
+                y: $pos[1],
+                string: $text,
+                color: $clr,
+            );
         }
 
         return $this;
@@ -116,8 +136,7 @@ class ai_image {
      * @return bool
      */
     private function destroy(): bool {
-        imagedestroy($this->imgobject);
-        return true;
+        return imagedestroy($this->imgobject);
     }
 
     /**
@@ -131,18 +150,14 @@ class ai_image {
         }
         switch($this->imageinfo['mime']) {
             case 'image/jpeg':
-                return imagejpeg($this->imgobject, $newpath);
+                return imagejpeg(image: $this->imgobject, file: $newpath);
             case 'image/png':
-                return imagepng($this->imgobject, $newpath);
+                return imagepng(image: $this->imgobject, file: $newpath);
             case 'image/gif':
-                return imagegif($this->imgobject, $newpath);
+                return imagegif(image: $this->imgobject, file: $newpath);
             default:
                 break;
         }
-        if(!$this->destroy()) {
-            return false;
-        } else {
-            return true;
-        }
+        return $this->destroy();
     }
 }

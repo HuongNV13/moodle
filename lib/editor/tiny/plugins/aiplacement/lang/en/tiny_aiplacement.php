@@ -22,21 +22,21 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
+$string['aiplacement:generatetext'] = 'Generate text using AI';
+$string['aiplacement:generateimage'] = 'Generate image using AI';
 $string['aspectlandscape'] = 'Landscape';
 $string['aspectportrait'] = 'Portrait';
-$string['aspectratio'] = 'Aspect ratio';
+$string['aspectratio'] = 'Image shape';
 $string['aspectsquare'] = 'Square';
 $string['back'] = 'Go back';
 $string['buttontitle'] = 'tester';
 $string['definitionhigh'] = 'High';
 $string['definitionstandard'] = 'Standard';
-$string['errorgenimage'] = 'Error generating image.';
-$string['errorgentext'] = 'Error generating text.';
+$string['errorgeneral'] = 'Try again later';
 $string['generate'] = 'Generate';
+$string['generatefailtitle'] = 'Something went wrong';
 $string['generateimage'] = 'Generate Image';
 $string['generatetext'] = 'Generate Text';
-$string['generatefailtitle'] = 'Something went wrong';
 $string['generating'] = 'Generating';
 $string['imagemodaltitle'] = 'Generate an image using AI';
 $string['imageprompt_label'] = 'Describe the image you want AI to create';
@@ -54,6 +54,6 @@ $string['pluginname'] = 'AI Placement';
 $string['privacy:metadata'] = 'The AI Placement plugin does not store any personal data.';
 $string['regenerate'] = 'Regenerate';
 $string['textmodaltitle'] = 'Generate text using AI';
-$string['textprompt_label'] = 'What do you want to write?';
+$string['textprompt_label'] = 'Describe the text you want AI to create';
 $string['textresponse_label'] = 'AI Generated Text';
 $string['textresponse_placeholder'] = 'Generated text will appear here, and can be edited before inserting into the editor.';
