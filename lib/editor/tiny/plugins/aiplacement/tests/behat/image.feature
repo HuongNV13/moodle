@@ -24,7 +24,7 @@ Feature: Generate image using AI
       | activity | name      | intro     | introformat | course | content     | contentformat | idnumber |
       | page     | PageName1 | PageDesc1 | 1           | C1     | PageContent | 1             | 1        |
       | page     | PageName2 | PageDesc2 | 1           | C2     | PageContent | 1             | 2        |
-    Given the following "permission overrides" exist:
+    And the following "permission overrides" exist:
       | capability                     | permission | role    | contextlevel | reference |
       | tiny/aiplacement:generatetext  | Prohibit   | user    | System       |           |
       | tiny/aiplacement:generateimage | Prohibit   | custom2 | Course       | C1        |
@@ -55,10 +55,10 @@ Feature: Generate image using AI
 
   @javascript
   Scenario: Image generation using AI is not available if the user does not have permission
-    When I am on the "PageName1" "page activity" page logged in as teacher2
-    And I navigate to "Settings" in current page administration
+    Given I am on the "PageName1" "page activity" page logged in as teacher2
+    When I navigate to "Settings" in current page administration
     Then "AI Generate Image" button should not exist in the "Description" TinyMCE editor
-    When I am on the "PageName1" "page activity" page logged in as teacher1
+    And I am on the "PageName1" "page activity" page logged in as teacher1
     And I navigate to "Settings" in current page administration
     And "AI Generate Image" button should exist in the "Description" TinyMCE editor
     And I click on the "AI Generate Image" button for the "Description" TinyMCE editor

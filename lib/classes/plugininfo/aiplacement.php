@@ -92,10 +92,9 @@ class aiplacement extends base {
         );
         if (file_exists($this->full_path('settings.php'))) {
             include($this->full_path('settings.php')); // This may also set $settings to null.
+            // Show the save changes button between the specific settings and the actions table.
+            $settings->add(new \admin_setting_savebutton("{$section}/savebutton"));
         }
-
-        // Show the save changes button between the specific settings and the actions table.
-        $settings->add(new \admin_setting_savebutton("{$section}/savebutton"));
 
         // Load the actions table.
         if (file_exists($this->full_path('setting_actions.php'))) {

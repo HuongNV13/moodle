@@ -44,16 +44,12 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
      * @return boolean
      */
     public static function is_enabled(
-            context $context,
-            array $options,
-            array $fpoptions,
-            ?editor $editor = null
+        context $context,
+        array $options,
+        array $fpoptions,
+        ?editor $editor = null
     ): bool {
-        // Disabled if:
-        // - Not logged in or guest.
-        // - Files are not allowed.
-        $canhavefiles = !empty($options['maxfiles']);
-        return true;
+        return in_array(true, self::get_allowed_actions($context));
     }
 
     /**
@@ -63,8 +59,8 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
      */
     public static function get_available_buttons(): array {
         return [
-                'tiny_aiplacement/generate_text',
-                'tiny_aiplacement/generate_image',
+            'tiny_aiplacement/generate_text',
+            'tiny_aiplacement/generate_image',
         ];
     }
 
@@ -90,16 +86,32 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
      * @return array
      */
     public static function get_plugin_configuration_for_context(
-            context $context,
-            array $options,
-            array $fpoptions,
-            ?editor $editor = null
+        context $context,
+        array $options,
+        array $fpoptions,
+        ?editor $editor = null
     ): array {
         global $USER;
+        $allowedactions = self::get_allowed_actions($context);
+        return [
+            'contextid' => $context->id,
+            'userid' => (int) $USER->id,
+            'textallowed' => $allowedactions['textallowed'],
+            'imageallowed' => $allowedactions['imageallowed'],
+        ];
+    }
 
-        $textallowed = false;
-        $imageallowed = false;
-
+    /**
+     * Get the allowed actions for the plugin.
+     *
+     * @param context $context The context that the editor is used within
+     * @return array The allowed actions.
+     */
+    private static function get_allowed_actions(context $context): array {
+        $allowedactions = [
+            'textallowed' => false,
+            'imageallowed' => false,
+        ];
         [$plugintype, $pluginname] = explode('_', \core_component::normalize_componentname('aiplacement_tinymce'), 2);
         $manager = \core_plugin_manager::resolve_plugininfo_class($plugintype);
         if ($manager::is_plugin_enabled($pluginname)) {
@@ -107,25 +119,17 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
                 generate_text::class,
                 generate_image::class,
             ], true);
-            if (get_config('aiplacement_tinymce', 'generatetext')
-                && has_capability('tiny/aiplacement:generatetext', $context)
+            if (has_capability('tiny/aiplacement:generatetext', $context)
                 && manager::is_action_enabled('aiplacement_tinymce', 'core_ai\\aiactions\\generate_text')
                 && !empty($providers[generate_text::class])) {
-                $textallowed = true;
+                $allowedactions['textallowed'] = true;
             }
-            if (get_config('aiplacement_tinymce', 'generateimage')
-                && has_capability('tiny/aiplacement:generateimage', $context)
+            if (has_capability('tiny/aiplacement:generateimage', $context)
                 && manager::is_action_enabled('aiplacement_tinymce', 'core_ai\\aiactions\\generate_image')
                 && !empty($providers[generate_image::class])) {
-                $imageallowed = true;
+                $allowedactions['imageallowed'] = true;
             }
         }
-
-        return [
-            'contextid' => $context->id,
-            'userid' => (int) $USER->id,
-            'textallowed' => $textallowed,
-            'imageallowed' => $imageallowed,
-        ];
+        return $allowedactions;
     }
 }

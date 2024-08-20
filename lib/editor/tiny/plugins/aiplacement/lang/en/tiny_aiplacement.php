@@ -22,8 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['aiplacement:generatetext'] = 'Generate text using AI';
 $string['aiplacement:generateimage'] = 'Generate image using AI';
+$string['aiplacement:generatetext'] = 'Generate text using AI';
 $string['aspectlandscape'] = 'Landscape';
 $string['aspectportrait'] = 'Portrait';
 $string['aspectratio'] = 'Image shape';
