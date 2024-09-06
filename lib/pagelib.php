@@ -1511,7 +1511,36 @@ class moodle_page {
         $this->_url = new moodle_url($url, $params);
 
         $fullurl = $this->_url->out_omit_querystring();
-        if (strpos($fullurl, "$CFG->wwwroot/") !== 0) {
+        $wwwroot = new \core\url($CFG->wwwroot);
+        $partialcheck = false;
+
+        if (!empty($CFG->reverseproxy)) {
+            // Moodle is behind a reverse proxy.
+            // It's ok if:
+            // - The host is different from the wwwroot.
+            // - The port is different from the wwwroot.
+            // - The scheme is different from the wwwroot.
+            $partialcheck = true;
+        } else if (
+            !empty($CFG->sslproxy) &&
+            $this->_url->get_scheme() === 'http' &&
+            $wwwroot->get_scheme() === 'https'
+        ) {
+            // Moodle is behind an SSL proxy.
+            // That is, Moodle server used http, but the client used https.
+            // We just need to make sure that the URL is under the wwwroot, except for the protocol.
+            $partialcheck = true;
+        }
+
+        if ($partialcheck) {
+            // Moodle is behind a reverse proxy or an SSL proxy.
+            // We just need to make sure that the URL path is under the wwwroot path.
+            $checkcondition = !str_starts_with($this->_url->get_path(), $wwwroot->get_path());
+        } else {
+            $checkcondition = !str_starts_with($fullurl, "$CFG->wwwroot/");
+        }
+
+        if ($checkcondition) {
             debugging('Most probably incorrect set_page() url argument, it does not match the wwwroot!');
         }
         $shorturl = str_replace("$CFG->wwwroot/", '', $fullurl);
