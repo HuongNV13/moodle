@@ -1211,6 +1211,7 @@ const Tour = class {
 
         // Remove the backdrop features.
         $('[data-flexitour="step-background"]').remove();
+        $('[data-flexitour="target-clone"]').remove();
         $('[data-flexitour="step-backdrop"]').removeAttr('data-flexitour');
 
         const backdrop = $('[data-flexitour="backdrop"]');
@@ -1666,7 +1667,14 @@ const Tour = class {
 
                 if (!stepConfig.zIndex) {
                     let targetClone = targetNode.clone();
-                    background.append(targetClone.first());
+                    targetClone.css({
+                        width: targetNode.outerWidth(),
+                        height: targetNode.outerHeight(),
+                        left: targetNode.offset().left,
+                        top: targetNode.offset().top,
+                        position: 'absolute',
+                    }).attr('data-flexitour', 'target-clone');
+                    $('body').append(targetClone.first());
                     $('body').append(fader);
                     $('body').append(background);
                 } else {
