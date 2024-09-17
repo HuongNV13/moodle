@@ -19,6 +19,7 @@ namespace core\session;
 use coding_exception;
 use core\di;
 use core\clock;
+use core\local\redis\redis_helper_trait;
 use RedisCluster;
 use RedisClusterException;
 use RedisException;
@@ -32,6 +33,8 @@ use SessionHandlerInterface;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class redis extends handler implements SessionHandlerInterface {
+
+    use redis_helper_trait;
     /**
      * Compressor: none.
      */
@@ -271,7 +274,7 @@ class redis extends handler implements SessionHandlerInterface {
             try {
                 // Create a $redis object of a RedisCluster or Redis class.
                 if ($this->clustermode) {
-                    $this->connection = new \RedisCluster(
+                    $this->connection = $this->handle_redis_connection_cluster_mode(
                         name: null,
                         seeds: $trimmedservers,
                         timeout: 1,
@@ -282,8 +285,7 @@ class redis extends handler implements SessionHandlerInterface {
                     );
                 } else {
                     $delay = rand(100, 500);
-                    $this->connection = new \Redis();
-                    $this->connection->connect(
+                    $this->connection = $this->handle_redis_connection_non_cluster_mode(
                         host: $server,
                         port: $port,
                         timeout: 1,

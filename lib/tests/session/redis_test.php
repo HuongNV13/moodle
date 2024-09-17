@@ -16,6 +16,7 @@
 
 namespace core\session;
 
+use core\local\redis\redis_helper_trait;
 use core\tests\session\mock_handler;
 use Redis;
 use RedisException;
@@ -38,6 +39,7 @@ use RedisException;
  * @covers \core\session\redis
  */
 final class redis_test extends \advanced_testcase {
+    use redis_helper_trait;
     /** @var string $keyprefix This key prefix used when testing Redis */
     protected string $keyprefix = '';
     /** @var ?Redis $redis The current testing redis connection */
@@ -95,7 +97,14 @@ final class redis_test extends \advanced_testcase {
         $CFG->session_redis_lock_expire = $this->lockexpire;
 
         $this->redis = new Redis();
-        $this->redis->connect($server, $port, 1, null, 1, 0, $opts);
+        $this->redis = $this->handle_redis_connection_non_cluster_mode(
+            host: $server,
+            port: $port,
+            timeout: 1,
+            retry_interval: 1,
+            read_timeout: 0,
+            context: $opts,
+        );
         if (!$this->redis->ping()) {
             $this->markTestSkipped("Redis ping failed");
         }
@@ -358,7 +367,7 @@ final class redis_test extends \advanced_testcase {
 
         // The Redis session test config allows the user to put the port number inside the host. e.g. 127.0.0.1:6380.
         // Therefore, to get the host, we need to explode it.
-        list($host, ) = explode(':', TEST_SESSION_REDIS_HOST);
+        [$host, ] = explode(':', TEST_SESSION_REDIS_HOST);
 
         $expected = "Failed to connect (try 5 out of 5) to Redis at $host:111111";
         $this->assertDebuggingCalledCount(5);
