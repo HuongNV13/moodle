@@ -303,6 +303,142 @@ class moodle_page_test extends \advanced_testcase {
         $this->assertSame('a-page-type', $this->testpage->pagetype);
     }
 
+    /**
+     * Test set_url with SSL proxy.
+     * @dataProvider set_url_ssl_proxy_provider
+     */
+    public function test_set_url_ssl_proxy(string $wwwroot, string $requesturl, bool $error, bool $donottestifoff = false): void {
+        global $CFG;
+
+        // Test with sslproxy set to true.
+        $CFG->sslproxy = true;
+
+        $CFG->wwwroot = $wwwroot;
+        $this->testpage->set_url($requesturl);
+        if ($error) {
+            $this->assertDebuggingCalled('Most probably incorrect set_page() url argument, it does not match the wwwroot!', DEBUG_NORMAL);
+        }
+
+        // Test with sslproxy set to false.
+        if (!$donottestifoff) {
+            $CFG->sslproxy = false;
+
+            $CFG->wwwroot = $wwwroot;
+            $this->testpage->set_url($requesturl);
+            $this->assertDebuggingCalled('Most probably incorrect set_page() url argument, it does not match the wwwroot!',
+                DEBUG_NORMAL);
+        }
+    }
+
+    /**
+     * Test set_url with Reverse proxy.
+     * @dataProvider set_url_reverse_proxy_provider
+     */
+    public function test_set_url_reverse_proxy(string $wwwroot, string $requesturl, bool $error, bool $donottestifoff = false): void {
+        global $CFG;
+
+        // Test with reverseproxy set to true.
+        $CFG->reverseproxy = true;
+
+        $CFG->wwwroot = $wwwroot;
+        $this->testpage->set_url($requesturl);
+        if ($error) {
+            $this->assertDebuggingCalled('Most probably incorrect set_page() url argument, it does not match the wwwroot!', DEBUG_NORMAL);
+        }
+
+        // Test with reverseproxy set to false.
+        if (!$donottestifoff) {
+            $CFG->reverseproxy = false;
+            $CFG->wwwroot = $wwwroot;
+            $this->testpage->set_url($requesturl);
+            $this->assertDebuggingCalled('Most probably incorrect set_page() url argument, it does not match the wwwroot!',
+                DEBUG_NORMAL);
+        }
+    }
+
+    /**
+     * Data provider for {@see test_set_url_ssl_proxy}.
+     *
+     * @return array
+     */
+    public function set_url_ssl_proxy_provider(): array {
+        return [
+            'Same http scheme' => [
+                'wwwroot' => 'http://example.com',
+                'requesturl' => 'http://example.com/courses',
+                'error' => false,
+                'donottestifoff' => true,
+            ],
+            'Different scheme (wwwroot is http, request is https)' => [
+                'wwwroot' => 'http://example.com',
+                'requesturl' => 'https://example.com/courses',
+                'error' => true,
+                'errorifoff' => true,
+            ],
+            'Different scheme (wwwroot is https, request is http) + different host' => [
+                'wwwroot' => 'https://example.com',
+                'requesturl' => 'http://abc.com/courses',
+                'error' => true,
+            ],
+            'Different scheme (wwwroot is https, request is http) + same host + different wwwroot port' => [
+                'wwwroot' => 'https://example.com:8000',
+                'requesturl' => 'http://example.com/courses',
+                'error' => true,
+            ],
+            'Different scheme (wwwroot is https, request is http) + same host + different request port' => [
+                'wwwroot' => 'https://example.com',
+                'requesturl' => 'http://example.com:8000/courses',
+                'error' => true,
+            ],
+            'Different scheme (wwwroot is https, request is http) + same host + same port' => [
+                'wwwroot' => 'https://example.com',
+                'requesturl' => 'http://example.com/courses',
+                'error' => false,
+            ],
+        ];
+    }
+
+    /**
+     * Data provider for {@see test_set_url_reverse_proxy}.
+     *
+     * @return array
+     */
+    public function set_url_reverse_proxy_provider(): array {
+        return [
+            'Same http scheme' => [
+                'wwwroot' => 'http://example.com',
+                'requesturl' => 'http://example.com/courses',
+                'error' => false,
+                'donottestifoff' => true,
+            ],
+            'Different scheme (wwwroot is http, request is https)' => [
+                'wwwroot' => 'http://example.com',
+                'requesturl' => 'https://example.com/courses',
+                'error' => false,
+            ],
+            'Different scheme (wwwroot is https, request is http) + same host' => [
+                'wwwroot' => 'https://example.com',
+                'requesturl' => 'http://example.com/courses',
+                'error' => false,
+            ],
+            'Different scheme (wwwroot is https, request is http) + different host + same port' => [
+                'wwwroot' => 'https://example.com:8000',
+                'requesturl' => 'http://abc.com:8000/courses',
+                'error' => false,
+            ],
+            'Different scheme (wwwroot is https, request is http) + different host + different request port' => [
+                'wwwroot' => 'https://example.com',
+                'requesturl' => 'http://abc.com:8000/courses',
+                'error' => false,
+            ],
+            'Different scheme (wwwroot is https, request is http) + different host + no port' => [
+                'wwwroot' => 'https://example.com',
+                'requesturl' => 'http://abc.com/courses',
+                'error' => false,
+            ],
+        ];
+    }
+
     public function test_set_subpage(): void {
         // Exercise SUT.
         $this->testpage->set_subpage('somestring');

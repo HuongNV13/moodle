@@ -1514,7 +1514,10 @@ class moodle_page {
         $wwwroot = new \core\url($CFG->wwwroot);
         $partialcheck = false;
 
-        if (!empty($CFG->reverseproxy)) {
+        if (!empty($CFG->reverseproxy) &&
+            ($this->_url->get_host() !== $wwwroot->get_host() || $this->_url->get_scheme() !== $wwwroot->get_scheme() ||
+                ((!empty($wwwroot->get_port()) || !empty($this->_url->get_port())) &&
+                    $this->_url->get_port() !== $wwwroot->get_port()))) {
             // Moodle is behind a reverse proxy.
             // It's ok if:
             // - The host is different from the wwwroot.
@@ -1524,7 +1527,9 @@ class moodle_page {
         } else if (
             !empty($CFG->sslproxy) &&
             $this->_url->get_scheme() === 'http' &&
-            $wwwroot->get_scheme() === 'https'
+            $wwwroot->get_scheme() === 'https' &&
+            $this->_url->get_host() === $wwwroot->get_host() &&
+            (empty($wwwroot->get_port()) && empty($this->_url->get_port()) || $this->_url->get_port() == $wwwroot->get_port())
         ) {
             // Moodle is behind an SSL proxy.
             // That is, Moodle server used http, but the client used https.
