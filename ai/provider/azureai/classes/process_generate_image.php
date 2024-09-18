@@ -63,8 +63,8 @@ class process_generate_image extends abstract_processor {
         // If the request was successful, save the URL to a file.
         if ($response['success']) {
             $fileobj = $this->url_to_file(
-                    $this->action->get_configuration('userid'),
-                    $response['sourceurl']
+                $this->action->get_configuration('userid'),
+                $response['sourceurl']
             );
             // Add the file to the response, so the calling placement can do whatever they want with it.
             $response['draftfile'] = $fileobj;
@@ -108,7 +108,7 @@ class process_generate_image extends abstract_processor {
                 'user' => $userid,
             ]),
             headers: [
-                    'Content-Type' => 'application/json',
+                'Content-Type' => 'application/json',
             ],
         );
     }
@@ -153,8 +153,8 @@ class process_generate_image extends abstract_processor {
         $downloadtmpdir = make_request_directory();
         $tempdst = $downloadtmpdir . $filename;
         $client->get($url, [
-                'sink' => $tempdst,
-                'timeout' => $CFG->repositorygetfiletimeout,
+            'sink' => $tempdst,
+            'timeout' => $CFG->repositorygetfiletimeout,
         ]);
         $image = new ai_image($tempdst);
         $image->add_watermark()->save();
@@ -163,11 +163,11 @@ class process_generate_image extends abstract_processor {
         // Placements (on behalf of the user) can then move it to the correct location.
         $fileinfo = new \stdClass();
         $fileinfo->contextid = \context_user::instance($userid)->id;
-        $fileinfo->filearea  = 'draft';
+        $fileinfo->filearea = 'draft';
         $fileinfo->component = 'user';
-        $fileinfo->itemid    = file_get_unused_draft_itemid();
-        $fileinfo->filepath  = '/';
-        $fileinfo->filename  = $filename;
+        $fileinfo->itemid = file_get_unused_draft_itemid();
+        $fileinfo->filepath = '/';
+        $fileinfo->filename = $filename;
 
         $fs = get_file_storage();
         return $fs->create_file_from_string($fileinfo, file_get_contents($tempdst));

@@ -48,7 +48,7 @@ final class process_generate_text_test extends \advanced_testcase {
     protected function setUp(): void {
         parent::setUp();
         // Load a response body from a file.
-        $this->responsebodyjson = file_get_contents(__DIR__ . '/fixtures/text_request_success.json');
+        $this->responsebodyjson = file_get_contents(self::get_fixture_path('aiprovider_azureai', 'text_request_success.json'));
         $this->create_provider();
         $this->create_action();
     }
@@ -62,6 +62,7 @@ final class process_generate_text_test extends \advanced_testcase {
 
     /**
      * Create the action object.
+     *
      * @param int $userid The user id to use in the action.
      */
     private function create_action(int $userid = 1): void {
@@ -232,6 +233,7 @@ final class process_generate_text_test extends \advanced_testcase {
         $this->assertEquals($response['errorcode'], $result->get_errorcode());
         $this->assertEquals($response['errormessage'], $result->get_errormessage());
     }
+
     /**
      * Test process method.
      */

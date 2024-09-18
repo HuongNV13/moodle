@@ -17,7 +17,6 @@
 namespace aiprovider_azureai;
 
 use core\http_client;
-use core_ai\aiactions\responses\response_base;
 use core_ai\process_base;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\RequestOptions;
@@ -46,7 +45,7 @@ abstract class abstract_processor extends process_base {
      * @return string
      */
     protected function get_system_instruction(): string {
-        return $this->action->get_system_instruction();
+        return $this->action::get_system_instruction();
     }
 
     /**

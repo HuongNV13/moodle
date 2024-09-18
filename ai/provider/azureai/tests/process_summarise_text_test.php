@@ -47,7 +47,7 @@ final class process_summarise_text_test extends \advanced_testcase {
     protected function setUp(): void {
         parent::setUp();
         // Load a response body from a file.
-        $this->responsebodyjson = file_get_contents(__DIR__ . '/fixtures/text_request_success.json');
+        $this->responsebodyjson = file_get_contents(self::get_fixture_path('aiprovider_azureai', 'text_request_success.json'));
         $this->create_provider();
         $this->create_action();
     }
@@ -61,13 +61,14 @@ final class process_summarise_text_test extends \advanced_testcase {
 
     /**
      * Create the action object.
+     *
      * @param int $userid The user id to use in the action.
      */
     private function create_action(int $userid = 1): void {
         $this->action = new \core_ai\aiactions\summarise_text(
-                contextid: 1,
-                userid: $userid,
-                prompttext: 'This is a test prompt',
+            contextid: 1,
+            userid: $userid,
+            prompttext: 'This is a test prompt',
         );
     }
 
@@ -94,14 +95,14 @@ final class process_summarise_text_test extends \advanced_testcase {
      */
     public function test_handle_api_error(): void {
         $responses = [
-                500 => new Response(500, ['Content-Type' => 'application/json']),
-                503 => new Response(503, ['Content-Type' => 'application/json']),
-                401 => new Response(401, ['Content-Type' => 'application/json'],
-                        '{"error": {"message": "Invalid Authentication"}}'),
-                404 => new Response(404, ['Content-Type' => 'application/json'],
-                        '{"error": {"message": "You must be a member of an organization to use the API"}}'),
-                429 => new Response(429, ['Content-Type' => 'application/json'],
-                        '{"error": {"message": "Rate limit reached for requests"}}'),
+            500 => new Response(500, ['Content-Type' => 'application/json']),
+            503 => new Response(503, ['Content-Type' => 'application/json']),
+            401 => new Response(401, ['Content-Type' => 'application/json'],
+                '{"error": {"message": "Invalid Authentication"}}'),
+            404 => new Response(404, ['Content-Type' => 'application/json'],
+                '{"error": {"message": "You must be a member of an organization to use the API"}}'),
+            429 => new Response(429, ['Content-Type' => 'application/json'],
+                '{"error": {"message": "Rate limit reached for requests"}}'),
         ];
 
         $processor = new process_summarise_text($this->provider, $this->action);
@@ -125,9 +126,9 @@ final class process_summarise_text_test extends \advanced_testcase {
      */
     public function test_handle_api_success(): void {
         $response = new Response(
-                200,
-                ['Content-Type' => 'application/json'],
-                $this->responsebodyjson
+            200,
+            ['Content-Type' => 'application/json'],
+            $this->responsebodyjson
         );
 
         // We're testing a private method, so we need to set up reflector magic.
@@ -155,9 +156,9 @@ final class process_summarise_text_test extends \advanced_testcase {
 
         // The response from Azure AI.
         $mock->append(new Response(
-                200,
-                ['Content-Type' => 'application/json'],
-                $this->responsebodyjson,
+            200,
+            ['Content-Type' => 'application/json'],
+            $this->responsebodyjson,
         ));
 
         $processor = new process_summarise_text($this->provider, $this->action);
@@ -183,13 +184,13 @@ final class process_summarise_text_test extends \advanced_testcase {
         $method = new \ReflectionMethod($processor, 'prepare_response');
 
         $response = [
-                'success' => true,
-                'id' => 'chatcmpl-9lkwPWOIiQEvI3nfcGofJcmS5lPYo',
-                'fingerprint' => 'fp_c4e5b6fa31',
-                'generatedcontent' => 'Sure, here is some sample text',
-                'finishreason' => 'stop',
-                'prompttokens' => '11',
-                'completiontokens' => '568',
+            'success' => true,
+            'id' => 'chatcmpl-9lkwPWOIiQEvI3nfcGofJcmS5lPYo',
+            'fingerprint' => 'fp_c4e5b6fa31',
+            'generatedcontent' => 'Sure, here is some sample text',
+            'finishreason' => 'stop',
+            'prompttokens' => '11',
+            'completiontokens' => '568',
         ];
 
         $result = $method->invoke($processor, $response);
@@ -211,9 +212,9 @@ final class process_summarise_text_test extends \advanced_testcase {
         $method = new \ReflectionMethod($processor, 'prepare_response');
 
         $response = [
-                'success' => false,
-                'errorcode' => 500,
-                'errormessage' => 'Internal server error.',
+            'success' => false,
+            'errorcode' => 500,
+            'errormessage' => 'Internal server error.',
         ];
 
         $result = $method->invoke($processor, $response);
@@ -224,6 +225,7 @@ final class process_summarise_text_test extends \advanced_testcase {
         $this->assertEquals($response['errorcode'], $result->get_errorcode());
         $this->assertEquals($response['errormessage'], $result->get_errormessage());
     }
+
     /**
      * Test process method.
      */
@@ -315,9 +317,9 @@ final class process_summarise_text_test extends \advanced_testcase {
         $clock->bump(HOURSECS - 10);
         // The response from Azure AI.
         $mock->append(new Response(
-             200,
-             ['Content-Type' => 'application/json'],
-             $this->responsebodyjson,
+            200,
+            ['Content-Type' => 'application/json'],
+            $this->responsebodyjson,
         ));
         $this->create_provider();
         $this->create_action($user1->id);
@@ -334,9 +336,9 @@ final class process_summarise_text_test extends \advanced_testcase {
         $this->create_action($user2->id);
         // The response from Azure AI.
         $mock->append(new Response(
-             200,
-             ['Content-Type' => 'application/json'],
-             $this->responsebodyjson,
+            200,
+            ['Content-Type' => 'application/json'],
+            $this->responsebodyjson,
         ));
         $processor = new process_summarise_text($this->provider, $this->action);
         $result = $processor->process();

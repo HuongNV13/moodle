@@ -31,9 +31,9 @@ use core_privacy\local\request\userlist;
  * @codeCoverageIgnore
  */
 class provider implements
-        \core_privacy\local\metadata\provider,
-        \core_privacy\local\request\core_userlist_provider,
-        \core_privacy\local\request\plugin\provider {
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\core_userlist_provider,
+    \core_privacy\local\request\plugin\provider {
 
     #[\Override]
     public static function get_metadata(collection $collection): collection {
@@ -75,4 +75,3 @@ class provider implements
     public static function delete_data_for_user(approved_contextlist $contextlist) {
     }
 }
-

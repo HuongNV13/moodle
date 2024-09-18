@@ -29,10 +29,10 @@ defined('MOODLE_INTERNAL') || die();
 if ($hassiteconfig) {
     // Provider specific settings.
     $settings = new admin_settingspage_provider(
-       'aiprovider_azureai',
+        'aiprovider_azureai',
         new lang_string('pluginname', 'aiprovider_azureai'),
-       'moodle/site:config',
-       true
+        'moodle/site:config',
+        true
     );
 
     $settings->add(new admin_setting_heading(

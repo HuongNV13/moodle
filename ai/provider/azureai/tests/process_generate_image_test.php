@@ -44,7 +44,7 @@ final class process_generate_image_test extends \advanced_testcase {
     protected function setUp(): void {
         parent::setUp();
         // Load a response body from a file.
-        $this->responsebodyjson = file_get_contents(__DIR__ . '/fixtures/image_request_success.json');
+        $this->responsebodyjson = file_get_contents(self::get_fixture_path('aiprovider_azureai', 'image_request_success.json'));
         $this->create_provider();
         $this->create_action();
     }
@@ -58,17 +58,18 @@ final class process_generate_image_test extends \advanced_testcase {
 
     /**
      * Create the action object.
+     *
      * @param int $userid The user id to use in the action.
      */
     private function create_action(int $userid = 1): void {
         $this->action = new \core_ai\aiactions\generate_image(
-                contextid: 1,
-                userid: $userid,
-                prompttext: 'This is a test prompt',
-                quality: 'hd',
-                aspectratio: 'square',
-                numimages: 1,
-                style: 'vivid',
+            contextid: 1,
+            userid: $userid,
+            prompttext: 'This is a test prompt',
+            quality: 'hd',
+            aspectratio: 'square',
+            numimages: 1,
+            style: 'vivid',
         );
     }
 
@@ -117,14 +118,14 @@ final class process_generate_image_test extends \advanced_testcase {
      */
     public function test_handle_api_error(): void {
         $responses = [
-                500 => new Response(500, ['Content-Type' => 'application/json']),
-                503 => new Response(503, ['Content-Type' => 'application/json']),
-                401 => new Response(401, ['Content-Type' => 'application/json'],
-                        '{"error": {"message": "Invalid Authentication"}}'),
-                404 => new Response(404, ['Content-Type' => 'application/json'],
-                        '{"error": {"message": "You must be a member of an organization to use the API"}}'),
-                429 => new Response(429, ['Content-Type' => 'application/json'],
-                        '{"error": {"message": "Rate limit reached for requests"}}'),
+            500 => new Response(500, ['Content-Type' => 'application/json']),
+            503 => new Response(503, ['Content-Type' => 'application/json']),
+            401 => new Response(401, ['Content-Type' => 'application/json'],
+                '{"error": {"message": "Invalid Authentication"}}'),
+            404 => new Response(404, ['Content-Type' => 'application/json'],
+                '{"error": {"message": "You must be a member of an organization to use the API"}}'),
+            429 => new Response(429, ['Content-Type' => 'application/json'],
+                '{"error": {"message": "Rate limit reached for requests"}}'),
         ];
 
         $processor = new process_generate_image($this->provider, $this->action);
@@ -148,9 +149,9 @@ final class process_generate_image_test extends \advanced_testcase {
      */
     public function test_handle_api_success(): void {
         $response = new Response(
-                200,
-                ['Content-Type' => 'application/json'],
-                $this->responsebodyjson
+            200,
+            ['Content-Type' => 'application/json'],
+            $this->responsebodyjson
         );
 
         // We're testing a private method, so we need to setup reflector magic.
@@ -221,7 +222,7 @@ final class process_generate_image_test extends \advanced_testcase {
             'success' => true,
             'revisedprompt' => 'An image that represents the concept of a \'test\'.',
             'imageurl' => 'oaidalleapiprodscus.blob.core.windows.net',
-            ];
+        ];
 
         $result = $method->invoke($processor, $response);
 
@@ -320,13 +321,13 @@ final class process_generate_image_test extends \advanced_testcase {
         $numimages = 1;
         $style = 'vivid';
         $this->action = new \core_ai\aiactions\generate_image(
-                contextid: $contextid,
-                userid: $userid,
-                prompttext: $prompttext,
-                quality: $quality,
-                aspectratio: $aspectratio,
-                numimages: $numimages,
-                style: $style,
+            contextid: $contextid,
+            userid: $userid,
+            prompttext: $prompttext,
+            quality: $quality,
+            aspectratio: $aspectratio,
+            numimages: $numimages,
+            style: $style,
         );
 
         $processor = new process_generate_image($this->provider, $this->action);
@@ -338,6 +339,7 @@ final class process_generate_image_test extends \advanced_testcase {
         $this->assertEquals('An image that represents the concept of a \'test\'.', $result->get_response_data()['revisedprompt']);
         $this->assertEquals($url, $result->get_response_data()['sourceurl']);
     }
+
     /**
      * Test process method with error.
      */
@@ -465,9 +467,9 @@ final class process_generate_image_test extends \advanced_testcase {
         ));
         // The image downloaded from the server successfully.
         $mock->append(new Response(
-           200,
-           ['Content-Type' => 'image/jpeg'],
-           \GuzzleHttp\Psr7\Utils::streamFor(fopen(self::get_fixture_path('aiprovider_azureai', 'test.jpg'), 'r')),
+            200,
+            ['Content-Type' => 'image/jpeg'],
+            \GuzzleHttp\Psr7\Utils::streamFor(fopen(self::get_fixture_path('aiprovider_azureai', 'test.jpg'), 'r')),
         ));
         $processor = new process_generate_image($this->provider, $this->action);
         $result = $processor->process();
@@ -479,17 +481,17 @@ final class process_generate_image_test extends \advanced_testcase {
         $this->setUser($user1);
         // The response from Azure AI.
         $mock->append(new Response(
-           200,
-           ['Content-Type' => 'application/json'],
-           json_encode([
-              'created' => 1719140500,
-              'data' => [
-                 (object) [
-                    'revised_prompt' => 'An image that represents the concept of a \'test\'.',
-                    'url' => $url,
-                 ],
-              ],
-           ]),
+            200,
+            ['Content-Type' => 'application/json'],
+            json_encode([
+                'created' => 1719140500,
+                'data' => [
+                    (object) [
+                        'revised_prompt' => 'An image that represents the concept of a \'test\'.',
+                        'url' => $url,
+                    ],
+                ],
+            ]),
         ));
         // The image downloaded from the server successfully.
         $mock->append(new Response(
@@ -596,7 +598,7 @@ final class process_generate_image_test extends \advanced_testcase {
                 'data' => [
                     (object) [
                         'revised_prompt' => 'An image that represents the concept of a \'test\'.',
-                         'url' => $url,
+                        'url' => $url,
                     ],
                 ],
             ]),
