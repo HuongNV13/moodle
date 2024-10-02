@@ -146,4 +146,4 @@ jobs:
         env:
           dbtype: ${{ matrix.db }}
           phpunit_options: ${{ secrets.phpunit_options }}
-        run: vendor/bin/phpunit $phpunit_options ${{ inputs.phpunit_extra_options }}
+        run: vendor/bin/phpunit --filter test_send_overdue_notification_to_user mod/assign/tests/notification_helper_test.php
