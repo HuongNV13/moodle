@@ -1321,7 +1321,7 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2024120500.02);
     }
 
-    if ($oldversion < 2024120500.03) {
+    if ($oldversion < 2024121300.01) {
         // Define table ai_providers to be created.
         $table = new xmldb_table('ai_providers');
 
@@ -1348,7 +1348,7 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_convert_ai_providers_to_instances();
 
         // Main savepoint reached.
-        upgrade_main_savepoint(true, 2024120500.03);
+        upgrade_main_savepoint(true, 2024121300.01);
     }
 
     return true;
