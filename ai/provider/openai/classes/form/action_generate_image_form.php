@@ -16,7 +16,9 @@
 
 namespace aiprovider_openai\form;
 
-use core_ai\form\action_settings_form;
+use aiprovider_openai\helper;
+
+require_once($CFG->libdir . '/formslib.php');
 
 /**
  * Generate image action provider settings form.
@@ -25,58 +27,55 @@ use core_ai\form\action_settings_form;
  * @copyright  2024 Matt Porritt <matt.porritt@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class action_generate_image_form extends action_settings_form {
+class action_generate_image_form extends action_form {
     #[\Override]
-    protected function definition() {
+    protected function definition(): void {
+        parent::definition();
         $mform = $this->_form;
-        $actionconfig = $this->_customdata['actionconfig']['settings'] ?? [];
-        $returnurl = $this->_customdata['returnurl'] ?? null;
-        $actionname = $this->_customdata['actionname'];
-        $action = $this->_customdata['action'];
-        $providerid = $this->_customdata['providerid'] ?? 0;
 
-        // Action model to use.
-        $mform->addElement(
-            'text',
-            'model',
-            get_string("action:{$actionname}:model", 'aiprovider_openai'),
-            'maxlength="255" size="20"',
-        );
-        $mform->setType('model', PARAM_TEXT);
-        $mform->addRule('model', null, 'required', null, 'client');
-        $mform->setDefault('model', $actionconfig['model'] ?? 'dall-e-3');
-        $mform->addHelpButton('model', "action:{$actionname}:model", 'aiprovider_openai');
+        $this->add_model_fields();
 
         // API endpoint.
         $mform->addElement(
             'text',
             'endpoint',
-            get_string("action:{$actionname}:endpoint", 'aiprovider_openai'),
+            get_string("action:{$this->actionname}:endpoint", 'aiprovider_openai'),
             'maxlength="255" size="30"',
         );
         $mform->setType('endpoint', PARAM_URL);
         $mform->addRule('endpoint', null, 'required', null, 'client');
-        $mform->setDefault('endpoint', $actionconfig['endpoint'] ?? 'https://api.openai.com/v1/images/generations');
+        $mform->setDefault('endpoint', $this->actionconfig['endpoint'] ?? 'https://api.openai.com/v1/images/generations');
 
-        if ($returnurl) {
-            $mform->addElement('hidden', 'returnurl', $returnurl);
+        if ($this->returnurl) {
+            $mform->addElement('hidden', 'returnurl', $this->returnurl);
             $mform->setType('returnurl', PARAM_LOCALURL);
         }
 
         // Add the action class as a hidden field.
-        $mform->addElement('hidden', 'action', $action);
+        $mform->addElement('hidden', 'action', $this->action);
         $mform->setType('action', PARAM_TEXT);
 
         // Add the provider class as a hidden field.
-        $mform->addElement('hidden', 'provider', 'aiprovider_openai');
+        $mform->addElement('hidden', 'provider', $this->providername);
         $mform->setType('provider', PARAM_TEXT);
 
         // Add the provider id as a hidden field.
-        $mform->addElement('hidden', 'providerid', $providerid);
+        $mform->addElement('hidden', 'providerid', $this->providerid);
         $mform->setType('providerid', PARAM_INT);
 
-        $this->add_action_buttons();
+        $this->set_data($this->actionconfig);
+    }
 
-        $this->set_data($actionconfig);
+    #[\Override]
+    protected function get_model_list(): array {
+        $models = [];
+        $models['custom'] = get_string('custom', 'core_form');
+        foreach (helper::get_model_classes() as $class) {
+            $model = new $class();
+            if ($model->is_compatible_with_image()) {
+                $models[$model->get_model_name()] = $model->get_model_display_name();
+            }
+        }
+        return $models;
     }
 }

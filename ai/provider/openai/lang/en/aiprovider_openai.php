@@ -37,8 +37,24 @@ $string['action:summarise_text:systeminstruction'] = 'System instruction';
 $string['action:summarise_text:systeminstruction_help'] = 'This instruction is sent to the AI model along with the user\'s prompt. Editing this instruction is not recommended unless absolutely required.';
 $string['apikey'] = 'OpenAI API key';
 $string['apikey_help'] = 'Get a key from your <a href="https://platform.openai.com/account/api-keys" target="_blank">OpenAI API keys</a>.';
+$string['custom_model_name'] = 'Custom model name';
+$string['extraparams'] = 'Extra parameters';
+$string['extraparams_help'] = 'Extra parameters can be configured here. We support JSON format. For example:
+<pre>
+{
+    "temperature": 0.5,
+    "max_tokens": 100,
+}
+</pre>';
+$string['invalidjson'] = 'Invalid JSON string';
 $string['orgid'] = 'OpenAI organization ID';
 $string['orgid_help'] = 'Get your OpenAI organization ID from your <a href="https://platform.openai.com/account/org-settings" target="_blank">OpenAI account</a>.';
+$string['settings'] = 'Settings';
+$string['settings_help'] = 'You can adjust the settings below to customize how requests are sent to OpenAI. Update the values as needed, ensuring they align with your requirements.<br><br>';
+$string['settings_max_tokens'] = 'The maximum number of tokens to generate in the response';
+$string['settings_frequency_penalty'] = 'Penalizes new tokens based on their frequency in the text so far';
+$string['settings_top_p'] = 'Controls nucleus sampling';
+$string['settings_presence_penalty'] = 'Penalizes new tokens based on whether they appear in the text so far';
 $string['pluginname'] = 'OpenAI API Provider';
 $string['privacy:metadata'] = 'The OpenAI API provider plugin does not store any personal data.';
 $string['privacy:metadata:aiprovider_openai:externalpurpose'] = 'This information is sent to the OpenAI API in order for a response to be generated. Your OpenAI account settings may change how OpenAI stores and retains this data. No user data is explicitly sent to OpenAI or stored in Moodle LMS by this plugin.';
