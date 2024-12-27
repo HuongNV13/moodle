@@ -57,8 +57,9 @@ final class process_generate_image_test extends \advanced_testcase {
 
     /**
      * Create the provider object.
+     * @param array $actionconfig The action configuration to use.
      */
-    private function create_provider(): void {
+    private function create_provider(array $actionconfig = []): void {
         $this->manager = \core\di::get(\core_ai\manager::class);
         $config = [
             'apikey' => '123',
@@ -71,6 +72,7 @@ final class process_generate_image_test extends \advanced_testcase {
             classname: '\aiprovider_openai\provider',
             name: 'dummy',
             config: $config,
+            actionconfig: $actionconfig,
         );
     }
 
@@ -130,6 +132,52 @@ final class process_generate_image_test extends \advanced_testcase {
         $this->assertEquals('hd', $requestdata->quality);
         $this->assertEquals('url', $requestdata->response_format);
         $this->assertEquals('1024x1024', $requestdata->size);
+    }
+
+    /**
+     * Test create_request_object with extra model settings.
+     */
+    public function test_create_request_object_with_model_settings(): void {
+        $this->create_provider([
+            \core_ai\aiactions\generate_image::class => [
+                'settings' => [
+                    'model' => 'gpt-4o',
+                    'top_p' => '0.9',
+                    'temperature' => '0.5',
+                ]
+            ],
+        ]);
+        $processor = new process_generate_image($this->provider, $this->action);
+
+        // We're working with a private method here, so we need to use reflection.
+        $method = new \ReflectionMethod($processor, 'create_request_object');
+        $request = $method->invoke($processor, 1);
+
+        $body = (object) json_decode($request->getBody()->getContents());
+
+        $this->assertEquals('gpt-4o', $body->model);
+        $this->assertEquals('0.9', $body->top_p);
+        $this->assertEquals('0.5', $body->temperature);
+
+        $this->create_provider([
+            \core_ai\aiactions\generate_image::class => [
+                'settings' => [
+                    'model' => 'custom',
+                    'modelextraparams' => 'top_p|0.9' . PHP_EOL . 'temperature|0.5',
+                ]
+            ],
+        ]);
+        $processor = new process_generate_image($this->provider, $this->action);
+
+        // We're working with a private method here, so we need to use reflection.
+        $method = new \ReflectionMethod($processor, 'create_request_object');
+        $request = $method->invoke($processor, 1);
+
+        $body = (object) json_decode($request->getBody()->getContents());
+
+        $this->assertEquals('custom', $body->model);
+        $this->assertEquals('0.9', $body->top_p);
+        $this->assertEquals('0.5', $body->temperature);
     }
 
     /**

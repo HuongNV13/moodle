@@ -14,24 +14,36 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace core_ai\aimodel;
+
+use MoodleQuickForm;
+
 /**
- * Hook listener callbacks for the Open AI Provider.
+ * Base Model class.
  *
- * @package    aiprovider_openai
- * @copyright  2024 Matt Porritt <matt.porritt@moodle.com>
+ * @package    core_ai
+ * @copyright  2024 Huong Nguyen <huongnv13@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+abstract class base {
+    /**
+     * Get the display name of the model.
+     *
+     * @return string The display name of the model.
+     */
+    abstract public function get_model_display_name(): string;
 
-defined('MOODLE_INTERNAL') || die();
+    /**
+     * Get the name of the model.
+     *
+     * @return string The name of the model.
+     */
+    abstract public function get_model_name(): string;
 
-$callbacks = [
-    [
-        'hook' => \core_ai\hook\after_ai_provider_form_hook::class,
-        'callback' => \aiprovider_openai\hook_listener::class . '::set_form_definition_for_aiprovider_openai',
-    ],
-
-    [
-        'hook' => \core_ai\hook\after_ai_action_settings_form_hook::class,
-        'callback' => \aiprovider_openai\hook_listener::class . '::set_model_form_definition_for_aiprovider_openai',
-    ],
-];
+    /**
+     * Add the model settings to the form.
+     *
+     * @param MoodleQuickForm $mform The form to add the model settings to.
+     */
+    abstract public function add_model_settings(MoodleQuickForm $mform): void;
+}

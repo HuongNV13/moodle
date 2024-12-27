@@ -374,6 +374,7 @@ class manager {
         string $name,
         bool $enabled = false,
         ?array $config = null,
+        ?array $actionconfig = null,
     ): provider {
         if (!class_exists($classname) || !is_a($classname, provider::class, true)) {
             throw new \coding_exception("Provider class not valid: {$classname}");
@@ -382,6 +383,7 @@ class manager {
             enabled: $enabled,
             name: $name,
             config: $config ? json_encode($config) : '',
+            actionconfig: $actionconfig ? json_encode($actionconfig) : '',
         );
 
         $id = $this->db->insert_record('ai_providers', $provider->to_record());

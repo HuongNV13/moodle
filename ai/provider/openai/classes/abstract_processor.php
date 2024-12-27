@@ -52,6 +52,31 @@ abstract class abstract_processor extends process_base {
     }
 
     /**
+     * Get the model settings.
+     *
+     * @return array
+     */
+    protected function get_model_settings(): array {
+        $settings = $this->provider->actionconfig[$this->action::class]['settings'];
+        if (!empty($settings['modelextraparams'])) {
+            // Custom model settings.
+            foreach (explode(PHP_EOL, $settings['modelextraparams']) as $param) {
+                $param = explode('|', $param);
+                $settings[$param[0]] = $param[1];
+            }
+        }
+
+        // Unset unnecessary settings.
+        unset(
+            $settings['model'],
+            $settings['endpoint'],
+            $settings['systeminstruction'],
+            $settings['providerid'],
+        );
+        return $settings;
+    }
+
+    /**
      * Get the system instructions.
      *
      * @return string

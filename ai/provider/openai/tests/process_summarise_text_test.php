@@ -58,8 +58,9 @@ final class process_summarise_text_test extends \advanced_testcase {
 
     /**
      * Create the provider object.
+     * @param array $actionconfig The action configuration to use.
      */
-    private function create_provider(): void {
+    private function create_provider(array $actionconfig = []): void {
         $this->manager = \core\di::get(\core_ai\manager::class);
         $config = [
             'apikey' => '123',
@@ -72,6 +73,7 @@ final class process_summarise_text_test extends \advanced_testcase {
             classname: '\aiprovider_openai\provider',
             name: 'dummy',
             config: $config,
+            actionconfig: $actionconfig,
         );
     }
 
@@ -103,6 +105,54 @@ final class process_summarise_text_test extends \advanced_testcase {
         $this->assertEquals(get_string('action_summarise_text_instruction', 'core_ai'), $body->messages[0]->content);
         $this->assertEquals('This is a test prompt', $body->messages[1]->content);
         $this->assertEquals('user', $body->messages[1]->role);
+    }
+
+    /**
+     * Test create_request_object with extra model settings.
+     */
+    public function test_create_request_object_with_model_settings(): void {
+        $this->create_provider([
+            \core_ai\aiactions\summarise_text::class => [
+                'settings' => [
+                    'model' => 'gpt-4o',
+                    'systeminstruction' => 'This is a system instruction',
+                    'top_p' => '0.9',
+                    'temperature' => '0.5',
+                ]
+            ],
+        ]);
+        $processor = new process_summarise_text($this->provider, $this->action);
+
+        // We're working with a private method here, so we need to use reflection.
+        $method = new \ReflectionMethod($processor, 'create_request_object');
+        $request = $method->invoke($processor, 1);
+
+        $body = (object) json_decode($request->getBody()->getContents());
+
+        $this->assertEquals('gpt-4o', $body->model);
+        $this->assertEquals('0.9', $body->top_p);
+        $this->assertEquals('0.5', $body->temperature);
+
+        $this->create_provider([
+            \core_ai\aiactions\summarise_text::class => [
+                'settings' => [
+                    'model' => 'custom',
+                    'systeminstruction' => 'This is a system instruction',
+                    'modelextraparams' => 'top_p|0.9' . PHP_EOL . 'temperature|0.5',
+                ]
+            ],
+        ]);
+        $processor = new process_summarise_text($this->provider, $this->action);
+
+        // We're working with a private method here, so we need to use reflection.
+        $method = new \ReflectionMethod($processor, 'create_request_object');
+        $request = $method->invoke($processor, 1);
+
+        $body = (object) json_decode($request->getBody()->getContents());
+
+        $this->assertEquals('custom', $body->model);
+        $this->assertEquals('0.9', $body->top_p);
+        $this->assertEquals('0.5', $body->temperature);
     }
 
     /**

@@ -16,6 +16,8 @@
 
 namespace aiprovider_openai;
 
+use aiprovider_openai\model\base;
+use core_ai\hook\after_ai_action_settings_form_hook;
 use core_ai\hook\after_ai_provider_form_hook;
 
 /**
@@ -59,6 +61,41 @@ class hook_listener {
         $mform->setType('orgid', PARAM_TEXT);
         $mform->addHelpButton('orgid', 'orgid', 'aiprovider_openai');
 
+    }
+
+    /**
+     * Hook listener for the Open AI action settings form.
+     *
+     * @param after_ai_action_settings_form_hook $hook The hook to add to config action settings.
+     */
+    public static function set_model_form_definition_for_aiprovider_openai(after_ai_action_settings_form_hook $hook): void {
+        if ($hook->plugin !== 'aiprovider_openai') {
+            return;
+        }
+
+        $mform = $hook->mform;
+        if (isset($mform->_elementIndex['modeltemplate'])) {
+            $model = $mform->getElementValue('modeltemplate');
+            if (is_array($model)) {
+                $model = $model[0];
+            }
+
+            if ($model == 'custom') {
+                $mform->addElement('header', 'modelsettingsheader', 'Model');
+                $mform->addElement(
+                    'textarea',
+                    'modelextraparams',
+                    'Extra parameters'
+                );
+                $mform->setType('modelextraparams', PARAM_TEXT);
+            } else {
+                $targetmodel = helper::get_model_class($model);
+                if ($targetmodel) {
+                    $mform->addElement('header', 'modelsettingsheader', 'Model');
+                    $targetmodel->add_model_settings($mform);
+                }
+            }
+        }
     }
 
 }
