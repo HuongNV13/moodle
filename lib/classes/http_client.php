@@ -78,6 +78,11 @@ class http_client extends Client {
             }
         }
 
+        // Disable the certificate verification for Behat and PHPUnit tests.
+        if (defined('BEHAT_SITE_RUNNING') || (defined('PHPUNIT_TEST') && PHPUNIT_TEST)) {
+            $settings['verify'] = false;
+        }
+
         return $settings;
     }
 
