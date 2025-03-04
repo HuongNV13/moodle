@@ -1182,7 +1182,8 @@ class manager {
         $hostname = (string)gethostname();
 
         if (empty($time)) {
-            $time = time();
+            $clock = \core\di::get(\core\clock::class);
+            $time = $clock->time();
         }
 
         $task->set_timestarted($time);

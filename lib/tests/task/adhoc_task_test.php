@@ -737,7 +737,8 @@ final class adhoc_task_test extends \advanced_testcase {
         global $DB;
         $this->resetAfterTest(true);
 
-        $now = time();
+        $clock = $this->mock_clock_with_frozen();
+        $now = $clock->time();
 
         // Create an adhoc task.
         $task = new adhoc_test_task();
@@ -753,7 +754,7 @@ final class adhoc_task_test extends \advanced_testcase {
         $this->assertNull($firststartingtime);
 
         // This will make sure that the task will be started after the $now value.
-        sleep(3);
+        $clock->bump(5);
 
         // Get the task from the scheduler.
         $task = manager::get_next_adhoc_task(timestart: $now);
@@ -773,8 +774,11 @@ final class adhoc_task_test extends \advanced_testcase {
         $this->assertNotNull($origintimestarted);
         $this->assertGreaterThan($now, $origintimestarted);
 
+        // Time travel 24 hours into the future.
+        $clock->bump(DAYSECS * 3);
+        $now = $clock->time();
         // Get the task from the scheduler.
-        $task = manager::get_next_adhoc_task(timestart: $now + 86400);
+        $task = manager::get_next_adhoc_task(timestart: $now);
         // Mark the task as starting.
         manager::adhoc_task_starting($task);
         // Execute the task.
