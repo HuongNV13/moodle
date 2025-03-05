@@ -14,33 +14,27 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Privacy Subsystem implementation for mlbackend_php.
- *
- * @package    mlbackend_php
- * @copyright  2018 David Monllao
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-namespace mlbackend_php\privacy;
-
-defined('MOODLE_INTERNAL') || die();
+namespace core_analytics\tests;
 
 /**
- * Privacy Subsystem for mlbackend_php implementing null_provider.
+ * A trait to check machine learning configurations.
  *
- * @copyright  2018 David Monllao
+ * @package    core_analytics
+ * @category   test
+ * @copyright  2024 David Woloszyn <david.woloszyn@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements \core_privacy\local\metadata\null_provider {
-
+trait mlbackend_configuration_trait {
     /**
-     * Get the language string identifier with the component's language
-     * file to explain why this plugin stores no data.
+     * Check if mlbackend_python is configured.
      *
-     * @return  string
+     * @return bool
      */
-    public static function get_reason(): string {
-        return 'privacy:metadata';
+    public static function is_mlbackend_python_configured(): bool {
+        if (defined('TEST_MLBACKEND_PYTHON_HOST') && defined('TEST_MLBACKEND_PYTHON_PORT')
+                && defined('TEST_MLBACKEND_PYTHON_USERNAME') && defined('TEST_MLBACKEND_PYTHON_USERNAME')) {
+            return true;
+        }
+        return false;
     }
 }
