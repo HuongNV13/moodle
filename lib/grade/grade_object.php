@@ -217,7 +217,7 @@ abstract class grade_object {
         }
 
         global $DB;
-        $rs = $DB->get_recordset_select($table, $wheresql, $newparams);
+        $rs = $DB->get_recordset_select($table, $wheresql, $newparams, 'id ASC');
         //returning false rather than empty array if nothing found
         if (!$rs->valid()) {
             $rs->close();
