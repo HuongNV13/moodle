@@ -1560,6 +1560,7 @@ function make_localcache_directory($directory, $exceptiononerror = true) {
     if (!file_exists($timestampfile)) {
         touch($timestampfile);
         @chmod($timestampfile, $CFG->filepermissions);
+        clearstatcache();
 
     } else if (filemtime($timestampfile) <  $CFG->localcachedirpurged) {
         // This means our local cached dir was not purged yet.
