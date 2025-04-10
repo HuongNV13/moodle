@@ -31,6 +31,7 @@ Feature: Change password
   Scenario: A user with expired password must change it when log in directly and then be redirected to the home page
     Given I force a password change for user "testuser"
     And I log in as "testuser"
+    And I wait to be redirected
     And I should see "You must change your password to proceed"
     When I set the field "Current password" to "testuser"
     And I set the field "New password" to "NewPassword1*"
@@ -53,6 +54,7 @@ Feature: Change password
     And I set the field "Username" to "testuser"
     And I set the field "Password" to "testuser"
     And I press "Log in"
+    And I wait to be redirected
     Then I should see "You must change your password to proceed"
     And I set the field "Current password" to "testuser"
     And I set the field "New password" to "NewPassword1*"
