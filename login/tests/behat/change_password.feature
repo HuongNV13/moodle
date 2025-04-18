@@ -55,10 +55,7 @@ Feature: Change password
     And I press "Log in"
     Then I should see "You must change your password to proceed"
     And I set the field "Current password" to "testuser"
-    And I set the field "New password" to "NewPassword1*"
-    And I set the field "New password (again)" to "NewPassword1*"
+    And I set the field "New password" to "12345678"
+    And I set the field "New password (again)" to "12345678"
     And I click on "Save changes" "button"
-    And I should see "Password has been changed"
-    And I click on "Continue" "button"
-    And I am on site homepage
-    And I should see "Course 1"
+    And I should see "Passwords must have at least 1 lower case letter(s)."
