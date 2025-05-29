@@ -520,7 +520,8 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
             return;
         }
 
-        require(['core/notification'], function(Notification) {
+        require(['core/notification', 'core/pending'], function(Notification, Pending) {
+            var pendingPromise = new Pending('mod_quiz/resource:delete');
             Notification.saveCancelPromise(
                 M.util.get_string('confirm', 'moodle'),
                 M.util.get_string('areyousureremoveselected', 'quiz'),
@@ -549,8 +550,13 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
                 });
 
                 return;
-            }.bind(this)).catch(function() {
+            }.bind(this))
+            .finally(function() {
+                pendingPromise.resolve();
+            })
+            .catch(function() {
                 // User cancelled.
+                pendingPromise.resolve();
             });
         }.bind(this));
     },
