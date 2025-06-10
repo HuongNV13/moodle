@@ -630,6 +630,7 @@ $string['enroladminnewcourse_help'] = 'When an admin adds a new course, should t
 $string['enrolinstancedefaults'] = 'Enrolment instance defaults';
 $string['enrolinstancedefaults_desc'] = 'Default enrolment settings in new courses.';
 $string['enrolmultipleusers'] = 'Enrol the users';
+$string['ensureauroraversion'] = 'Aurora MySQL must be configured to match the required MySQL engine version. Verify your setup meets specifications.';
 $string['environment'] = 'Environment';
 $string['environmenterrortodo'] = 'You must solve all the environmental problems (errors) found above before proceeding to install this Moodle version!';
 $string['environmenterrorupgrade'] = 'Warning: you should solve all the environmental problems (errors) found above before proceeding to upgrade this Moodle version!  Upgrading without fixing these requirements could cause problems such as data loss.  Are you sure you want to continue with the upgrade?';
