@@ -2808,9 +2808,9 @@ function check_async_backup(environment_results $result): ?environment_results {
  * @return environment_results|null The updated environment results object if Aurora is detected, or null otherwise.
  */
 function check_aurora_version(environment_results $result): ?environment_results {
-    global $DB;
+    global $CFG;
 
-    if ($DB->get_dbvendor() === 'auroramysql') {
+    if ($CFG->dbtype === 'auroramysql') {
         $result->setInfo('Aurora compatibility');
         $result->setFeedbackStr('ensureauroraversion');
         return $result;
