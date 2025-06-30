@@ -72,4 +72,29 @@ class action_settings_form extends moodleform {
             return $data;
         }
     }
+
+    #[\Override]
+    public function get_data(): ?\stdClass {
+        $data = parent::get_data();
+
+        if ($data) {
+            if (isset($data->modeltemplate)) {
+                if ($data->modeltemplate === 'custom') {
+                    $data->model = $data->custommodel;
+                } else {
+                    // Set the model to the selected model template.
+                    $data->model = $data->modeltemplate;
+                }
+
+            }
+            // Unset the model template.
+            unset($data->custommodel);
+            unset($data->modeltemplate);
+
+            // Unset any false-y values.
+            $data = (object) array_filter((array) $data);
+        }
+
+        return $data;
+    }
 }

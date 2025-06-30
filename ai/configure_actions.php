@@ -87,6 +87,14 @@ if ($data = $mform->get_data()) {
     $providerinstance = $manager->get_provider_instances(['id' => $id]);
     $providerinstance = reset($providerinstance);
     $actionconfig = $providerinstance->actionconfig;
+
+    // Check if the action model is already configured.
+    if (isset($actionconfig[$action]['settings']['modelsettings'])) {
+        $existingmodelsettings = $actionconfig[$action]['settings']['modelsettings'];
+        // If the model settings are already set, we need to merge them with the new settings.
+        $data->modelsettings = array_merge($existingmodelsettings, $data->modelsettings);
+    }
+
     $actionconfig[$action]['settings'] = (array)$data;
     $actionconfig[$action]['enabled'] = $providerinstance->actionconfig[$action]['enabled'];
 

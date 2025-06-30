@@ -55,7 +55,12 @@ class action_form extends action_settings_form {
     #[\Override]
     protected function definition(): void {
         $mform = $this->_form;
-        $this->actionconfig = $this->_customdata['actionconfig']['settings'] ?? [];
+        $model = $this->_customdata['actionconfig']['settings']['model'] ?? '';
+        if (!empty($model)) {
+            $this->actionconfig = $this->_customdata['actionconfig']['settings']['modelsettings'][$model];
+        } else {
+            $this->actionconfig = [];
+        }
         $this->returnurl = $this->_customdata['returnurl'] ?? null;
         $this->actionname = $this->_customdata['actionname'];
         $this->action = $this->_customdata['action'];
@@ -77,23 +82,27 @@ class action_form extends action_settings_form {
     public function get_data(): ?\stdClass {
         $data = parent::get_data();
 
-        if ($data) {
-            if (isset($data->modeltemplate)) {
-                if ($data->modeltemplate === 'custom') {
-                    $data->model = $data->custommodel;
-                } else {
-                    // Set the model to the selected model template.
-                    $data->model = $data->modeltemplate;
+        if (isset($data->model) && $data->model != 'custom') {
+            $modelclass = helper::get_model_class($data->model);
+            if ($modelclass) {
+                if ($modelclass->has_model_settings()) {
+                    $modelsettings = array_keys($modelclass->get_model_settings());
+                    // Process the model settings.
+                    $modeldata = [];
+                    foreach ($data as $key => $value) {
+                        if (in_array($key, $modelsettings)) {
+                            $modeldata[$key] = $value;
+                            unset($data->$key);
+                        }
+                    }
+                    if (!empty($modeldata)) {
+                        $data->modelsettings[$data->model] = $modeldata;
+                    }
                 }
-
             }
-            // Unset the model template.
-            unset($data->custommodel);
-            unset($data->modeltemplate);
-
-            // Unset any false-y values.
-            $data = (object) array_filter((array) $data);
         }
+
+        // We also need to cover model = custom case.
 
         return $data;
     }
