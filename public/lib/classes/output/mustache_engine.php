@@ -24,6 +24,8 @@
 
 namespace core\output;
 
+use Mustache\Engine;
+
 /**
  * Custom Moodle engine for mustache.
  *
@@ -31,7 +33,7 @@ namespace core\output;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @package core
  */
-class mustache_engine extends \Mustache_Engine {
+class mustache_engine extends Engine {
     /**
      * @var mustache_helper_collection
      */

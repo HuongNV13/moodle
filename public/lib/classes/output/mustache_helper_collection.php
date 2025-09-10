@@ -16,6 +16,10 @@
 
 namespace core\output;
 
+use Mustache\HelperCollection;
+use Mustache\LambdaHelper;
+use Mustache\Tokenizer;
+
 /**
  * Custom Moodle helper collection for mustache.
  *
@@ -23,7 +27,7 @@ namespace core\output;
  * @copyright  2019 Ryan Wyllie <ryan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mustache_helper_collection extends \Mustache_HelperCollection {
+class mustache_helper_collection extends HelperCollection {
     /**
      * @var string[] Names of helpers that aren't allowed to be called within other helpers.
      */
@@ -57,7 +61,7 @@ class mustache_helper_collection extends \Mustache_HelperCollection {
      * helper function. This prevents the disallowed helper functions from being
      * called by nested render functions from within other helpers.
      *
-     * @see \Mustache_HelperCollection::add()
+     * @see \Mustache\HelperCollection::add()
      * @param string $name
      * @param mixed  $helper
      */
@@ -66,7 +70,7 @@ class mustache_helper_collection extends \Mustache_HelperCollection {
         $disallowedlist = $this->disallowednestedhelpers;
 
         if (is_callable($helper) && !empty($disallowedlist)) {
-            $helper = function ($source, \Mustache_LambdaHelper $lambdahelper) use ($helper, $disallowedlist) {
+            $helper = function ($source, LambdaHelper $lambdahelper) use ($helper, $disallowedlist) {
 
                 // Temporarily override the disallowed helpers to return nothing
                 // so that they can't be executed from within other helpers.
@@ -142,8 +146,8 @@ class mustache_helper_collection extends \Mustache_HelperCollection {
      * @return string Parsed string
      */
     public function strip_disallowed_helpers($disallowedlist, $string) {
-        $starttoken = \Mustache_Tokenizer::T_SECTION;
-        $endtoken = \Mustache_Tokenizer::T_END_SECTION;
+        $starttoken = Tokenizer::T_SECTION;
+        $endtoken = Tokenizer::T_END_SECTION;
         if ($endtoken == '/') {
             $endtoken = '\/';
         }
