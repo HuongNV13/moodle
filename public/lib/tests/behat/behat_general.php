@@ -197,6 +197,8 @@ class behat_general extends behat_base {
                     $this->execute_js_on_node($iframe, "{{ELEMENT}}.name = '{$iframename}';");
                 }
                 $context->getSession()->switchToIFrame($iframename);
+                // Wait until the iframe is completely loaded.
+                $context->getSession()->wait(behat_base::get_extended_timeout(), 'document.readyState === "complete"');
 
                 // If no exception we are done.
                 return true;
