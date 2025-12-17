@@ -75,15 +75,26 @@
         }
 
         if ($confirm != md5($delete)) {
+            $stringkey = admin_get_user_deletion_string_component();
+
             echo $OUTPUT->header();
             $fullname = fullname($user, true);
-            echo $OUTPUT->heading(get_string('deleteuser', 'admin'));
+            echo $OUTPUT->heading(get_string('deleteuserx', 'admin', $fullname));
 
             $optionsyes = array('delete'=>$delete, 'confirm'=>md5($delete), 'sesskey'=>sesskey());
             $deleteurl = new moodle_url($returnurl, $optionsyes);
             $deletebutton = new single_button($deleteurl, get_string('delete'), 'post');
 
-            echo $OUTPUT->confirm(get_string('deletecheckfull', '', "'$fullname'"), $deletebutton, $returnurl);
+            echo $OUTPUT->confirm(
+                get_string(
+                    'deletecheckfull',
+                    $stringkey,
+                    (new moodle_url(get_docs_url('Data_privacy')))->out(false),
+                ),
+                $deletebutton,
+                $returnurl,
+                ['confirmtitle' => get_string('deleteuserx', 'admin', $fullname)]
+            );
             echo $OUTPUT->footer();
             die;
         } else {
