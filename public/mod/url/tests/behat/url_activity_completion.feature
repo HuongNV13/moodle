@@ -85,7 +85,7 @@ Feature: View activity completion information in the URL resource
       | idnumber       | Music history       |
       | name           | Music history       |
       | intro          | URL description     |
-      | externalurl    | https://moodle.org/ |
+      | externalurl    | https://www.google.com/ |
       | completion     | 2                   |
       | completionview | 1                   |
       | display        | 5                   |
