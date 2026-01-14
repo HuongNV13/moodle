@@ -33,6 +33,8 @@ require_once(__DIR__ . '/../config.php');
 // The state parameter we've given (used in moodle as a redirect url).
 // Per https://www.rfc-editor.org/rfc/rfc6749#section-4.1.2.1, state is required, even during error responses.
 $state = required_param('state', PARAM_LOCALURL);
+// Some oauth providers (like Apple) send back user info in the callback only on the first authorization request.
+$userinfo = optional_param('user', '', PARAM_RAW);
 $redirecturl = new moodle_url($state);
 $params = $redirecturl->params();
 
@@ -62,19 +64,15 @@ if ($error) {
 $code = required_param('code', PARAM_RAW);
 
 if (isset($params['sesskey']) and confirm_sesskey($params['sesskey'])) {
-    // Apple passes back the user information only on the first hit to the oauth service.
-    // This user information is stored in the $SESSION variable to capture the user information.
-    $appleuserinfo = optional_param('user', '', PARAM_RAW);
-    if (!empty($appleuserinfo)) {
-        $parsedstate = [];
-        parse_str($state, $parsedstate);
-        if (isset($parsedstate['id']) && !empty($parsedstate['id'])) {
-            $issuer = new \core\oauth2\issuer($parsedstate['id']);
-            if ($issuer && $issuer->get('servicetype') === 'apple') {
-                global $SESSION;
-                $SESSION->appleuserpostcontent = $appleuserinfo;
-            }
-        }
+    $parsedstate = [];
+    parse_str($state, $parsedstate);
+    if (isset($parsedstate['id']) && !empty($parsedstate['id'])) {
+        // Dispatch the hook after OAuth2 verification is successful.
+        $hook = new \core\oauth2\hook\after_oauth2_verified(
+            issuerid: $parsedstate['id'],
+            userinfo: $userinfo,
+        );
+        \core\di::get(\core\hook\manager::class)->dispatch($hook);
     }
     $redirecturl->param('oauth2code', $code);
     redirect($redirecturl);

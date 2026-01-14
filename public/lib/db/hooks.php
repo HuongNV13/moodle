@@ -139,4 +139,8 @@ $callbacks = [
         'callback' => [\core_courseformat\hook_listener::class, 'before_course_viewed'],
         'priority' => 999,
     ],
+    [
+        'hook' => \core\oauth2\hook\after_oauth2_verified::class,
+        'callback' => [\core\oauth2\hook_callbacks::class, 'after_oauth2_verified'],
+    ],
 ];
