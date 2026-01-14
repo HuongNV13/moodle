@@ -857,9 +857,37 @@ EOF;
      * @return  bool Whether any JS is still pending completion.
      */
     public static function wait_for_pending_js_in_session(Session $session) {
+        global $CFG;
+        $baseurl = new core\url($CFG->wwwroot);
+        $currentsessionurl = new core\url($session->getCurrentUrl());
+
         if (!self::running_javascript_in_session($session)) {
             // JS is not available therefore there is nothing to wait for.
             return false;
+        }
+
+        $jscode = trim(preg_replace('/\s+/', ' ', '
+            return (function() {
+                if (document.readyState !== "complete") {
+                    return "incomplete";
+                }
+
+                if (typeof M !== "object" || typeof M.util !== "object" || typeof M.util.pending_js === "undefined") {
+                    return "";
+                }
+
+                return M.util.pending_js.join(":");
+            })()'));
+        if ($baseurl->get_host() !== $currentsessionurl->get_host()) {
+            // We are in a different domain, M is not defined in this case.
+            // We just need to wait for document.readyState to be complete.
+            $jscode = trim(preg_replace('/\s+/', ' ', '
+                return (function() {
+                    if (document.readyState !== "complete") {
+                        return "incomplete";
+                    }
+                    return "";
+                })()'));
         }
 
         // We don't use behat_base::spin() here as we don't want to end up with an exception
@@ -867,18 +895,6 @@ EOF;
         for ($i = 0; $i < self::get_extended_timeout() * 10; $i++) {
             $pending = '';
             try {
-                $jscode = trim(preg_replace('/\s+/', ' ', '
-                    return (function() {
-                        if (document.readyState !== "complete") {
-                            return "incomplete";
-                        }
-
-                        if (typeof M !== "object" || typeof M.util !== "object" || typeof M.util.pending_js === "undefined") {
-                            return "";
-                        }
-
-                        return M.util.pending_js.join(":");
-                    })()'));
                 $pending = self::evaluate_script_in_session($session, $jscode);
             } catch (NoSuchWindowException $nsw) {
                 // We catch an exception here, in case we just closed the window we were interacting with.
