@@ -857,8 +857,16 @@ EOF;
      * @return  bool Whether any JS is still pending completion.
      */
     public static function wait_for_pending_js_in_session(Session $session) {
+        global $CFG;
         if (!self::running_javascript_in_session($session)) {
             // JS is not available therefore there is nothing to wait for.
+            return false;
+        }
+
+        $basehost = (new core\url($CFG->wwwroot))->get_host();
+        $currenthost = (new core\url($session->getCurrentUrl()))->get_host();
+        if ($basehost !== $currenthost) {
+            // We are in a different domain, we cannot access the JS variables of another domain.
             return false;
         }
 
