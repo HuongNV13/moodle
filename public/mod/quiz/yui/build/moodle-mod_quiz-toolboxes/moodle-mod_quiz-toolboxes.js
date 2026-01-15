@@ -415,7 +415,8 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
         );
 
         // Create the confirmation dialogue.
-        require(['core/notification'], function(Notification) {
+        require(['core/notification', 'core/pending'], function(Notification, Pending) {
+            var pendingPromise = new Pending('mod_quiz/delete:with_confirmation');
             Notification.saveCancelPromise(
                 M.util.get_string('confirm', 'moodle'),
                 M.util.get_string('confirmremovequestion', 'quiz', qtypename),
@@ -436,11 +437,13 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
                             M.core.actionmenu.instance.hideMenu(ev);
                         }
                     }
+                    pendingPromise.resolve();
                 });
 
                 return;
             }.bind(this)).catch(function() {
                 // User cancelled.
+                pendingPromise.resolve();
             });
         }.bind(this));
     },
@@ -520,7 +523,8 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
             return;
         }
 
-        require(['core/notification'], function(Notification) {
+        require(['core/notification', 'core/pending'], function(Notification, Pending) {
+            var pendingPromise = new Pending('mod_quiz/delete_multiple:with_confirmation');
             Notification.saveCancelPromise(
                 M.util.get_string('confirm', 'moodle'),
                 M.util.get_string('areyousureremoveselected', 'quiz'),
@@ -546,11 +550,13 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
                         // Remove the select multiple options.
                         Y.one('body').removeClass(CSS.SELECTMULTIPLE);
                     }
+                    pendingPromise.resolve();
                 });
 
                 return;
             }.bind(this)).catch(function() {
                 // User cancelled.
+                pendingPromise.resolve();
             });
         }.bind(this));
     },
