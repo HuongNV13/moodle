@@ -415,33 +415,39 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
         );
 
         // Create the confirmation dialogue.
-        require(['core/notification', 'core/pending'], function(Notification, Pending) {
+        require(['core/modal_save_cancel', 'core/modal_events', 'core/pending'], function(SaveCancelModal, ModalEvents, Pending) {
             var pendingPromise = new Pending('mod_quiz/delete:with_confirmation');
-            Notification.saveCancelPromise(
-                M.util.get_string('confirm', 'moodle'),
-                M.util.get_string('confirmremovequestion', 'quiz', qtypename),
-                M.util.get_string('yes', 'moodle')
-            ).then(function() {
-                var spinner = this.add_spinner(element);
-                var data = {
-                    'class': 'resource',
-                    'action': 'DELETE',
-                    'id': Y.Moodle.mod_quiz.util.slot.getId(element)
-                };
-                this.send_request(data, spinner, function(response) {
-                    if (response.deleted) {
-                        // Actually remove the element.
-                        Y.Moodle.mod_quiz.util.slot.remove(element);
-                        this.reorganise_edit_page();
-                        if (M.core.actionmenu && M.core.actionmenu.instance) {
-                            M.core.actionmenu.instance.hideMenu(ev);
+            var modalPromise = SaveCancelModal.create({
+                title: M.util.get_string('confirm', 'moodle'),
+                body: M.util.get_string('confirmremovequestion', 'quiz', qtypename),
+                buttons: {
+                    save: M.util.get_string('yes', 'moodle'),
+                },
+                removeOnClose: true,
+            });
+            var that = this;
+            modalPromise.then(function(modal) {
+                modal.getRoot().on(ModalEvents.save, function() {
+                    var spinner = that.add_spinner(element);
+                    var data = {
+                        'class': 'resource',
+                        'action': 'DELETE',
+                        'id': Y.Moodle.mod_quiz.util.slot.getId(element)
+                    };
+                    that.send_request(data, spinner, function(response) {
+                        if (response.deleted) {
+                            // Actually remove the element.
+                            Y.Moodle.mod_quiz.util.slot.remove(element);
+                            this.reorganise_edit_page();
+                            if (M.core.actionmenu && M.core.actionmenu.instance) {
+                                M.core.actionmenu.instance.hideMenu(ev);
+                            }
                         }
-                    }
+                    });
+                    modal.hide();
                 });
-
+                modal.show();
                 return;
-            }.bind(this)).catch(function() {
-                // User cancelled.
             }).finally(function() {
                 pendingPromise.resolve();
             });
@@ -551,11 +557,10 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
                         Y.one('body').removeClass(CSS.SELECTMULTIPLE);
                     }
                 });
-
+                pendingPromise.resolve();
                 return;
             }.bind(this)).catch(function() {
                 // User cancelled.
-            }).finally(function() {
                 pendingPromise.resolve();
             });
         }.bind(this));
