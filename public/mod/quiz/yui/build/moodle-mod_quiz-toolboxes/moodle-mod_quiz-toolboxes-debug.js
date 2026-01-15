@@ -427,6 +427,9 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
             });
             var that = this;
             modalPromise.then(function(modal) {
+                modal.getRoot().on(ModalEvents.shown, function() {
+                    pendingPromise.resolve();
+                });
                 modal.getRoot().on(ModalEvents.save, function() {
                     var spinner = that.add_spinner(element);
                     var data = {
@@ -448,8 +451,6 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
                 });
                 modal.show();
                 return;
-            }).finally(function() {
-                pendingPromise.resolve();
             });
         }.bind(this));
     },
