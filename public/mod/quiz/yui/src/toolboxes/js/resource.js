@@ -204,12 +204,12 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
                             M.core.actionmenu.instance.hideMenu(ev);
                         }
                     }
-                    pendingPromise.resolve();
                 });
 
                 return;
             }.bind(this)).catch(function() {
                 // User cancelled.
+            }).finally(function() {
                 pendingPromise.resolve();
             });
         }.bind(this));
@@ -317,12 +317,12 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
                         // Remove the select multiple options.
                         Y.one('body').removeClass(CSS.SELECTMULTIPLE);
                     }
-                    pendingPromise.resolve();
                 });
 
                 return;
             }.bind(this)).catch(function() {
                 // User cancelled.
+            }).finally(function() {
                 pendingPromise.resolve();
             });
         }.bind(this));
