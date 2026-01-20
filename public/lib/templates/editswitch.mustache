@@ -59,9 +59,7 @@
     </noscript>
 </form>
 {{#js}}
-M.util.js_pending('core/edit_switch:init');
 require(['core/edit_switch'], function(editSwitch) {
     editSwitch.init('{{uniqid}}-editingswitch');
-    M.util.js_complete('core/edit_switch:init');
 });
 {{/js}}

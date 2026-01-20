@@ -1496,12 +1496,6 @@ class behat_navigation extends behat_base {
      * @Given I turn editing mode on
      */
     public function i_turn_editing_mode_on() {
-        // Wait for the edit mode toggle to be ready before interacting with it.
-        $this->execute('behat_general::wait_until_exists', [
-            get_string('editmode'),
-            'field',
-        ]);
-
         $this->execute('behat_forms::i_set_the_field_to', [get_string('editmode'), 1]);
 
         if (!$this->running_javascript()) {
