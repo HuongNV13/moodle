@@ -48,14 +48,38 @@ if ($confirm and confirm_sesskey()) {
     echo $OUTPUT->render($continue);
     echo $OUTPUT->box_end();
 } else {
-    list($in, $params) = $DB->get_in_or_equal($SESSION->bulk_users);
+    $stringkey = admin_get_user_deletion_string_component();
+
+    [$in, $params] = $DB->get_in_or_equal($SESSION->bulk_users);
     $userlist = $DB->get_records_select_menu('user', "id $in", $params, 'fullname', 'id,'.$DB->sql_fullname().' AS fullname');
     $usernames = implode(', ', $userlist);
+
+    $usercount = count($SESSION->bulk_users);
+
+    if ($usercount > 3) {
+        $deleteuserstr = get_string('deleteselectedusers', 'admin', $usernames);
+    } else if ($usercount > 1) {
+        $deleteuserstr = get_string('deleteusersx', 'admin', $usernames);
+    } else {
+        $deleteuserstr = get_string('deleteuserx', 'admin', $usernames);
+    }
+
     echo $OUTPUT->heading(get_string('confirmation', 'admin'));
-    $formcontinue = new single_button(new moodle_url('user_bulk_delete.php',
-        ['confirm' => 1, 'returnurl' => $returnurl]), get_string('yes'));
-    $formcancel = new single_button($return, get_string('no'), 'get');
-    echo $OUTPUT->confirm(get_string('deletecheckfull', '', $usernames), $formcontinue, $formcancel);
+    $formcontinue = new single_button(
+        new moodle_url('user_bulk_delete.php', ['confirm' => 1, 'returnurl' => $returnurl]),
+        get_string('delete')
+    );
+    $formcancel = new single_button($return, get_string('cancel'), 'get');
+    echo $OUTPUT->confirm(
+        get_string(
+            'deletecheckfull',
+            $stringkey,
+            (new moodle_url(get_docs_url('Data_privacy')))->out(false),
+        ),
+        $formcontinue,
+        $formcancel,
+        ['confirmtitle' => $deleteuserstr]
+    );
 }
 
 echo $OUTPUT->footer();

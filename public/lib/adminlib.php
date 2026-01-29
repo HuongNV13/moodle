@@ -656,6 +656,28 @@ function enable_cli_maintenance_mode() {
     chmod("$CFG->dataroot/climaintenance.html", $CFG->filepermissions);
 }
 
+/**
+ * Return the language component used for user deletion confirmations.
+ *
+ * If the data privacy tool is installed and automatic deletion requests are enabled the string
+ * lives in the plugin, otherwise we fall back to the core string.
+ *
+ * @return string language component (either tool_dataprivacy or moodle)
+ */
+function admin_get_user_deletion_string_component(): string {
+    $plugininfo = \core\plugin_manager::instance()->get_plugin_info('tool_dataprivacy');
+
+    if (
+        $plugininfo &&
+        $plugininfo->is_installed_and_upgraded() &&
+        get_config('tool_dataprivacy', 'automaticdeletionrequests')
+    ) {
+        return 'tool_dataprivacy';
+    }
+
+    return 'moodle';
+}
+
 /// CLASS DEFINITIONS /////////////////////////////////////////////////////////
 
 

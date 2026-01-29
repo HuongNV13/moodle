@@ -353,7 +353,7 @@ class users extends system_report {
             [
                 'class' => 'text-danger',
                 'data-modal' => 'confirmation',
-                'data-modal-title-str' => json_encode(['deleteuser', 'admin']),
+                'data-modal-title-str' => ':deletetitle',
                 'data-modal-content-str' => ':deletestr',
                 'data-modal-yes-button-str' => json_encode(['delete', 'core']),
                 'data-modal-destination' => ':deleteurl',
@@ -363,11 +363,20 @@ class users extends system_report {
             new lang_string('delete', 'moodle'),
         ))->add_callback(static function(\stdclass $row) use ($USER, $contextsystem): bool {
 
+            // We get the string from the dataprivacy plugin if installed and automatic deletion is enabled.
+            $stringkey = admin_get_user_deletion_string_component();
+
+            $row->deletetitle = json_encode([
+                'deleteuserx',
+                'admin',
+                fullname($row, true),
+            ]);
+
             // Populate deletion modal attributes.
             $row->deletestr = json_encode([
-                'deletecheckfull',
-                'moodle',
-                fullname($row, true),
+                "deletecheckfull",
+                $stringkey,
+                (new moodle_url(get_docs_url('Data_privacy')))->out(false),
             ]);
 
             $row->deleteurl = (new moodle_url('/admin/user.php', [
