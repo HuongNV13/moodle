@@ -35595,6 +35595,11 @@ textarea[data-auto-rows] {
   max-width: 34ch;
 }
 
+.login-layout-description {
+  margin-inline-start: auto;
+  text-align: end;
+}
+
 .login-layout-tagline {
   margin-inline: auto;
 }
@@ -35673,6 +35678,7 @@ textarea[data-auto-rows] {
   box-shadow: 0 0 0 0.25rem rgba(15, 108, 191, 0.75);
 }
 .login-container .login-signup,
+.login-container .login-authinstructions,
 .login-container .login-instructions {
   font-size: 0.875rem;
 }

@@ -84,6 +84,11 @@ $login-input-bg: $gray-100 !default;
     max-width: 34ch;
 }
 
+.login-layout-description {
+    margin-inline-start: auto;
+    text-align: end;
+}
+
 .login-layout-tagline {
     margin-inline: auto;
 }
@@ -199,6 +204,7 @@ $login-input-bg: $gray-100 !default;
     }
 
     .login-signup,
+    .login-authinstructions,
     .login-instructions {
         font-size: $font-size-sm;
     }

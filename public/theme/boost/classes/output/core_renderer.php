@@ -270,13 +270,7 @@ class core_renderer extends \core_renderer {
             true,
             ['context' => context_course::instance(SITEID), "escape" => false]
         );
-
-        unset($context->instructions);
-        if (is_enabled_auth('none')) {
-            $context->instructions = get_string('loginstepsnone');
-        } else if ($CFG->registerauth == 'email') {
-            $context->instructions = get_string('logindonthaveaccount');
-        }
+        $context->hasauthinstructions = !empty($CFG->auth_instructions);
 
         return $this->render_from_template('core/loginform', $context);
     }

@@ -35595,6 +35595,11 @@ textarea[data-auto-rows] {
   max-width: 34ch;
 }
 
+.login-layout-description {
+  margin-inline-start: auto;
+  text-align: end;
+}
+
 .login-layout-tagline {
   margin-inline: auto;
 }
