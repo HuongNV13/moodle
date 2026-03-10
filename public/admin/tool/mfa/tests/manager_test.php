@@ -277,6 +277,13 @@ final class manager_test extends \advanced_testcase {
         $guideurl = new \moodle_url('/pluginfile.php/1/tool_mfa/guidance/0/capybara.png');
         $this->assertEquals(\tool_mfa\manager::NO_REDIRECT, \tool_mfa\manager::should_require_mfa($guideurl, false));
 
+        // Access any theme pluginfile area via wildcard component and filearea rules.
+        $themeurl = new \moodle_url('/pluginfile.php/1/theme_boost/loginbackgroundimage/0/background.jpg');
+        $this->assertEquals(\tool_mfa\manager::NO_REDIRECT, \tool_mfa\manager::should_require_mfa($themeurl, false));
+
+        $themeurl = new \moodle_url('/pluginfile.php/1/theme_classic/customfield/0/example.txt');
+        $this->assertEquals(\tool_mfa\manager::NO_REDIRECT, \tool_mfa\manager::should_require_mfa($themeurl, false));
+
         // Access private area.
         $user3 = $this->getDataGenerator()->create_user();
         $privateurl = new \moodle_url("/pluginfile.php/{$user3->id}/user/private/privatefile.png");
