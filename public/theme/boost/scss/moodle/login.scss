@@ -76,12 +76,15 @@ $login-input-bg: $gray-100 !default;
 }
 
 .login-layout-title {
-    font-size: $h1-font-size;
+    font-size: $h2-font-size;
 }
 
 .login-layout-description,
 .login-layout-tagline {
     max-width: 34ch;
+}
+
+.login-layout-tagline {
     margin-inline: auto;
 }
 

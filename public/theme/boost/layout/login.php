@@ -26,10 +26,18 @@ defined('MOODLE_INTERNAL') || die();
 
 $bodyattributes = $OUTPUT->body_attributes();
 
+// Authentication instructions.
+$instructions = get_string('loginwelcomedescription');
+if (!empty($CFG->auth_instructions)) {
+    $instructions = $CFG->auth_instructions;
+}
+
 $templatecontext = [
     'sitename' => format_string($SITE->shortname, true, ['context' => context_course::instance(SITEID), "escape" => false]),
     'output' => $OUTPUT,
-    'bodyattributes' => $bodyattributes
+    'bodyattributes' => $bodyattributes,
+    'cansignup' => $CFG->registerauth == 'email' || !empty($CFG->registerauth),
+    'instructions' => $instructions,
 ];
 
 echo $OUTPUT->render_from_template('theme_boost/login', $templatecontext);

@@ -27,23 +27,25 @@
     {}
 }}
 <div class="login-layout-left-content">
-    <p class="login-layout-title mb-3">{{#str}}loginwelcometitle{{/str}}</p>
-    <p class="login-layout-description mb-4">
-        {{#str}}loginwelcomedescription{{/str}}
-    </p>
+    <div class="login-layout-title mb-3 text-start">{{#str}}loginwelcometitle{{/str}}</div>
+    <div class="login-layout-description mb-4 text-start">
+        {{#instructions}}
+            {{{instructions}}}
+        {{/instructions}}
+    </div>
     <p class="login-layout-tagline mb-4">{{#str}}loginpaneltagline{{/str}}</p>
     <div class="login-layout-stats" role="presentation">
         <div class="login-layout-stat">
-            <strong class="login-layout-stat-value">500+</strong>
-            <span class="login-layout-stat-label">{{#str}}loginstatcourses{{/str}}</span>
+            <strong class="login-layout-stat-value">500M</strong>
+            <span class="login-layout-stat-label">{{#str}}loginstatusers{{/str}}</span>
         </div>
         <div class="login-layout-stat">
-            <strong class="login-layout-stat-value">50k</strong>
-            <span class="login-layout-stat-label">{{#str}}loginstatstudents{{/str}}</span>
+            <strong class="login-layout-stat-value">150K</strong>
+            <span class="login-layout-stat-label">{{#str}}loginstatsites{{/str}}</span>
         </div>
         <div class="login-layout-stat">
-            <strong class="login-layout-stat-value">100+</strong>
-            <span class="login-layout-stat-label">{{#str}}loginstatinstructors{{/str}}</span>
+            <strong class="login-layout-stat-value">200+</strong>
+            <span class="login-layout-stat-label">{{#str}}loginstatcountries{{/str}}</span>
         </div>
     </div>
 </div>

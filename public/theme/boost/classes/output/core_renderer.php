@@ -16,6 +16,7 @@
 
 namespace theme_boost\output;
 
+use context_course;
 use moodle_url;
 use html_writer;
 use get_string;
@@ -251,5 +252,32 @@ class core_renderer extends \core_renderer {
             }
         }
         return $firstview;
+    }
+
+    public function render_login(\core_auth\output\login $form) {
+        global $CFG, $SITE;
+
+        $context = $form->export_for_template($this);
+
+        $context->errorformatted = $this->error_text($context->error);
+        $url = $this->get_logo_url();
+        if ($url) {
+            $url = $url->out(false);
+        }
+        $context->logourl = $url;
+        $context->sitename = format_string(
+            $SITE->fullname,
+            true,
+            ['context' => context_course::instance(SITEID), "escape" => false]
+        );
+
+        unset($context->instructions);
+        if (is_enabled_auth('none')) {
+            $context->instructions = get_string('loginstepsnone');
+        } else if ($CFG->registerauth == 'email') {
+            $context->instructions = get_string('logindonthaveaccount');
+        }
+
+        return $this->render_from_template('core/loginform', $context);
     }
 }

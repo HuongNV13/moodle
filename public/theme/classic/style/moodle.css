@@ -35587,12 +35587,15 @@ textarea[data-auto-rows] {
 }
 
 .login-layout-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
 }
 
 .login-layout-description,
 .login-layout-tagline {
   max-width: 34ch;
+}
+
+.login-layout-tagline {
   margin-inline: auto;
 }
 
