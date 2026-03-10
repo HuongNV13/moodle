@@ -1,84 +1,290 @@
-$loginbackground-gradient-from: $gray-100 !default;
-$loginbackground-gradient-to: $gray-300 !default;
-$logincontainer-bg: $white !default;
-$logincontainer-padding: 3rem !default;
-$logincontainer-shadow: $box-shadow !default;
-$logindivider-margin-top: 1.5rem !default;
-$logindivider-margin-bottom: 1.5rem !default;
-$logindivider-border: $border-color !default;
-$login-identity-provider-btn-border: $border-color !default;
+// =============================================================================
+// Login page design tokens
+//
+// Override these in a preset or child theme before this file is imported.
+// =============================================================================
 
-.pagelayout-login #region-main {
-    border: 0;
-    background-color: inherit;
-}
+$login-layout-left-bg: $primary !default;
+// Applied to both panels for consistent breathing room around inner content.
+$login-layout-panel-padding: 3rem !default;
+// Max-width cap for the form column. Prevents the form stretching too wide on
+// large viewports once the panel is wider than this value. Kicks in at xl+.
+$login-layout-content-width: 576px !default;
+// Max-width cap for the welcome/stats copy on the left panel. Keeps line
+// lengths readable (roughly 55–65 chars) regardless of panel size.
+$login-layout-copy-width: 420px !default;
+// Input field background — lighter than gray-200 to give fields a subtle lift.
+$login-input-bg: $gray-100 !default;
 
-.pagelayout-login #page {
-    background: $loginbackground-gradient-from;
-    @include gradient-x($loginbackground-gradient-from, $loginbackground-gradient-to, 0%, 100%);
-    div[role="main"] {
-        height: 100%;
+// =============================================================================
+// Page-level resets
+// =============================================================================
+
+.pagelayout-login {
+    #region-main,
+    #region-main-box {
+        border: 0;
+        background-color: transparent;
+    }
+
+    #page {
+        margin: 0;
+        min-height: 100vh;
+        background-color: $white;
     }
 }
 
-.login-wrapper {
+// =============================================================================
+// Split layout wrapper
+//
+// Bootstrap row g-0 in the template handles the flex display and 50/50 split
+// via col-lg-6 on each panel. We only need to ensure the wrapper is at least
+// viewport-tall so the background colours fill the screen on short-content
+// pages.
+// =============================================================================
+
+.login-layout {
+    min-height: 100vh;
+}
+
+// =============================================================================
+// Left panel — welcome copy + stats
+//
+// position: sticky + align-self: flex-start keeps the panel pinned to the
+// viewport top while the right panel (and page) scroll freely when the form
+// is taller than the viewport. align-self: flex-start is required because
+// Bootstrap col defaults to align-self: stretch, which disables sticky.
+// =============================================================================
+
+.login-layout-left {
+    // Column widths are handled by col-lg-6 in the template.
+    background-color: $login-layout-left-bg;
+    color: color-contrast($login-layout-left-bg); // ensures readable text regardless of background colour.
+    position: sticky;
+    top: 0;
+    align-self: flex-start; // required for position: sticky inside a flex row
+    height: 100vh;           // always viewport-height — stays pinned while page scrolls
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    padding: $login-layout-panel-padding;
 }
 
+.login-layout-left-content {
+    max-width: $login-layout-copy-width;
+    text-align: center;
+}
+
+.login-layout-title {
+    font-size: $h1-font-size;
+}
+
+.login-layout-description,
+.login-layout-tagline {
+    max-width: 34ch;
+    margin-inline: auto;
+}
+
+.login-layout-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    justify-items: center;
+}
+
+.login-layout-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.login-layout-stat-value {
+    font-size: $h5-font-size;
+    line-height: 1;
+}
+
+// =============================================================================
+// Right panel — login form
+//
+// min-height: 100vh ensures the panel fills the screen even on short forms.
+// No height cap or overflow-y here — the panel grows naturally with its
+// content, so long forms (many OAuth providers, language picker, etc.) are
+// never clipped. The page scrollbar handles overflow; the left panel stays
+// pinned via sticky.
+// =============================================================================
+
+.login-layout-right {
+    // Column widths are handled by col-12 col-lg-6 in the template.
+    min-height: 100vh;
+    padding: $login-layout-panel-padding;
+    display: flex;
+    justify-content: center;
+}
+
+.login-layout-right-content {
+    width: 100%;
+    max-width: $login-layout-content-width;
+    margin: auto 0;
+}
+
+// =============================================================================
+// Login form container and components
+// =============================================================================
+
 .login-container {
-    background-color: $logincontainer-bg;
-    padding: $logincontainer-padding;
-    box-shadow: $logincontainer-shadow;
-    margin-bottom: 2rem;
-    @include border-radius();
+    .login-logo {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .login-title {
+        font-size: $h2-font-size;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-subtitle {
+        color: $gray-700;
+    }
+
+    .login-form {
+        .form-control {
+            background-color: $login-input-bg;
+            box-shadow: none;
+
+            &:hover {
+                background-color: $login-input-bg;
+            }
+
+            &:focus {
+                background-color: $login-input-bg;
+                border-color: $input-focus-border-color;
+                box-shadow: $input-focus-box-shadow;
+            }
+        }
+
+        .login-form-forgotpassword {
+            text-align: end; // end = right in LTR, left in RTL — no float needed
+        }
+
+        // The toggle button sits in a Bootstrap input-group alongside the
+        // password field. Bootstrap collapses the shared border via -1px margin,
+        // but the seam remains because btn-secondary uses $gray-400 while the
+        // input border is $gray-500. We override the Bootstrap CSS custom
+        // properties (--bs-btn-border-color etc.) so that every state — normal,
+        // hover, active — all inherit the input border colour. Removing the
+        // shared inline-start border then merges the two into one continuous loop.
+        .toggle-sensitive-wrapper .toggle-sensitive-btn {
+            // Override Bootstrap's CSS custom properties so all states use the
+            // input border colour, not the btn-secondary default ($gray-400).
+            --bs-btn-bg: #{$login-input-bg};
+            --bs-btn-border-color: #{$input-border-color};
+            --bs-btn-hover-bg: #{$login-input-bg};
+            --bs-btn-hover-border-color: #{$input-border-color};
+            --bs-btn-active-bg: #{$login-input-bg};
+            --bs-btn-active-border-color: #{$input-border-color};
+            border-inline-start: none; // remove shared edge to kill the seam
+            color: $gray-700;
+
+            &:focus,
+            &:focus-visible {
+                background-color: $login-input-bg;
+                border-color: $input-focus-border-color;
+                box-shadow: $input-focus-box-shadow;
+            }
+        }
+    }
+
+    .login-signup,
+    .login-instructions {
+        font-size: $font-size-sm;
+    }
+
+    .login-signup {
+        text-align: center;
+    }
+
+    .login-separator {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: $gray-600;
+        font-size: $font-size-sm;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+
+        &::before,
+        &::after {
+            content: "";
+            flex: 1;
+            border-top: $border-width solid $border-color;
+        }
+    }
+
+    // OAuth provider links and guest button get full width via .login-identityprovider-btn.
+    // #loginbtn uses w-100 in the template (it doesn't carry that class).
+    .login-identityprovider-btn {
+        width: 100%;
+    }
+
+    // OAuth provider buttons and guest login share this class.
+    // - background-color: $white is explicit so buttons remain readable when
+    //   the admin sets a dark page background color (customizable via admin).
+    // - color and border use gray-600 per UX spec; hover darkens border slightly.
+    .login-identityprovider-btn {
+        background-color: $white;
+        border-color: $gray-400;
+        color: $gray-600;
+
+        &:hover,
+        &:focus {
+            background-color: $gray-100;
+            border-color: $gray-500;
+            color: $gray-600;
+        }
+    }
+
+    .login-cookiesnotice {
+        text-align: center;
+
+        .btn-link {
+            // Target the button directly — font-size on the parent div is
+            // overridden by Bootstrap's --bs-btn-font-size custom property.
+            font-size: $font-size-sm;
+            color: $gray-600;
+
+            &:hover,
+            &:focus {
+                color: $gray-700;
+            }
+        }
+    }
+
     .login-languagemenu {
         display: flex;
-        justify-content: flex-start;
+        justify-content: center;
+
         .dropdown-menu {
             max-height: 300px;
             overflow-y: auto;
         }
     }
-    .login-logo {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 1rem;
-    }
-    .login-divider {
-        margin-top: $logindivider-margin-top;
-        margin-bottom: $logindivider-margin-bottom;
-        border-top: $border-width solid $logindivider-border;
-    }
-
-    h1.login-heading {
-        font-size: $h2-font-size;
-    }
-
-    h2.login-heading {
-        font-size: $h4-font-size;
-    }
-    .login-identityproviders {
-        .login-identityprovider-btn {
-            border: $border-width solid $login-identity-provider-btn-border;
-        }
-    }
-    .divider {
-        width: $border-width;
-        background-color: $gray-300;
-        height: $font-size-base * 2;
-    }
-    .action-menu-trigger {
-        a {
-            margin: 0.5rem 0;
-        }
-    }
 }
 
-@include media-breakpoint-up(md) {
-    .login-container {
-        width: 500px !important; /* stylelint-disable-line declaration-no-important */
+// =============================================================================
+// Responsive overrides — below lg (< 992px)
+//
+// Left panel is hidden via d-none d-lg-flex on the element in the template.
+// Right panel becomes full-width via col-12 on the element in the template.
+// We only need to adjust padding and lift the content max-width cap here.
+// =============================================================================
+
+@include media-breakpoint-down(lg) {
+    .login-layout-right {
+        padding: 1.5rem 1rem;
+    }
+
+    .login-layout-right-content {
+        max-width: 100%;
     }
 }
