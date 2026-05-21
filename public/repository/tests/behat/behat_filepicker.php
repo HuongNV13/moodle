@@ -222,8 +222,13 @@ class behat_filepicker extends behat_base {
      * @param string $filemanagerelement
      */
     public function i_add_and_overwrite_file_from_repository_to_filemanager($filepath, $repository, $filemanagerelement) {
-        $this->add_file_from_repository_to_filemanager($filepath, $repository, $filemanagerelement, new TableNode(array()),
-                get_string('overwrite', 'repository'));
+        $this->add_file_from_repository_to_filemanager(
+            $filepath,
+            $repository,
+            $filemanagerelement,
+            new TableNode([]),
+            get_string('overridewithnewname', 'repository'),
+        );
     }
 
     /**
@@ -252,8 +257,13 @@ class behat_filepicker extends behat_base {
      */
     public function i_add_and_overwrite_file_from_repository_to_filemanager_as($filepath, $repository, $filemanagerelement,
             TableNode $data) {
-        $this->add_file_from_repository_to_filemanager($filepath, $repository, $filemanagerelement, $data,
-                get_string('overwrite', 'repository'));
+        $this->add_file_from_repository_to_filemanager(
+            $filepath,
+            $repository,
+            $filemanagerelement,
+            $data,
+            get_string('overridewithnewname', 'repository'),
+        );
     }
 
     /**

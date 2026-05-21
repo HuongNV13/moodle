@@ -750,39 +750,21 @@ M.core_filepicker.init = function(Y, options) {
         process_existing_file: function(data) {
             var scope = this;
             var handleOverwrite = function(e) {
-                // overwrite
+                // Override with new name: keep the server's unique new filename instead of overwriting
+                // the existing file, so the new URL forces browsers to fetch the latest content.
                 e.preventDefault();
+                var scope = this;
                 var data = this.process_dlg.dialogdata;
-                var params = {}
-                params['existingfilename'] = data.existingfile.filename;
-                params['existingfilepath'] = data.existingfile.filepath;
-                params['newfilename'] = data.newfile.filename;
-                params['newfilepath'] = data.newfile.filepath;
-                this.hide_header();
-                this.request({
-                    'params': params,
-                    'scope': this,
-                    'action':'overwrite',
-                    'path': '',
-                    'client_id': this.options.client_id,
-                    'repository_id': this.active_repo.id,
-                    'callback': function(id, o, args) {
-                        scope.hide();
-                        // Add an arbitrary parameter to the URL to force browsers to re-load the new image even
-                        // if the file name has not changed.
-                        var urlimage = data.existingfile.url + "?time=" + (new Date()).getTime();
-                        if (scope.options.editor_target && scope.options.env == 'editor') {
-                            // editor needs to update url
-                            scope.options.editor_target.value = urlimage;
-                            scope.options.editor_target.dispatchEvent(new Event('change'), {'bubbles': true});
-                        }
-                        var fileinfo = {'client_id':scope.options.client_id,
-                            'url': urlimage,
-                            'file': data.existingfile.filename};
-                        var formcallback_scope = scope.options.magicscope ? scope.options.magicscope : scope;
-                        scope.options.formcallback.apply(formcallback_scope, [fileinfo]);
-                    }
-                }, true);
+                if (scope.options.editor_target && scope.options.env == 'editor') {
+                    scope.options.editor_target.value = data.newfile.url;
+                    scope.options.editor_target.dispatchEvent(new Event('change'), {'bubbles': true});
+                }
+                scope.hide();
+                var formcallback_scope = scope.options.magicscope ? scope.options.magicscope : scope;
+                var fileinfo = {'client_id': scope.options.client_id,
+                                'url': data.newfile.url,
+                                'file': data.newfile.filename};
+                scope.options.formcallback.apply(formcallback_scope, [fileinfo]);
             }
             var handleRename = function(e) {
                 // inserts file with the new name
@@ -839,7 +821,7 @@ M.core_filepicker.init = function(Y, options) {
                 if (this.options.env == 'editor') {
                     node.one('.fp-dlg-text').setContent(M.util.get_string('fileexistsdialog_editor', 'repository'));
                 } else {
-                    node.one('.fp-dlg-text').setContent(M.util.get_string('fileexistsdialog_filemanager', 'repository'));
+                    node.one('.fp-dlg-text').setContent(M.util.get_string('fileexistsdialog_filemanager_cache', 'repository'));
                 }
             }
             this.selectnode.removeClass('loading');

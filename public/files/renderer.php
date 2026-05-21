@@ -499,6 +499,16 @@ class core_files_renderer extends plugin_renderer_base {
     }
 
     /**
+     * FilePicker JS template for info popup dialogue shown when a previously-used filename
+     * is re-uploaded (e.g. after deletion), informing the user it will be renamed.
+     *
+     * @return string
+     */
+    protected function fp_js_template_infofile() {
+        return $this->render_from_template('core/filemanager_infofile', []);
+    }
+
+    /**
      * FilePicker JS template for repository login form including templates for each element type
      *
      * @return string
