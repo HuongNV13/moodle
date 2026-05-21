@@ -889,6 +889,7 @@ $string['failedtasksubject'] = 'Task failed: {$a}';
 $string['feedback'] = 'Feedback';
 $string['file'] = 'File';
 $string['fileexists'] = 'There is already a file called {$a}';
+$string['fileexistssamename'] = 'The file you have selected has the same name as an existing file ({$a}). To prevent browser caching issues, it will be uploaded with a new timestamp-based name.';
 $string['filemissing'] = '{$a} is missing';
 $string['filereaderror'] = 'Unable to read the file \'{$a}\'. Please check that it really is a file and not a folder.';
 $string['files'] = 'Files';
