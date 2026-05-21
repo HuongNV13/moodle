@@ -66,8 +66,12 @@ class behat_repository_upload extends behat_base {
      * @param string $filemanagerelement
      */
     public function i_upload_and_overwrite_file_to_filemanager($filepath, $filemanagerelement) {
-        $this->upload_file_to_filemanager($filepath, $filemanagerelement, new TableNode(array()),
-                get_string('overwrite', 'repository'));
+        $this->upload_file_to_filemanager(
+            $filepath,
+            $filemanagerelement,
+            new TableNode([]),
+            get_string('overridewithnewname', 'repository'),
+        );
     }
 
     /**
@@ -95,8 +99,12 @@ class behat_repository_upload extends behat_base {
      * @param TableNode $data Data to fill in upload form
      */
     public function i_upload_and_overwrite_file_to_filemanager_as($filepath, $filemanagerelement, TableNode $data) {
-        $this->upload_file_to_filemanager($filepath, $filemanagerelement, $data,
-                get_string('overwrite', 'repository'));
+        $this->upload_file_to_filemanager(
+            $filepath,
+            $filemanagerelement,
+            $data,
+            get_string('overridewithnewname', 'repository'),
+        );
     }
 
     /**

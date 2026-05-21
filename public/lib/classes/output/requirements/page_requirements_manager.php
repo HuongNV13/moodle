@@ -874,7 +874,8 @@ class page_requirements_manager {
                         'requires' => ['node', 'event', 'json', 'core_filepicker'],
                         'strings'  => [
                             ['uploadformlimit', 'moodle'], ['droptoupload', 'moodle'], ['maxfilesreached', 'moodle'],
-                            ['dndenabled_inbox', 'moodle'], ['fileexists', 'moodle'], ['maxbytesfile', 'error'],
+                            ['dndenabled_inbox', 'moodle'], ['fileexists', 'moodle'], ['fileexistssamename', 'moodle'],
+                            ['maxbytesfile', 'error'],
                             ['sizegb', 'moodle'], ['sizemb', 'moodle'], ['sizekb', 'moodle'], ['sizeb', 'moodle'],
                             ['maxareabytesreached', 'moodle'], ['serverconnection', 'error'],
                             ['changesmadereallygoaway', 'moodle'], ['complete', 'moodle'],

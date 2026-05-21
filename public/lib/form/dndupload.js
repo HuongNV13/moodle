@@ -60,6 +60,9 @@ M.form_dndupload.init = function(Y, options) {
         totalOfRequest: 0,
         // Number of request upload.
         numberOfRequestUpload: 0,
+        // Set of all filenames ever seen in the filemanager during this page session.
+        // Persists across deletes so re-uploads of deleted files are detected.
+        seenfilenames: new Set(),
 
         /**
          * Initalise the drag and drop upload interface
@@ -111,6 +114,13 @@ M.form_dndupload.init = function(Y, options) {
                 // Needed to tell the filemanager to redraw when files uploaded
                 // and to check how many files are already uploaded
                 this.filemanager = options.filemanager;
+                // Seed seenfilenames with the initial file list so any future re-upload
+                // of a deleted file is detected for timestamp renaming.
+                if (options.filemanager.options && options.filemanager.options.list) {
+                    options.filemanager.options.list.forEach(function(f) {
+                        dnduploadhelper.seenfilenames.add(f.filename);
+                    });
+                }
             } else if (options.formcallback) {
 
                 // Needed to tell the filepicker to update when a new
@@ -372,6 +382,12 @@ M.form_dndupload.init = function(Y, options) {
                     };
                 }
             }
+            // Sync seenfilenames so newly uploaded files are also tracked for future drops.
+            if (this.filemanager && this.filemanager.options && this.filemanager.options.list) {
+                this.filemanager.options.list.forEach(function(f) {
+                    dnduploadhelper.seenfilenames.add(f.filename);
+                });
+            }
             let uploader = new dnduploader(options);
             for (let i = 0; i < items.length; i++) {
                 let entry = items[i].webkitGetAsEntry();
@@ -603,10 +619,14 @@ M.form_dndupload.init = function(Y, options) {
         uploadqueue: [],
         // This list of files with name clashes.
         renamequeue: [],
+        // Files whose names were previously seen this session (e.g. uploaded then deleted).
+        prevseenqueue: [],
         // Size of the current queue.
         queuesize: 0,
         // Set to true if the user has clicked on 'overwrite all'.
         overwriteall: false,
+        // Set to true if the user has clicked on 'override all with new names'.
+        overrideall: false,
         // Set to true if the user has clicked on 'rename all'.
         renameall: false,
         // The file manager helper.
@@ -732,6 +752,8 @@ M.form_dndupload.init = function(Y, options) {
 
                 if (this.has_name_clash(files[i].name)) {
                     this.renamequeue.push(files[i]);
+                } else if (dnduploadhelper.seenfilenames.has(files[i].name)) {
+                    this.prevseenqueue.push(files[i]);
                 } else {
                     if (!this.add_to_upload_queue(files[i], files[i].name, false)) {
                         return false;
@@ -774,7 +796,7 @@ M.form_dndupload.init = function(Y, options) {
          * @param bool overwrite - true to overwrite the existing file
          * @return bool true if added successfully
          */
-        add_to_upload_queue: function(file, filename, overwrite) {
+        add_to_upload_queue: function(file, filename, overwrite, timestampname) {
             if (!overwrite) {
                 this.newFileCount++;
             }
@@ -798,7 +820,7 @@ M.form_dndupload.init = function(Y, options) {
                     return false;
                 }
             }
-            this.uploadqueue.push({file:file, filename:filename, overwrite:overwrite});
+            this.uploadqueue.push({file: file, filename: filename, overwrite: overwrite, timestampname: timestampname || ''});
             return true;
         },
 
@@ -818,17 +840,59 @@ M.form_dndupload.init = function(Y, options) {
         },
 
         /**
+         * Take the next file from the prevseenqueue and show an info dialog explaining it
+         * will be renamed with a timestamp to prevent browser caching. Called recursively
+         * until the queue is empty, then calls do_upload.
+         * @return void
+         */
+        process_prevseenqueue: function() {
+            if (this.prevseenqueue.length == 0) {
+                // All previously-seen files handled - start the actual upload.
+                if (this.callbackNumberOfRequestUpload && this.uploadqueue.length > 0) {
+                    this.callbackNumberOfRequestUpload.increaseTotal(this.newFileCount);
+                }
+                this.do_upload();
+                return;
+            }
+            var file = this.prevseenqueue.shift();
+            var self = this;
+            var tsname = this.generate_timestamp_name(file.name);
+
+            var info_dlg_node = Y.Node.create(M.core_filepicker.templates.infofile);
+            var node = info_dlg_node;
+            node.generateID();
+            var info_dlg = new M.core.dialogue({
+                bodyContent: node,
+                headerContent: M.util.get_string('fileexistsdialogheader', 'repository'),
+                centered: true,
+                modal: true,
+                visible: false
+            });
+            node.one('.fp-dlg-text').setContent(M.util.get_string('fileexistssamename', 'moodle', file.name));
+            node.one('.fp-dlg-butok').on('click', function(e) {
+                e.preventDefault();
+                info_dlg.hide();
+                if (self.add_to_upload_queue(file, file.name, true, tsname)) {
+                    self.process_prevseenqueue();
+                }
+            }, this);
+            info_dlg.after('visibleChange', function() {
+                if (!info_dlg.get('visible')) {
+                    info_dlg.destroy(true);
+                }
+            }, this);
+            info_dlg.show();
+        },
+
+        /**
          * Take the next file from the renamequeue and ask the user what to do with
          * it. Called recursively until the queue is empty, then calls do_upload.
          * @return void
          */
         process_renames: function() {
             if (this.renamequeue.length == 0) {
-                // All rename processing complete - start the actual upload.
-                if(this.callbackNumberOfRequestUpload && this.uploadqueue.length > 0) {
-                    this.callbackNumberOfRequestUpload.increaseTotal(this.newFileCount);
-                }
-                this.do_upload();
+                // All rename processing complete - handle previously-seen filenames next.
+                this.process_prevseenqueue();
                 return;
             }
             var multiplefiles = (this.renamequeue.length > 1);
@@ -840,6 +904,15 @@ M.form_dndupload.init = function(Y, options) {
 
             // If the user has clicked on overwrite/rename ALL then process
             // this file, as appropriate, then process the rest of the queue.
+            if (this.overrideall) {
+                var tsname = this.generate_timestamp_name(file.name);
+                // Upload with the original name + overwrite=true so the server replaces the old file.
+                // After upload, draftfiles_ajax will rename it to the timestamp name to bust the cache.
+                if (this.add_to_upload_queue(file, file.name, true, tsname)) {
+                    this.process_renames();
+                }
+                return;
+            }
             if (this.overwriteall) {
                 if (this.add_to_upload_queue(file, file.name, true)) {
                     this.process_renames();
@@ -873,11 +946,13 @@ M.form_dndupload.init = function(Y, options) {
             });
             process_dlg.plug(Y.Plugin.Drag,{handles:['#'+node.get('id')+' .yui3-widget-hd']});
 
-            // Overwrite original.
+            // Override: upload with the original name + overwrite=true so the server replaces the old
+            // file, then rename to a timestamp name after upload to bust the browser cache.
             node.one('.fp-dlg-butoverwrite').on('click', function(e) {
                 e.preventDefault();
                 process_dlg.hide();
-                if (self.add_to_upload_queue(file, file.name, true)) {
+                var tsname = self.generate_timestamp_name(file.name);
+                if (self.add_to_upload_queue(file, file.name, true, tsname)) {
                     self.process_renames();
                 }
             }, this);
@@ -912,12 +987,13 @@ M.form_dndupload.init = function(Y, options) {
 
             // If there are more files still to go, offer the 'overwrite/rename all' options.
             if (multiplefiles) {
-                // Overwrite all original files.
+                // Override all: upload with original name + overwrite=true, then rename to timestamp name.
                 node.one('.fp-dlg-butoverwriteall').on('click', function(e) {
                     e.preventDefault();
                     process_dlg.hide();
-                    this.overwriteall = true;
-                    if (self.add_to_upload_queue(file, file.name, true)) {
+                    this.overrideall = true;
+                    var tsname = self.generate_timestamp_name(file.name);
+                    if (self.add_to_upload_queue(file, file.name, true, tsname)) {
                         self.process_renames();
                     }
                 }, this);
@@ -932,7 +1008,7 @@ M.form_dndupload.init = function(Y, options) {
                     }
                 }, this);
             }
-            node.one('.fp-dlg-text').setContent(M.util.get_string('fileexists', 'moodle', file.name));
+            node.one('.fp-dlg-text').setContent(M.util.get_string('fileexistssamename', 'moodle', file.name));
             process_dlg_node.one('.fp-dlg-butrename').setContent(M.util.get_string('renameto', 'repository', newname));
 
             // Destroy the dialog once it has been hidden.
@@ -1006,6 +1082,24 @@ M.form_dndupload.init = function(Y, options) {
         },
 
         /**
+         * Generates a timestamp-based file name to avoid browser caching when replacing a file.
+         * E.g. 'photo.jpg' becomes 'photo_1716278400000.jpg'.
+         *
+         * @param {string} filename - the original file name
+         * @return {string} the timestamp-suffixed file name
+         */
+        generate_timestamp_name: function(filename) {
+            var extension = '';
+            var basename = filename;
+            var dotpos = filename.lastIndexOf('.');
+            if (dotpos !== -1) {
+                basename = filename.substr(0, dotpos);
+                extension = filename.substr(dotpos);
+            }
+            return basename + '_' + Date.now() + extension;
+        },
+
+        /**
          * Upload the next file from the uploadqueue - called recursively after each
          * upload is complete, then handles the callback to the filemanager/filepicker
          * @param lastresult - the last result from the server
@@ -1013,7 +1107,7 @@ M.form_dndupload.init = function(Y, options) {
         do_upload: function(lastresult) {
             if (this.uploadqueue.length > 0) {
                 var filedetails = this.uploadqueue.shift();
-                this.upload_file(filedetails.file, filedetails.filename, filedetails.overwrite);
+                this.upload_file(filedetails.file, filedetails.filename, filedetails.overwrite, filedetails.timestampname);
             } else {
                 if (this.callbackNumberOfRequestUpload && !this.callbackNumberOfRequestUpload.get()) {
                     this.uploadfinished(lastresult);
@@ -1036,7 +1130,7 @@ M.form_dndupload.init = function(Y, options) {
          * @param string filename - the name to give the file
          * @param bool overwrite - true if the existing file should be overwritten
          */
-        upload_file: function(file, filename, overwrite) {
+        upload_file: function(file, filename, overwrite, timestampname) {
 
             // This would be an ideal place to use the Y.io function
             // however, this does not support data encoded using the
@@ -1092,7 +1186,30 @@ M.form_dndupload.init = function(Y, options) {
                         if (self.callbackNumberOfRequestUpload) {
                             self.callbackNumberOfRequestUpload.decrease();
                         }
-                        self.do_upload(result); // continue uploading
+                        if (timestampname) {
+                            // Rename the uploaded file to a timestamp-based name so browsers fetch
+                            // the new content instead of serving the cached version.
+                            var savepath = (self.options.filemanager && self.options.filemanager.currentpath)
+                                ? self.options.filemanager.currentpath : '/';
+                            var renamedata = new FormData();
+                            renamedata.append('sesskey', M.cfg.sesskey);
+                            renamedata.append('itemid', self.options.itemid);
+                            renamedata.append('action', 'updatefile');
+                            renamedata.append('filename', filename);
+                            renamedata.append('filepath', savepath);
+                            renamedata.append('newfilename', timestampname);
+                            renamedata.append('newfilepath', savepath);
+                            var renamexhr = new XMLHttpRequest();
+                            renamexhr.open('POST', M.cfg.wwwroot + '/repository/draftfiles_ajax.php', true);
+                            renamexhr.onreadystatechange = function() {
+                                if (renamexhr.readyState == 4) {
+                                    self.do_upload(result);
+                                }
+                            };
+                            renamexhr.send(renamedata);
+                        } else {
+                            self.do_upload(result); // continue uploading
+                        }
                     } else {
                         self.print_msg(M.util.get_string('serverconnection', 'error'), 'error');
                         self.uploadfinished();
