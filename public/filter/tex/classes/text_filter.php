@@ -203,10 +203,7 @@ class text_filter extends \core_filters\text_filter {
                 '/',
                 $imagefile
             );
-            if ($storedfile) {
-                $rendercache->set($cachekey, 1);
-                $imagefound = true;
-            }
+            $imagefound = (bool) $storedfile;
         }
         if (!$imagefound && has_capability('moodle/site:config', context_system::instance())) {
             $link = '/filter/tex/texdebug.php';

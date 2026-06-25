@@ -60,12 +60,12 @@ function xmldb_filter_tex_upgrade($oldversion) {
     // Automatically generated Moodle v5.2.0 release upgrade line.
     // Put any upgrade step following this.
 
-    if ($oldversion < 2026042400) {
+    if ($oldversion < 2026062500) {
         global $CFG;
 
         // Migrate existing rendered images from the legacy dataroot location to the Moodle file system,
         // then remove the old directory. Images not migrated (corrupt/unreadable) will be re-rendered.
-        $olddir = "{$CFG->dataroot}/filter/tex";
+        $olddir = str_replace('\\', '/', "{$CFG->dataroot}/filter/tex");
         if (file_exists($olddir) && is_dir($olddir)) {
             $syscontext = \core\context\system::instance();
             $fs = get_file_storage();
@@ -97,7 +97,7 @@ function xmldb_filter_tex_upgrade($oldversion) {
             remove_dir($olddir);
         }
 
-        upgrade_plugin_savepoint(true, 2026042400, 'filter', 'tex');
+        upgrade_plugin_savepoint(true, 2026062500, 'filter', 'tex');
     }
 
     return true;

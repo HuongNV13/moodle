@@ -45,12 +45,12 @@ function xmldb_filter_algebra_upgrade($oldversion) {
     // Automatically generated Moodle v5.2.0 release upgrade line.
     // Put any upgrade step following this.
 
-    if ($oldversion < 2026042400) {
+    if ($oldversion < 2026062500) {
         global $CFG;
 
         // Migrate existing rendered images from the legacy dataroot location to the Moodle file system,
         // then remove the old directory. Images not migrated (corrupt/unreadable) will be re-rendered.
-        $olddir = "{$CFG->dataroot}/filter/algebra";
+        $olddir = str_replace('\\', '/', "{$CFG->dataroot}/filter/algebra");
         if (file_exists($olddir) && is_dir($olddir)) {
             $syscontext = \core\context\system::instance();
             $fs = get_file_storage();
@@ -82,7 +82,7 @@ function xmldb_filter_algebra_upgrade($oldversion) {
             remove_dir($olddir);
         }
 
-        upgrade_plugin_savepoint(true, 2026042400, 'filter', 'algebra');
+        upgrade_plugin_savepoint(true, 2026062500, 'filter', 'algebra');
     }
 
     return true;

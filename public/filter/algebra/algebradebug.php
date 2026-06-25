@@ -212,22 +212,23 @@ function tex2image($texexp, $md5, $return=false) {
     $background = get_config('filter_algebra', 'latexbackground');
     $lateximage = $latex->render($texexp, $image, 12, $density, $background);
 
-    if ($return) {
-        if ($lateximage) {
-            $syscontext = context_system::instance();
-            $fs = get_file_storage();
-            if (!$fs->file_exists($syscontext->id, 'filter_algebra', 'rendered_images', 0, '/', $image)) {
-                $filerecord = [
-                    'contextid' => $syscontext->id,
-                    'component' => 'filter_algebra',
-                    'filearea' => 'rendered_images',
-                    'itemid' => 0,
-                    'filepath' => '/',
-                    'filename' => $image,
-                ];
-                $fs->create_file_from_pathname($filerecord, $lateximage);
-            }
+    if ($lateximage) {
+        $syscontext = context_system::instance();
+        $fs = get_file_storage();
+        if (!$fs->file_exists($syscontext->id, 'filter_algebra', 'rendered_images', 0, '/', $image)) {
+            $filerecord = [
+                'contextid' => $syscontext->id,
+                'component' => 'filter_algebra',
+                'filearea' => 'rendered_images',
+                'itemid' => 0,
+                'filepath' => '/',
+                'filename' => $image,
+            ];
+            $fs->create_file_from_pathname($filerecord, $lateximage);
         }
+    }
+
+    if ($return) {
         return $image;
     }
     if ($lateximage) {
