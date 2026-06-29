@@ -33,6 +33,7 @@ final class linearnavigationsettings_test extends \advanced_testcase {
      * @param bool $hasstickyfooter Whether the page already has a sticky footer.
      * @param bool $shownavigationfooter Whether the navigation footer should be shown.
      * @param bool $hascm Whether the page is on an activity page.
+     * @param bool $hassupplementarycontent Whether the page has supplementary content.
      * @param bool $expected The expected result.
      */
     #[\PHPUnit\Framework\Attributes\DataProvider('show_navigation_footer_provider')]
@@ -42,6 +43,7 @@ final class linearnavigationsettings_test extends \advanced_testcase {
         bool $hasstickyfooter,
         bool $shownavigationfooter,
         bool $hascm,
+        bool $hassupplementarycontent,
         bool $expected,
     ): void {
         $this->resetAfterTest();
@@ -60,6 +62,9 @@ final class linearnavigationsettings_test extends \advanced_testcase {
         }
         $moodlepage->set_has_sticky_footer($hasstickyfooter);
         $moodlepage->set_show_navigation_footer($shownavigationfooter);
+        if ($hassupplementarycontent) {
+            $moodlepage->set_supplementary_content(new \action_link(new \moodle_url('/'), 'Test'));
+        }
 
         $this->assertSame($expected, linearnavigationsettings::show_navigation_footer($moodlepage));
     }
@@ -77,6 +82,7 @@ final class linearnavigationsettings_test extends \advanced_testcase {
                 'hasstickyfooter' => false,
                 'shownavigationfooter' => true,
                 'hascm' => true,
+                'hassupplementarycontent' => false,
                 'expected' => true,
             ],
             'Supported format with linear navigation disabled' => [
@@ -85,7 +91,17 @@ final class linearnavigationsettings_test extends \advanced_testcase {
                 'hasstickyfooter' => false,
                 'shownavigationfooter' => true,
                 'hascm' => true,
+                'hassupplementarycontent' => false,
                 'expected' => false,
+            ],
+            'Supported format with linear navigation disabled but supplementary content present' => [
+                'format' => 'topics',
+                'enablelinearnav' => 0,
+                'hasstickyfooter' => false,
+                'shownavigationfooter' => true,
+                'hascm' => true,
+                'hassupplementarycontent' => true,
+                'expected' => true,
             ],
             'Unsupported format' => [
                 'format' => 'singleactivity',
@@ -93,7 +109,17 @@ final class linearnavigationsettings_test extends \advanced_testcase {
                 'hasstickyfooter' => false,
                 'shownavigationfooter' => true,
                 'hascm' => true,
+                'hassupplementarycontent' => false,
                 'expected' => false,
+            ],
+            'Unsupported format with supplementary content present' => [
+                'format' => 'singleactivity',
+                'enablelinearnav' => 1,
+                'hasstickyfooter' => false,
+                'shownavigationfooter' => true,
+                'hascm' => true,
+                'hassupplementarycontent' => true,
+                'expected' => true,
             ],
             'Not on an activity page' => [
                 'format' => 'topics',
@@ -101,6 +127,7 @@ final class linearnavigationsettings_test extends \advanced_testcase {
                 'hasstickyfooter' => false,
                 'shownavigationfooter' => true,
                 'hascm' => false,
+                'hassupplementarycontent' => false,
                 'expected' => false,
             ],
             'Page already has a sticky footer' => [
@@ -109,6 +136,7 @@ final class linearnavigationsettings_test extends \advanced_testcase {
                 'hasstickyfooter' => true,
                 'shownavigationfooter' => true,
                 'hascm' => true,
+                'hassupplementarycontent' => false,
                 'expected' => false,
             ],
             'Navigation footer is suppressed' => [
@@ -117,6 +145,61 @@ final class linearnavigationsettings_test extends \advanced_testcase {
                 'hasstickyfooter' => false,
                 'shownavigationfooter' => false,
                 'hascm' => true,
+                'hassupplementarycontent' => false,
+                'expected' => false,
+            ],
+        ];
+    }
+
+    /**
+     * Test is_linear_navigation_enabled.
+     *
+     * @param string $format The course format to use.
+     * @param int $enablelinearnav The value of the enablelinearnav setting.
+     * @param bool $expected The expected result.
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('is_linear_navigation_enabled_provider')]
+    public function test_is_linear_navigation_enabled(
+        string $format,
+        int $enablelinearnav,
+        bool $expected,
+    ): void {
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course([
+            'format' => $format,
+            'enablelinearnav' => $enablelinearnav,
+        ]);
+        $page = $this->getDataGenerator()->create_module('page', ['course' => $course->id]);
+
+        $moodlepage = new \moodle_page();
+        $moodlepage->set_course($course);
+        $cm = get_coursemodule_from_id('page', $page->cmid);
+        $moodlepage->set_cm($cm, $course);
+
+        $this->assertSame($expected, linearnavigationsettings::is_linear_navigation_enabled($moodlepage));
+    }
+
+    /**
+     * Data provider for {@see test_is_linear_navigation_enabled}.
+     *
+     * @return array
+     */
+    public static function is_linear_navigation_enabled_provider(): array {
+        return [
+            'Supported format with linear navigation enabled' => [
+                'format' => 'topics',
+                'enablelinearnav' => 1,
+                'expected' => true,
+            ],
+            'Supported format with linear navigation disabled' => [
+                'format' => 'topics',
+                'enablelinearnav' => 0,
+                'expected' => false,
+            ],
+            'Unsupported format' => [
+                'format' => 'singleactivity',
+                'enablelinearnav' => 1,
                 'expected' => false,
             ],
         ];

@@ -121,6 +121,21 @@ class linearnavigationsettings {
     }
 
     /**
+     * Check if linear navigation is enabled for the course format on this page.
+     *
+     * @param \moodle_page $page
+     * @return bool if the linear navigation is enabled
+     */
+    public static function is_linear_navigation_enabled(\moodle_page $page): bool {
+        $format = \course_get_format($page->course);
+        if (!$format->uses_linear_navigation()) {
+            return false;
+        }
+        $formatoptions = $format->get_format_options();
+        return (bool) ($formatoptions[self::SETTING_ENABLE_LINEAR_NAV] ?? false);
+    }
+
+    /**
      * Check if the navigation footer should be shown on the page.
      *
      * @param \moodle_page $page

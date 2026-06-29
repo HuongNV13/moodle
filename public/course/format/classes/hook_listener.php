@@ -131,9 +131,12 @@ class hook_listener {
             return;
         }
 
-        // Add the sticky footer with the linear navigation content.
-        $linearnavigationcontent = new output\local\linearnavigation\footer_content($page->cm);
-        $stickyfootercontent = $hook->renderer->render($linearnavigationcontent);
+        $stickyfootercontent = '';
+        if (local\linearnavigationsettings::is_linear_navigation_enabled($page)) {
+            // Add the sticky footer with the linear navigation content.
+            $linearnavigationcontent = new output\local\linearnavigation\footer_content($page->cm);
+            $stickyfootercontent = $hook->renderer->render($linearnavigationcontent);
+        }
         $footer = new supplementary_sticky_footer(
             $stickyfootercontent,
             'course-linear-navigation',
