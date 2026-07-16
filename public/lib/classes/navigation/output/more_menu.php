@@ -16,6 +16,7 @@
 
 namespace core\navigation\output;
 
+use core\navigation\navigation_node;
 use renderable;
 use renderer_base;
 use templatable;
@@ -31,9 +32,16 @@ use custom_menu;
  */
 class more_menu implements renderable, templatable {
 
+    /** @var object The navigation content to render. */
     protected $content;
+
+    /** @var string The CSS class applied to the rendered navbar. */
     protected $navbarstyle;
+
+    /** @var bool Whether $content has children. */
     protected $haschildren;
+
+    /** @var bool Whether the more menu should behave with a tablist ARIA role. */
     protected $istablist;
 
     /**
@@ -81,6 +89,7 @@ class more_menu implements renderable, templatable {
             }
 
             $data['nodecollection'] = $this->content;
+            $data['reactprops'] = $this->export_react_props($this->content->children);
         } else {
             $data['nodearray'] = (array) $this->content;
             // If there is no node array to render then return an empty array.
@@ -91,6 +100,71 @@ class more_menu implements renderable, templatable {
         $data['moremenuid'] = uniqid();
 
         return $data;
+    }
+
+    /**
+     * Build the JSON props consumed by the core/nav/SecondaryNav React component.
+     *
+     * @param iterable $nodes The top-level navigation_node children to flatten.
+     * @return string JSON-encoded {items, morelabel, istablist} props.
+     */
+    protected function export_react_props(iterable $nodes): string {
+        return json_encode([
+            'items' => array_map(
+                fn(navigation_node $node): array => $this->export_node_for_react($node),
+                iterator_to_array($nodes, false),
+            ),
+            'morelabel' => get_string('moremenu', 'core'),
+            'istablist' => $this->istablist,
+        ], JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * Recursively flatten a navigation node into a JSON-safe array for the React SecondaryNav component.
+     *
+     * The returned structure deliberately omits action_link attached JS actions (e.g. confirmation
+     * dialogs), as no secondary navigation context currently attaches those to tab-bar-level nodes.
+     *
+     * @param navigation_node $node The node to flatten.
+     * @return array JSON-safe representation of the node and its children.
+     */
+    protected function export_node_for_react(navigation_node $node): array {
+        return [
+            'key' => (string) $node->key,
+            'text' => (string) $node->text,
+            'href' => $this->get_node_href($node),
+            'active' => (bool) $node->isactive,
+            'forceintomoremenu' => (bool) $node->forceintomoremenu,
+            'showchildreninsubmenu' => (bool) $node->showchildreninsubmenu,
+            'children' => $node->has_children()
+                ? array_map(
+                    fn(navigation_node $child): array => $this->export_node_for_react($child),
+                    iterator_to_array($node->children, false),
+                )
+                : [],
+        ];
+    }
+
+    /**
+     * Resolve the href a node should navigate to when rendered by the React SecondaryNav component.
+     *
+     * When rendered as a tablist (see $istablist), nodes are switched between via an in-page anchor
+     * stored in $node->tab (e.g. "#linkusers" on admin/search.php) rather than a real navigable action
+     * URL, matching the legacy moremenu_children.mustache template's behaviour. Otherwise the node's
+     * real action URL is used.
+     *
+     * @param navigation_node $node The node to resolve the href for.
+     * @return string|null The href, or null if the node has neither an action nor a tab anchor.
+     */
+    protected function get_node_href(navigation_node $node): ?string {
+        $actionurl = $node->action();
+        $actionhref = $actionurl ? $actionurl->out(false) : null;
+
+        if ($this->istablist) {
+            return $node->tab ?: $actionhref;
+        }
+
+        return $actionhref ?: ($node->tab ?: null);
     }
 
 }
