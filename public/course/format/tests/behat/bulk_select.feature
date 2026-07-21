@@ -229,6 +229,7 @@ Feature: Bulk activity and section selection.
     And I click on "Select section Section 2" "checkbox"
     Then I should see "2 selected" in the "sticky-footer" "region"
 
+  @theme_boost
   Scenario: Bulk selection in small devices
     Given I change the viewport size to "mobile"
     And I close block drawer if open

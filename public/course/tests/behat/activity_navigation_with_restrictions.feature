@@ -43,7 +43,7 @@ Feature: Activity navigation involving activities with access restrictions
     And I press "Save and return to course"
     And I log out
 
-  @javascript
+  @javascript @theme_boost
   Scenario: Activity navigation involving activities with access restrictions
     Given I am on the "Page 1" "page activity" page logged in as student1
     Then I should see "Page 2" in the "#next-activity-link" "css_element"
