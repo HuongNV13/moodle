@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="auth/magiclink/db" VERSION="2026072200" COMMENT="XMLDB file for Moodle auth/magiclink"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="auth_magiclink_token" COMMENT="Stores hashed magic link login tokens.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The ID of the user who requested the login link."/>
+        <FIELD NAME="tokenhash" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="A one-way hash of the login token (raw token is never stored, only its hash)."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The time the login link was requested."/>
+        <FIELD NAME="expires" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Unix timestamp when this token stops being valid."/>
+        <FIELD NAME="consumed" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" DEFAULT="0" COMMENT="Single-use flag, set to 1 once the token has been used to log in."/>
+        <FIELD NAME="requestip" TYPE="char" LENGTH="45" NOTNULL="false" SEQUENCE="false" COMMENT="IP address that requested the link, for audit only (not used to restrict where the link can be used from)."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid_fk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="tokenhash_uix" UNIQUE="true" FIELDS="tokenhash"/>
+        <INDEX NAME="userid_ix" UNIQUE="false" FIELDS="userid"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>
