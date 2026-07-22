@@ -46,6 +46,12 @@ If you did not request this link, you can safely ignore this email. Your account
 
 Regards,
 The {$a->sitename} team';
+$string['emailmessagehtml'] = '<p>Hello {$a->username},</p>
+<p>You\'ve requested a login link for {$a->sitename}. Click the link below to log in without needing a password:</p>
+<p><a href="{$a->link}">{$a->link}</a></p>
+<p>This link will expire in {$a->expiryminutes} minutes.</p>
+<p>If you did not request this link, you can safely ignore this email. Your account is secure and has not been accessed.</p>
+<p>Regards,<br>The {$a->sitename} team</p>';
 $string['verifyinvalidtoken'] = 'This login link is invalid or has expired. Please request a new one.';
 $string['verifyinvalidtokentitle'] = 'Login link invalid';
 $string['requestnewlink'] = 'Request a new login link';

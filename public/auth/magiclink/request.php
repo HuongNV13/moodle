@@ -122,9 +122,12 @@ if ($data = $mform->get_data()) {
 
                     $subject = get_string('emailsubject', 'auth_magiclink', $emaildata);
                     $message = get_string('emailmessage', 'auth_magiclink', $emaildata);
+                    $messagehtml = get_string('emailmessagehtml', 'auth_magiclink', $emaildata);
 
-                    // Send the email.
-                    $emailsent = email_to_user($user, $supportuser, $subject, $message);
+                    // Send the email with an HTML alternative so the link renders as a
+                    // clickable anchor (plain-text-only bodies rely on the mail client to
+                    // auto-detect the URL, which not all clients do).
+                    $emailsent = email_to_user($user, $supportuser, $subject, $message, $messagehtml);
                 } catch (\Exception $e) {
                     // Silently catch any email sending exceptions to avoid leaking information.
                     // The confirmation message will still be shown regardless.
