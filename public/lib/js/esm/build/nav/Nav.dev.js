@@ -133,12 +133,12 @@ function PillDropdownToggle({ label, selected, title, istablist = false, childre
         children: [
           selected && /* @__PURE__ */ jsxDEV("span", { className: "mds-nav-pill__indicator", "aria-hidden": "true" }, void 0, false, {
             fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-            lineNumber: 273,
+            lineNumber: 272,
             columnNumber: 30
           }, this),
           /* @__PURE__ */ jsxDEV("span", { className: "mds-nav-pill__label", dangerouslySetInnerHTML: { __html: label } }, void 0, false, {
             fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-            lineNumber: 275,
+            lineNumber: 274,
             columnNumber: 17
           }, this)
         ]
@@ -147,7 +147,7 @@ function PillDropdownToggle({ label, selected, title, istablist = false, childre
       true,
       {
         fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-        lineNumber: 261,
+        lineNumber: 260,
         columnNumber: 13
       },
       this
@@ -155,7 +155,7 @@ function PillDropdownToggle({ label, selected, title, istablist = false, childre
     menu
   ] }, void 0, true, {
     fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-    lineNumber: 260,
+    lineNumber: 259,
     columnNumber: 9
   }, this);
 }
@@ -176,7 +176,7 @@ function TabPill({ node }) {
       tabIndex: selected ? 0 : -1,
       children: /* @__PURE__ */ jsxDEV("span", { className: "mds-nav-pill__label", dangerouslySetInnerHTML: { __html: node.text } }, void 0, false, {
         fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-        lineNumber: 305,
+        lineNumber: 304,
         columnNumber: 13
       }, this)
     },
@@ -184,7 +184,7 @@ function TabPill({ node }) {
     false,
     {
       fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-      lineNumber: 293,
+      lineNumber: 292,
       columnNumber: 9
     },
     this
@@ -201,11 +201,11 @@ function SubmenuTrigger({ node, istablist = false }) {
       istablist,
       children: /* @__PURE__ */ jsxDEV("div", { className: "dropdown-menu", children: /* @__PURE__ */ jsxDEV(DropdownItems, { items: node.children, istablist }, void 0, false, {
         fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-        lineNumber: 327,
+        lineNumber: 326,
         columnNumber: 17
       }, this) }, void 0, false, {
         fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-        lineNumber: 326,
+        lineNumber: 325,
         columnNumber: 13
       }, this)
     },
@@ -213,31 +213,35 @@ function SubmenuTrigger({ node, istablist = false }) {
     false,
     {
       fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-      lineNumber: 320,
+      lineNumber: 319,
       columnNumber: 9
     },
     this
   );
 }
 __name(SubmenuTrigger, "SubmenuTrigger");
+const stampMenuItemRole = /* @__PURE__ */ __name((el) => {
+  el?.setAttribute("role", "menuitem");
+}, "stampMenuItemRole");
 const renderPill = /* @__PURE__ */ __name((item, istablist) => {
   if (item.showchildreninsubmenu && item.children.length > 0) {
     return /* @__PURE__ */ jsxDEV(SubmenuTrigger, { node: item, istablist }, void 0, false, {
       fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-      lineNumber: 342,
+      lineNumber: 360,
       columnNumber: 16
     });
   }
   if (istablist) {
     return /* @__PURE__ */ jsxDEV(TabPill, { node: item }, void 0, false, {
       fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-      lineNumber: 345,
+      lineNumber: 363,
       columnNumber: 16
     });
   }
   return /* @__PURE__ */ jsxDEV(
     NavPill,
     {
+      ref: stampMenuItemRole,
       label: item.text,
       href: item.href ?? "#",
       title: item.title ?? void 0,
@@ -247,7 +251,7 @@ const renderPill = /* @__PURE__ */ __name((item, istablist) => {
     false,
     {
       fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-      lineNumber: 348,
+      lineNumber: 366,
       columnNumber: 9
     }
   );
@@ -374,7 +378,7 @@ function Nav({ items, morelabel, istablist, navbarstyle, measuredclass = MEASURE
             false,
             {
               fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-              lineNumber: 544,
+              lineNumber: 563,
               columnNumber: 21
             },
             this
@@ -387,15 +391,15 @@ function Nav({ items, morelabel, istablist, navbarstyle, measuredclass = MEASURE
             className: `nav-item d-flex align-items-center dropdown dropdownmoremenu${overflow.length === 0 ? " d-none" : ""}`,
             children: /* @__PURE__ */ jsxDEV(PillDropdownToggle, { label: morelabel, selected: overflow.some(isNodeActive), istablist, children: /* @__PURE__ */ jsxDEV("div", { className: "dropdown-menu dropdown-menu-start", "data-region": "moredropdown", children: /* @__PURE__ */ jsxDEV(DropdownItems, { items: overflow, istablist }, void 0, false, {
               fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-              lineNumber: 559,
+              lineNumber: 578,
               columnNumber: 25
             }, this) }, void 0, false, {
               fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-              lineNumber: 558,
+              lineNumber: 577,
               columnNumber: 21
             }, this) }, void 0, false, {
               fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-              lineNumber: 557,
+              lineNumber: 576,
               columnNumber: 17
             }, this)
           },
@@ -403,7 +407,7 @@ function Nav({ items, morelabel, istablist, navbarstyle, measuredclass = MEASURE
           false,
           {
             fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-            lineNumber: 553,
+            lineNumber: 572,
             columnNumber: 13
           },
           this
@@ -414,7 +418,7 @@ function Nav({ items, morelabel, istablist, navbarstyle, measuredclass = MEASURE
     true,
     {
       fileName: "public/lib/js/esm/src/nav/Nav.tsx",
-      lineNumber: 536,
+      lineNumber: 555,
       columnNumber: 9
     },
     this
