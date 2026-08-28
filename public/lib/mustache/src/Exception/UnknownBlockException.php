@@ -14,25 +14,25 @@ namespace Mustache\Exception;
 use Mustache\Exception;
 
 /**
- * Unknown filter exception.
+ * Unknown block exception.
  */
-class UnknownFilterException extends \UnexpectedValueException implements Exception
+class UnknownBlockException extends \UnexpectedValueException implements Exception
 {
-    protected $filterName;
+    protected $blockName;
 
     /**
-     * @param string    $filterName
+     * @param string    $blockName
      * @param Exception $previous
      */
-    public function __construct($filterName, $previous = null)
+    public function __construct($blockName, $previous = null)
     {
-        $this->filterName = $filterName;
-        $message = sprintf('Unknown filter: %s', $filterName);
+        $this->blockName = $blockName;
+        $message = sprintf('Unknown block: %s', $blockName);
         parent::__construct($message, 0, $previous);
     }
 
-    public function getFilterName()
+    public function getBlockName()
     {
-        return $this->filterName;
+        return $this->blockName;
     }
 }

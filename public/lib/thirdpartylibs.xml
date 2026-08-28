@@ -312,7 +312,7 @@ All rights reserved.</copyright>
     <location>mustache</location>
     <name>Mustache</name>
     <description>PHP library for displaying mustache templates.</description>
-    <version>3.0.0</version>
+    <version>3.2.0</version>
     <license>MIT</license>
     <repository>https://github.com/bobthecow/mustache.php</repository>
     <copyrights>

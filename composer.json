@@ -85,7 +85,7 @@
         "adodb/adodb-php": "5.22.11",
         "html2text/html2text": "4.3.2",
         "michelf/php-markdown": "2.0.0",
-        "mustache/mustache": "3.0.0",
+        "mustache/mustache": "3.2.0",
         "openspout/openspout": "4.28.5",
         "geoip2/geoip2": "3.2.0",
         "maxmind-db/reader": "1.12.1",
