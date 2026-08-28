@@ -151,7 +151,9 @@ class hook_callbacks {
             \DI\autowire()
                 ->constructorParameter(
                     'parser',
-                    new \Lcobucci\JWT\Token\Parser(new \Lcobucci\JWT\Encoding\JoseEncoder()),
+                    \DI\factory(
+                        fn (): \Lcobucci\JWT\Token\Parser => new \Lcobucci\JWT\Token\Parser(new \Lcobucci\JWT\Encoding\JoseEncoder()),
+                    ),
                 ),
         );
     }
