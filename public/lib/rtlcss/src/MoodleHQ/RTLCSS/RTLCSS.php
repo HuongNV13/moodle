@@ -13,7 +13,7 @@ use Sabberworm\CSS\CSSList\CSSList;
 use Sabberworm\CSS\CSSList\Document;
 use Sabberworm\CSS\OutputFormat;
 use Sabberworm\CSS\Parser;
-use Sabberworm\CSS\Rule\Rule;
+use Sabberworm\CSS\Property\Declaration;
 use Sabberworm\CSS\RuleSet\DeclarationList;
 use Sabberworm\CSS\Settings;
 use Sabberworm\CSS\Value\CSSFunction;
@@ -98,7 +98,7 @@ class RTLCSS {
         }
     }
 
-    protected function processBackground(Rule $rule) {
+    protected function processBackground(Declaration $rule) {
         $value = $rule->getValue();
 
         // TODO Fix upstream library as it does not parse this well, commas don't take precedence.
@@ -230,17 +230,17 @@ class RTLCSS {
     }
 
     protected function processRule($rule) {
-        $property = $rule->getRule();
+        $property = $rule->getPropertyName();
         $value = $rule->getValue();
 
         if (preg_match('/direction$/im', $property)) {
             $rule->setValue($this->swapLtrRtl($value));
 
         } else if (preg_match('/left/im', $property)) {
-            $rule->setRule(str_replace('left', 'right', $property));
+            $rule->setPropertyName(str_replace('left', 'right', $property));
 
         } else if (preg_match('/right/im', $property)) {
-            $rule->setRule(str_replace('right', 'left', $property));
+            $rule->setPropertyName(str_replace('right', 'left', $property));
 
         } else if (preg_match('/transition(-property)?$/i', $property)) {
             $rule->setValue($this->swapLeftRight($value));
@@ -329,7 +329,7 @@ class RTLCSS {
 
     }
 
-    protected function processTransformOrigin(Rule $rule) {
+    protected function processTransformOrigin(Declaration $rule) {
         $value = $rule->getValue();
         $foundLeftOrRight = false;
 

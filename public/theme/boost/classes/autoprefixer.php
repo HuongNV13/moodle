@@ -36,7 +36,6 @@ use Sabberworm\CSS\OutputFormat;
 use Sabberworm\CSS\Parser;
 use Sabberworm\CSS\Property\AtRule;
 use Sabberworm\CSS\Property\Selector;
-use Sabberworm\CSS\Rule\Rule;
 use Sabberworm\CSS\RuleSet\AtRuleSet;
 use Sabberworm\CSS\RuleSet\DeclarationBlock;
 use Sabberworm\CSS\RuleSet\DeclarationList;
@@ -124,7 +123,7 @@ class autoprefixer {
         $finalrules = [];
 
         foreach ($rules as $rule) {
-            $property = $rule->getRule();
+            $property = $rule->getPropertyName();
             $value = $rule->getValue();
 
             if ($property === 'position' && $value === 'sticky') {
@@ -204,7 +203,7 @@ class autoprefixer {
         $rules = [];
 
         foreach ($node->getRules() as $key => $rule) {
-            $name = $rule->getRule();
+            $name = $rule->getPropertyName();
             $seen[$name] = true;
 
             if (!isset(self::$rules[$name])) {
@@ -218,7 +217,7 @@ class autoprefixer {
                     continue;
                 }
                 $newrule = clone $rule;
-                $newrule->setRule($newname);
+                $newrule->setPropertyName($newname);
                 $rules[] = $newrule;
             }
 
@@ -232,11 +231,12 @@ class autoprefixer {
             foreach ($selectors as $key => $selector) {
 
                 $matches = [];
-                if (preg_match($this->pseudosregex, $selector->getSelector(), $matches)) {
+                $selectortext = $selector->render(new OutputFormat());
+                if (preg_match($this->pseudosregex, $selectortext, $matches)) {
 
                     $newnode = clone $node;
                     foreach (self::$pseudos[$matches[1]] as $newpseudo) {
-                        $newselector = new Selector(str_replace($matches[1], $newpseudo, $selector->getSelector()));
+                        $newselector = new Selector(str_replace($matches[1], $newpseudo, $selectortext));
                         $selectors[$key] = $newselector;
                         $newnode = clone $node;
                         $newnode->setSelectors($selectors);
