@@ -168,6 +168,10 @@ class component {
         \Psr\SimpleCache::class => 'public/lib/psr/simple-cache/src',
         \RedeyeVentures::class => 'public/lib/geopattern-php/src',
         \Sabberworm\CSS::class => 'public/lib/php-css-parser/src',
+        \Safe::class => [
+            'public/lib/thecodingmachine/safe/lib',
+            'public/lib/thecodingmachine/safe/generated',
+        ],
         \ScssPhp\ScssPhp::class => 'public/lib/scssphp/src',
         \SimplePie::class => 'public/lib/simplepie/src',
         \Slim::class => 'public/lib/slim/slim/Slim',
@@ -197,6 +201,20 @@ class component {
         'public/lib/php-di/php-di/src/functions.php' => true,
         'public/lib/ralouphie/getallheaders/src/getallheaders.php' => true,
         'public/lib/symfony/deprecation-contracts/function.php' => true,
+
+        // Only the generated Safe function files actually used by php-css-parser are loaded here.
+        // See public/lib/thecodingmachine/safe/readme_moodle.txt.
+        // Must be loaded before php-css-parser's own BC alias files below, which call Safe\class_alias().
+        'public/lib/thecodingmachine/safe/generated/classobj.php' => true,
+        'public/lib/thecodingmachine/safe/generated/iconv.php' => true,
+        'public/lib/thecodingmachine/safe/generated/pcre.php' => true,
+        'public/lib/thecodingmachine/safe/lib/special_cases.php' => true,
+
+        // These define BC aliases for classes/interfaces renamed in PHP-CSS-Parser 9.2.0.
+        // Autoloading these on demand via a type hint or instanceof check is unreliable, since
+        // the class doing the check may already be resolvable under its new name.
+        'public/lib/php-css-parser/src/Rule/Rule.php' => true,
+        'public/lib/php-css-parser/src/RuleSet/RuleContainer.php' => true,
     ];
 
     /**
