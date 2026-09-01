@@ -732,7 +732,7 @@ define([
                 var option = $('<option>');
                 originalSelect.append(option);
             }
-            if ($.isArray(processedResults)) {
+            if (Array.isArray(processedResults)) {
                 // Add all the new ones returned from ajax.
                 $.each(processedResults, function(resultIndex, result) {
                     if (existingValues.indexOf(String(result.value)) === -1) {

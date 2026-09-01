@@ -27,7 +27,7 @@ define(['jquery', 'core/ajax'], function($, Ajax) {
 
         processResults: function(selector, results) {
             var contexts = [];
-            if ($.isArray(results)) {
+            if (Array.isArray(results)) {
                 $.each(results, function(index, context) {
                     contexts.push({
                         value: context.id,

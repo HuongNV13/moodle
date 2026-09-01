@@ -93,7 +93,7 @@ define(['jquery', 'core/ajax', 'core/log', 'core/notification', 'core/templates'
         if (example) {
             var rawJSON = example[1].trim();
             try {
-                context = $.parseJSON(rawJSON);
+                context = JSON.parse(rawJSON);
             } catch (e) {
                 log.debug('Could not parse json example context for template.');
                 log.debug(e);

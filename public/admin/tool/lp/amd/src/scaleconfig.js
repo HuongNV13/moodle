@@ -98,7 +98,7 @@ define(['jquery', 'core/notification', 'core/templates', 'core/ajax', 'tool_lp/d
     ScaleConfig.prototype.retrieveOriginalScaleConfig = function() {
         var jsonstring = $(this.inputSelector).val();
         if (jsonstring !== '') {
-            var scaleconfiguration = $.parseJSON(jsonstring);
+            var scaleconfiguration = JSON.parse(jsonstring);
             // The first object should contain the scale ID for the configuration.
             var scaledetail = scaleconfiguration.shift();
             // Check that this scale id matches the one from the page before returning the configuration.

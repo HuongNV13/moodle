@@ -453,7 +453,7 @@ define(
                     .done(dataencoded => {
 
                         removeSpinner(sectionElement, spinner);
-                        const data = $.parseJSON(dataencoded);
+                        const data = JSON.parse(dataencoded);
 
                         const newSectionElement = $(data.content);
                         sectionElement.replaceWith(newSectionElement);
@@ -716,7 +716,7 @@ define(
             var lightbox = addSectionLightbox(sectionElement);
             $.when.apply($, promises)
                 .done(function(dataencoded) {
-                    var data = $.parseJSON(dataencoded);
+                    var data = JSON.parse(dataencoded);
                     removeSpinner(sectionElement, spinner);
                     removeLightbox(lightbox);
                     sectionElement.find(SELECTOR.SECTIONACTIONMENU).find(SELECTOR.TOGGLE).focus();

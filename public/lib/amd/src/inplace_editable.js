@@ -330,9 +330,9 @@ define(
                 if (type === 'toggle') {
                     turnEditingOnToggle(el, options);
                 } else if (type === 'select') {
-                    turnEditingOnSelect(el, $.parseJSON(options));
+                    turnEditingOnSelect(el, JSON.parse(options));
                 } else if (type === 'autocomplete') {
-                    turnEditingOnAutocomplete(el, $.parseJSON(options));
+                    turnEditingOnAutocomplete(el, JSON.parse(options));
                 } else {
                     turnEditingOnText(el);
                 }

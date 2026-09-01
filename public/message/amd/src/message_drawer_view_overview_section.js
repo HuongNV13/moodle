@@ -176,7 +176,7 @@ function(
         // Recursively lowercase all of the keys for an object.
         var recursivelyLowercaseKeys = function(object) {
             return Object.keys(object).reduce(function(carry, key) {
-                if ($.isArray(object[key])) {
+                if (Array.isArray(object[key])) {
                     carry[key.toLowerCase()] = object[key].map(recursivelyLowercaseKeys);
                 } else {
                     carry[key.toLowerCase()] = object[key];

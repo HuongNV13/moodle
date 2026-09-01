@@ -27,7 +27,7 @@ define(['jquery', 'core/ajax', 'core/templates', 'core/str'], function($, Ajax, 
 
         processResults: function(selector, results) {
             var users = [];
-            if ($.isArray(results)) {
+            if (Array.isArray(results)) {
                 $.each(results, function(index, user) {
                     users.push({
                         value: user.id,

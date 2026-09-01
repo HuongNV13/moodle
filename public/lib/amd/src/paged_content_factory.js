@@ -120,7 +120,7 @@ function(
             itemsPerPage = DEFAULT.ITEMS_PER_PAGE_SINGLE;
         }
 
-        if ($.isArray(itemsPerPage)) {
+        if (Array.isArray(itemsPerPage)) {
             // If we're given a total number of pages then we don't support a variable
             // set of items per page so just use the first one.
             itemsPerPage = itemsPerPage[0];
@@ -168,7 +168,7 @@ function(
     var buildItemsPerPagePagingBarContext = function(itemsPerPage) {
         var context = [];
 
-        if ($.isArray(itemsPerPage)) {
+        if (Array.isArray(itemsPerPage)) {
             // Convert the array into a format accepted by the template.
             context = itemsPerPage.map(function(num) {
                 if (typeof num === 'number') {
@@ -215,7 +215,7 @@ function(
         var context = getDefaultPagingBarTemplateContext();
         context.itemsperpage = buildItemsPerPagePagingBarContext(itemsPerPage);
         // Only display the items per page selector if there is more than one to choose from.
-        context.showitemsperpageselector = $.isArray(itemsPerPage) && itemsPerPage.length > 1;
+        context.showitemsperpageselector = Array.isArray(itemsPerPage) && itemsPerPage.length > 1;
 
         return context;
     };
@@ -264,7 +264,7 @@ function(
             itemsPerPage = DEFAULT.ITEMS_PER_PAGE_SINGLE;
         }
 
-        if ($.isArray(itemsPerPage)) {
+        if (Array.isArray(itemsPerPage)) {
             // If we're given an array for the items per page, rather than a number,
             // then just use that as the options for the dropdown.
             return {
