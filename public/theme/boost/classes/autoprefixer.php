@@ -233,7 +233,6 @@ class autoprefixer {
                 $matches = [];
                 $selectortext = $selector->render(new OutputFormat());
                 if (preg_match($this->pseudosregex, $selectortext, $matches)) {
-
                     $newnode = clone $node;
                     foreach (self::$pseudos[$matches[1]] as $newpseudo) {
                         $newselector = new Selector(str_replace($matches[1], $newpseudo, $selectortext));
