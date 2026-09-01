@@ -352,7 +352,14 @@ All rights reserved.</copyright>
     <copyrights>
       <copyright>2011 Raphael Schweikert, http://sabberworm.com/</copyright>
     </copyrights>
-    <customised/>
+  </library>
+  <library>
+    <location>thecodingmachine/safe</location>
+    <name>thecodingmachine/safe</name>
+    <description>PHP core functions that throw exceptions instead of returning FALSE on error.</description>
+    <version>3.4.0</version>
+    <license>MIT</license>
+    <repository>https://github.com/thecodingmachine/safe</repository>
   </library>
   <library>
     <location>rtlcss</location>
