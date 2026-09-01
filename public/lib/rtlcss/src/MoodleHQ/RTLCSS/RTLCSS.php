@@ -14,7 +14,7 @@ use Sabberworm\CSS\CSSList\Document;
 use Sabberworm\CSS\OutputFormat;
 use Sabberworm\CSS\Parser;
 use Sabberworm\CSS\Rule\Rule;
-use Sabberworm\CSS\RuleSet\RuleSet;
+use Sabberworm\CSS\RuleSet\DeclarationList;
 use Sabberworm\CSS\Settings;
 use Sabberworm\CSS\Value\CSSFunction;
 use Sabberworm\CSS\Value\CSSString;
@@ -188,7 +188,7 @@ class RTLCSS {
                 if ($node instanceof CSSList) {
                     $this->processBlock($node);
                 }
-                if ($node instanceof RuleSet) {
+                if ($node instanceof DeclarationList) {
                     $this->processDeclaration($node);
                 }
             }
@@ -414,6 +414,11 @@ class RTLCSS {
         }
         $flags = !empty($options['ignoreCase']) ? 'im' : 'm';
         $expr = "/$expr/$flags";
+        // Value objects no longer implement __toString() (removed upstream in PHP-CSS-Parser 9.0.0),
+        // so render them to a string explicitly before matching.
+        if (is_object($value)) {
+            $value = $value->render(new OutputFormat());
+        }
         return preg_replace_callback($expr, function($matches) use ($a, $b, $options) {
             return $this->compare($matches[0], $a, !empty($options['ignoreCase'])) ? $b : $a;
         }, $value);

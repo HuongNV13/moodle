@@ -39,7 +39,7 @@ use Sabberworm\CSS\Property\Selector;
 use Sabberworm\CSS\Rule\Rule;
 use Sabberworm\CSS\RuleSet\AtRuleSet;
 use Sabberworm\CSS\RuleSet\DeclarationBlock;
-use Sabberworm\CSS\RuleSet\RuleSet;
+use Sabberworm\CSS\RuleSet\DeclarationList;
 use Sabberworm\CSS\Settings;
 use Sabberworm\CSS\Value\CSSFunction;
 use Sabberworm\CSS\Value\CSSString;
@@ -188,7 +188,7 @@ class autoprefixer {
             if ($node instanceof CSSList) {
                 $this->processBlock($node);
 
-            } else if ($node instanceof RuleSet) {
+            } else if ($node instanceof DeclarationList) {
                 $this->processDeclaration($node, $block);
             }
         }

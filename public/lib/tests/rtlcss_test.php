@@ -1139,8 +1139,8 @@ final class rtlcss_test extends basic_testcase {
      */
     public function test_background_position($data): void {
         $output = new OutputFormat();
-        $output->set('SpaceAfterRuleName', '');
-        $output->set('SpaceAfterListArgumentSeparator', array('default' => '', ',' => ' '));
+        $output->setSpaceAfterRuleName('');
+        $output->setSpaceAfterListArgumentSeparators(array('default' => '', ',' => ' '));
         $this->assert_sample($data, $output);
     }
 
@@ -1151,10 +1151,10 @@ final class rtlcss_test extends basic_testcase {
      */
     public function test_background($data): void {
         $output = new OutputFormat();
-        $output->set('SpaceAfterRuleName', ' ');
-        $output->set('SpaceBeforeRules', ' ');
-        $output->set('SpaceAfterRules', ' ');
-        $output->set('SpaceAfterListArgumentSeparator', array('default' => '', ',' => ' '));
+        $output->setSpaceAfterRuleName(' ');
+        $output->setSpaceBeforeRules(' ');
+        $output->setSpaceAfterRules(' ');
+        $output->setSpaceAfterListArgumentSeparators(array('default' => '', ',' => ' '));
         $this->assert_sample($data, $output);
     }
 
@@ -1165,12 +1165,12 @@ final class rtlcss_test extends basic_testcase {
      */
     public function test_directives($data): void {
         $output = new OutputFormat();
-        $output->set('SpaceAfterRuleName', '');
-        $output->set('SpaceBeforeRules', '');
-        $output->set('SpaceAfterRules', '');
-        $output->set('SpaceBetweenRules', '');
-        $output->set('SpaceBetweenBlocks', ' ');
-        $output->set('SpaceAfterListArgumentSeparator', array('default' => '', ',' => ' '));
+        $output->setSpaceAfterRuleName('');
+        $output->setSpaceBeforeRules('');
+        $output->setSpaceAfterRules('');
+        $output->setSpaceBetweenRules('');
+        $output->setSpaceBetweenBlocks(' ');
+        $output->setSpaceAfterListArgumentSeparators(array('default' => '', ',' => ' '));
         $this->assert_sample($data, $output);
     }
 
@@ -1181,10 +1181,10 @@ final class rtlcss_test extends basic_testcase {
      */
     public function test_properties($data): void {
         $output = new OutputFormat();
-        $output->set('SpaceAfterRuleName', '');
-        $output->set('SpaceBeforeRules', ' ');
-        $output->set('SpaceAfterRules', ' ');
-        $output->set('SpaceAfterListArgumentSeparator', array('default' => '', ',' => ' '));
+        $output->setSpaceAfterRuleName('');
+        $output->setSpaceBeforeRules(' ');
+        $output->setSpaceAfterRules(' ');
+        $output->setSpaceAfterListArgumentSeparators(array('default' => '', ',' => ' '));
         $this->assert_sample($data, $output);
     }
 
@@ -1196,8 +1196,8 @@ final class rtlcss_test extends basic_testcase {
     public function test_special($data): void {
         $this->markTestSkipped('Not yet supported!');
         $output = new OutputFormat();
-        $output->set('SpaceBeforeRules', ' ');
-        $output->set('SpaceAfterListArgumentSeparator', array('default' => '', ',' => ' '));
+        $output->setSpaceBeforeRules(' ');
+        $output->setSpaceAfterListArgumentSeparators(array('default' => '', ',' => ' '));
         $this->assert_sample($data, $output);
     }
 
@@ -1208,10 +1208,10 @@ final class rtlcss_test extends basic_testcase {
      */
     public function test_transform_origin($data): void {
         $output = new OutputFormat();
-        $output->set('SpaceAfterRuleName', '');
-        $output->set('SpaceBeforeRules', ' ');
-        $output->set('SpaceAfterRules', ' ');
-        $output->set('SpaceAfterListArgumentSeparator', array('default' => '', ',' => ' '));
+        $output->setSpaceAfterRuleName('');
+        $output->setSpaceBeforeRules(' ');
+        $output->setSpaceAfterRules(' ');
+        $output->setSpaceAfterListArgumentSeparators(array('default' => '', ',' => ' '));
         $this->assert_sample($data, $output);
     }
 
@@ -1224,9 +1224,9 @@ final class rtlcss_test extends basic_testcase {
     public function test_transforms($data): void {
         $this->markTestSkipped('Not yet supported!');
         $output = new OutputFormat();
-        $output->set('SpaceBeforeRules', ' ');
-        $output->set('SpaceAfterRules', ' ');
-        $output->set('SpaceAfterListArgumentSeparator', array('default' => '', ',' => ' '));
+        $output->setSpaceBeforeRules(' ');
+        $output->setSpaceAfterRules(' ');
+        $output->setSpaceAfterListArgumentSeparators(array('default' => '', ',' => ' '));
         $this->assert_sample($data, $output);
     }
 
@@ -1237,10 +1237,10 @@ final class rtlcss_test extends basic_testcase {
      */
     public function test_values_nsyntax($data): void {
         $output = new OutputFormat();
-        $output->set('SpaceBeforeRules', ' ');
-        $output->set('SpaceAfterRules', ' ');
-        $output->set('RGBHashNotation', false);
-        $output->set('SpaceAfterListArgumentSeparator', array('default' => '', ',' => ' '));
+        $output->setSpaceBeforeRules(' ');
+        $output->setSpaceAfterRules(' ');
+        $output->setRGBHashNotation(false);
+        $output->setSpaceAfterListArgumentSeparators(array('default' => '', ',' => ' '));
         $this->assert_sample($data, $output);
     }
 
@@ -1251,10 +1251,10 @@ final class rtlcss_test extends basic_testcase {
      */
     public function test_values($data): void {
         $output = new OutputFormat();
-        $output->set('SpaceAfterRuleName', '');
-        $output->set('SpaceBeforeRules', ' ');
-        $output->set('SpaceAfterRules', ' ');
-        $output->set('SpaceAfterListArgumentSeparator', array('default' => '', ',' => ' '));
+        $output->setSpaceAfterRuleName('');
+        $output->setSpaceBeforeRules(' ');
+        $output->setSpaceAfterRules(' ');
+        $output->setSpaceAfterListArgumentSeparators(array('default' => '', ',' => ' '));
         $this->assert_sample($data, $output);
     }
 }
