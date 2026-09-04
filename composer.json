@@ -79,7 +79,7 @@
         "phpmailer/phpmailer": "6.9.3",
         "simplepie/simplepie": "1.8.1",
         "aws/aws-sdk-php": "3.394.0",
-        "mtdowling/jmespath.php": "2.8.0",
+        "mtdowling/jmespath.php": "2.9.2",
         "spatie/php-cloneable": "1.0.2",
         "lbuchs/webauthn": "2.2.0",
         "adodb/adodb-php": "5.22.11",
