@@ -162,7 +162,7 @@ class bigbluebutton_proxy extends proxy_base {
 
         if (!$serverversion) {
             $xml = self::fetch_endpoint_xml('');
-            if (!$xml || $xml->returncode != 'SUCCESS') {
+            if (!$xml || is_bool($xml) || $xml->returncode != 'SUCCESS') {
                 return null;
             }
 
