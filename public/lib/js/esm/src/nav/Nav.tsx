@@ -255,6 +255,11 @@ function DropdownItems(
                     return <DropdownSubmenu key={item.key} node={item} istablist={istablist} />;
                 }
 
+                let ariaSelected: 'true' | 'false' | undefined;
+                if (istablist) {
+                    ariaSelected = item.active ? 'true' : 'false';
+                }
+
                 return (
                     <a
                         key={item.key}
@@ -262,8 +267,12 @@ function DropdownItems(
                         className={`dropdown-item${item.active ? ' active' : ''}`}
                         href={item.href ?? '#'}
                         title={item.title ?? undefined}
-                        aria-current={item.active ? 'page' : undefined}
-                        role="menuitem"
+                        aria-current={!istablist && item.active ? 'page' : undefined}
+                        aria-selected={ariaSelected}
+                        // Bootstrap's Tab component only fires "shown.bs.tab" (and sets aria-selected) for elements whose role
+                        // is exactly "tab". An overflowed tablist item still needs data-bs-toggle="tab" to switch panes, so it
+                        // must also carry role="tab".
+                        role={istablist ? 'tab' : 'menuitem'}
                         data-bs-toggle={istablist ? 'tab' : undefined}
                         data-text={istablist ? item.text : undefined}
                         // React owns this item's active state via item.active above regardless of

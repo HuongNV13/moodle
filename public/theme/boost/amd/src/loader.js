@@ -34,22 +34,46 @@ import SelectorEngine from './bootstrap/dom/selector-engine';
  * Rember the last visited tabs.
  */
 const rememberTabs = () => {
-    const tabTriggerList = document.querySelectorAll('a[data-bs-toggle="tab"]');
-    [...tabTriggerList].map(tabTriggerEl => tabTriggerEl.addEventListener('shown.bs.tab', (e) => {
+    // Delegate on the document rather than binding to each tab trigger directly.
+    document.addEventListener('shown.bs.tab', (e) => {
+        if (!e.target.matches('[data-bs-toggle="tab"]')) {
+            return;
+        }
         var hash = e.target.getAttribute('href');
         if (history.replaceState) {
             history.replaceState(null, null, hash);
         } else {
             location.hash = hash;
         }
-    }));
+    });
+
     const hash = window.location.hash;
-    if (hash) {
-        const tab = document.querySelector('[role="tablist"] [href="' + hash + '"]');
-        if (tab) {
-            tab.click();
-        }
+    if (!hash) {
+        return;
     }
+
+    const selectTabFromHash = () => {
+        const tab = document.querySelector('[role="tablist"] [href="' + hash + '"]');
+        if (!tab) {
+            return false;
+        }
+        tab.click();
+        return true;
+    };
+
+    if (selectTabFromHash()) {
+        return;
+    }
+
+    // The matching tab is not in the DOM yet, e.g. it belongs to a tablist that is still mounting
+    // asynchronously. Wait for it to appear rather than leaving the default tab selected.
+    const observer = new MutationObserver(() => {
+        if (selectTabFromHash()) {
+            observer.disconnect();
+        }
+    });
+    observer.observe(document.body, {childList: true, subtree: true});
+    setTimeout(() => observer.disconnect(), 5000);
 };
 
 /**

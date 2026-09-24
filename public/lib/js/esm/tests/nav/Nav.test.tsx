@@ -408,3 +408,44 @@ describe('@moodle/lms/core/nav/Nav submenus in the More menu', () => {
         expect(container.querySelectorAll('.dropdown-submenu .dropdown-divider')).toHaveLength(1);
     });
 });
+
+// Bootstrap's Tab component only fires "shown.bs.tab" (and manages aria-selected/tabindex) for an element whose role is exactly
+// "tab". An overflowed tablist item keeps its data-bs-toggle="tab", so without a matching role="tab" it still switches panes on
+// click but never fires "shown.bs.tab", and theme_boost/loader's tab listener (which updates the URL anchor) never runs.
+describe('@moodle/lms/core/nav/Nav istablist overflow', () => {
+    it('gives an overflowed tablist item role="tab" alongside data-bs-toggle="tab"', () => {
+        const container = renderItems(ITEMS, 4, true);
+
+        const overflowed = container.querySelector('[data-region="moredropdown"] > .dropdown-item');
+        expect(overflowed).toHaveAttribute('role', 'tab');
+        expect(overflowed).toHaveAttribute('data-bs-toggle', 'tab');
+    });
+
+    it('keeps role="menuitem" and no data-bs-toggle for a non-tablist overflowed item', () => {
+        const container = renderItems(ITEMS, 4, false);
+
+        const overflowed = container.querySelector('[data-region="moredropdown"] > .dropdown-item');
+        expect(overflowed).toHaveAttribute('role', 'menuitem');
+        expect(overflowed).not.toHaveAttribute('data-bs-toggle');
+    });
+
+    it('marks the active overflowed tablist item aria-selected, not aria-current', () => {
+        const items = ITEMS.map((item) => ({...item, active: item.text === 'Badges'}));
+        const container = renderItems(items, 4, true);
+
+        const badges = Array.from(container.querySelectorAll('[data-region="moredropdown"] > .dropdown-item'))
+            .find((node) => node.textContent === 'Badges');
+        expect(badges).toHaveAttribute('aria-selected', 'true');
+        expect(badges).not.toHaveAttribute('aria-current');
+    });
+
+    it('marks the active overflowed non-tablist item aria-current, not aria-selected', () => {
+        const items = ITEMS.map((item) => ({...item, active: item.text === 'Badges'}));
+        const container = renderItems(items, 4, false);
+
+        const badges = Array.from(container.querySelectorAll('[data-region="moredropdown"] > .dropdown-item'))
+            .find((node) => node.textContent === 'Badges');
+        expect(badges).toHaveAttribute('aria-current', 'page');
+        expect(badges).not.toHaveAttribute('aria-selected');
+    });
+});
