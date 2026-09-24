@@ -449,3 +449,58 @@ describe('@moodle/lms/core/nav/Nav istablist overflow', () => {
         expect(badges).not.toHaveAttribute('aria-selected');
     });
 });
+
+// The server computes `active` once, from the page's URL, which can't reflect a tab Bootstrap
+// later activates client-side. Without this sync, the pane Bootstrap controls and the pill React highlights can disagree.
+describe('@moodle/lms/core/nav/Nav shown.bs.tab sync', () => {
+    it('moves the selected pill to whichever tab Bootstrap reports as shown', () => {
+        const items = ITEMS.map((item) => ({...item, active: item.text === 'Home'}));
+        const container = renderItems(items, 10, true);
+
+        const homePill = container.querySelector('a[href="/home"]');
+        const dashboardPill = container.querySelector('a[href="/dashboard"]');
+        expect(homePill).toHaveClass('active');
+        expect(dashboardPill).not.toHaveClass('active');
+
+        act(() => {
+            dashboardPill!.dispatchEvent(new Event('shown.bs.tab', {bubbles: true}));
+        });
+
+        expect(homePill).not.toHaveClass('active');
+        expect(dashboardPill).toHaveClass('active');
+    });
+
+    it('marks the More toggle selected when Bootstrap activates an overflowed tab', () => {
+        const items = ITEMS.map((item) => ({...item, active: item.text === 'Home'}));
+        const container = renderItems(items, 4, true);
+
+        const badgesItem = Array.from(container.querySelectorAll('[data-region="moredropdown"] .dropdown-item'))
+            .find((node) => node.textContent === 'Badges') as HTMLElement;
+
+        act(() => {
+            badgesItem.dispatchEvent(new Event('shown.bs.tab', {bubbles: true}));
+        });
+
+        const moreToggle = container.querySelector('.dropdownmoremenu .mds-nav-pill');
+        expect(moreToggle).toHaveClass('mds-nav-pill--selected');
+        expect(badgesItem).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('ignores shown.bs.tab from outside this nav\'s own menu', () => {
+        const items = ITEMS.map((item) => ({...item, active: item.text === 'Home'}));
+        const container = renderItems(items, 10, true);
+
+        const outsider = document.createElement('a');
+        outsider.setAttribute('href', '/dashboard');
+        document.body.appendChild(outsider);
+
+        act(() => {
+            outsider.dispatchEvent(new Event('shown.bs.tab', {bubbles: true}));
+        });
+
+        expect(container.querySelector('a[href="/home"]')).toHaveClass('active');
+        expect(container.querySelector('a[href="/dashboard"]')).not.toHaveClass('active');
+
+        document.body.removeChild(outsider);
+    });
+});

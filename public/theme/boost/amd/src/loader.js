@@ -52,12 +52,31 @@ const rememberTabs = () => {
         return;
     }
 
+    /**
+     * Close the "More" dropdown if activating the given tab left it forced open.
+     *
+     * @param {Element} tab The tab element that was just activated.
+     */
+    const closeStrayDropdown = (tab) => {
+        const outerElem = tab.closest('.dropdown');
+        const menu = outerElem && outerElem.querySelector(':scope > .dropdown-menu');
+        if (!menu || !menu.classList.contains('show')) {
+            return;
+        }
+        menu.classList.remove('show');
+        const toggle = outerElem.querySelector(':scope > .dropdown-toggle');
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+    };
+
     const selectTabFromHash = () => {
         const tab = document.querySelector('[role="tablist"] [href="' + hash + '"]');
         if (!tab) {
             return false;
         }
         tab.click();
+        closeStrayDropdown(tab);
         return true;
     };
 
