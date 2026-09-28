@@ -30,7 +30,6 @@ Feature: Category links on the manage categories page always show that category'
     Given I am on the "Qbank 1" "core_question > question bank" page
     And I apply question bank filter "Category" with value "Category A"
     And I click on "Question A" "checkbox"
-    And I click on "With selected" "button"
     And I press "Move to"
     And I open the autocomplete suggestions list in the ".search-categories" "css_element"
     And I click on "Category B" item in the autocomplete list
