@@ -29,7 +29,7 @@ function ActivityDate({ label, value }) {
   }, this);
   return /* @__PURE__ */ jsxDEV(Badge, { label: content, variant: "secondary", subtle: true }, void 0, false, {
     fileName: "public/course/js/esm/src/ActivityDate.tsx",
-    lineNumber: 47,
+    lineNumber: 49,
     columnNumber: 12
   }, this);
 }

@@ -35673,6 +35673,9 @@ button.section-collapsemenu:hover .collapsemenu-text {
   display: contents;
 }
 .activity-item .activity-dates .mds-badge {
+  display: inline-flex;
+  padding: var(--mds-spacing-xxs, 0.25rem) var(--mds-spacing-xs, 0.5rem);
+  border-radius: var(--mds-border-radius-sm);
   gap: var(--mds-spacing-xxs, 0.25rem);
   font-size: var(--mds-font-size-paragraph-small);
   font-weight: var(--mds-font-weight-medium);
@@ -41131,8 +41134,7 @@ select {
   border-bottom: 0;
 }
 .path-mod .activity-dates {
-  padding-top: 0.5rem;
-  padding-bottom: 1rem;
+  padding-block: var(--mds-spacing-md, 1rem);
   display: flex;
   flex-wrap: wrap;
   gap: var(--mds-spacing-xs, 0.5rem);
@@ -41143,6 +41145,9 @@ select {
   display: contents;
 }
 .path-mod .activity-dates .mds-badge {
+  display: inline-flex;
+  padding: var(--mds-spacing-xxs, 0.25rem) var(--mds-spacing-xs, 0.5rem);
+  border-radius: var(--mds-border-radius-sm);
   gap: var(--mds-spacing-xxs, 0.25rem);
   font-size: var(--mds-font-size-paragraph-small);
   font-weight: var(--mds-font-weight-medium);

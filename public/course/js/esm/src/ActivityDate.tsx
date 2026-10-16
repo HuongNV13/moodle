@@ -44,5 +44,7 @@ export default function ActivityDate({label, value}: ActivityDateProps) {
             <span>{value}</span>
         </>
     );
+    // The design system Badge types `label` as a string, but renders it as children, so it accepts a node at runtime.
+    // We need the label and the date in separate spans, so cast until the design system accepts a ReactNode label.
     return <Badge label={content as unknown as string} variant="secondary" subtle />;
 }

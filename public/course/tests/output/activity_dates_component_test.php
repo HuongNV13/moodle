@@ -22,8 +22,8 @@ namespace core_course\output;
  * @package    core_course
  * @copyright  2026 Huong Nguyen <huongnv13@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @covers     \core_course\output\activity_dates_component
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(activity_dates_component::class)]
 final class activity_dates_component_test extends \advanced_testcase {
     /**
      * Test the dates are formatted, including the dates relative to another date.

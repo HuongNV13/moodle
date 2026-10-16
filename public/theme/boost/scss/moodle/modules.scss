@@ -27,8 +27,7 @@ select {
         }
     }
     .activity-dates {
-        padding-top: map-get($spacers, 2);
-        padding-bottom: map-get($spacers, 3);
+        padding-block: var(--mds-spacing-md, 1rem);
         display: flex;
         flex-wrap: wrap;
         gap: var(--mds-spacing-xs, 0.5rem);
@@ -38,6 +37,9 @@ select {
             display: contents;
         }
         .mds-badge {
+            display: inline-flex;
+            padding: var(--mds-spacing-xxs, 0.25rem) var(--mds-spacing-xs, 0.5rem);
+            border-radius: var(--mds-border-radius-sm);
             gap: var(--mds-spacing-xxs, 0.25rem);
             font-size: var(--mds-font-size-paragraph-small);
             font-weight: var(--mds-font-weight-medium);

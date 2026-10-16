@@ -34,7 +34,7 @@ class content_notification_task extends adhoc_task {
      * Run the main task.
      */
     public function execute() {
-        global $CFG, $OUTPUT;
+        global $CFG;
         require_once($CFG->libdir . '/enrollib.php');
 
         $data = $this->get_custom_data();

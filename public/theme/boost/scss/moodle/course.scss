@@ -424,6 +424,9 @@ button.section-collapsemenu {
             display: contents;
         }
         .mds-badge {
+            display: inline-flex;
+            padding: var(--mds-spacing-xxs, 0.25rem) var(--mds-spacing-xs, 0.5rem);
+            border-radius: var(--mds-border-radius-sm);
             gap: var(--mds-spacing-xxs, 0.25rem);
             font-size: var(--mds-font-size-paragraph-small);
             font-weight: var(--mds-font-weight-medium);
