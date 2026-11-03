@@ -203,7 +203,7 @@ class communication_feature implements
                 $matrixuserid = matrix_user_manager::get_matrixid_from_moodle(
                     userid: $userid,
                 );
-                if (!array_key_exists($matrixuserid, (array) $body->joined)) {
+                if (!array_key_exists($matrixuserid ?? '', (array) $body->joined)) {
                     unset($userids[$key]);
                 }
             }

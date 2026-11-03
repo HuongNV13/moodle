@@ -45,7 +45,7 @@ class special_gradeexportdefault extends \core_admin\setting\setting\configselec
     public function get_defaultsetting() {
         $this->load_choices();
         $defaultsetting = parent::get_defaultsetting();
-        if (array_key_exists($defaultsetting, $this->choices)) {
+        if ($defaultsetting !== null && array_key_exists($defaultsetting, $this->choices)) {
             return $defaultsetting;
         } else {
             return array_key_first($this->choices);
