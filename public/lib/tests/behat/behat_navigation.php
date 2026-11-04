@@ -156,6 +156,34 @@ class behat_navigation extends behat_base {
     }
 
     /**
+     * Opens the user menu.
+     *
+     * @Given I open the user menu
+     */
+    public function i_open_the_user_menu(): void {
+        $this->execute("behat_general::i_click_on", [$this->escape($this->get_user_menu_toggle_xpath()), "xpath_element"]);
+    }
+
+    /**
+     * Checks whether the button that opens the user menu says the menu is open.
+     *
+     * @Then the user menu should be expanded
+     * @Then the user menu should :not be expanded
+     * @throws ExpectationException
+     * @param string|null $not Instructs to check that the menu is not expanded, if defined
+     */
+    public function the_user_menu_should_be_expanded(?string $not = null): void {
+        $toggle = $this->find('xpath', $this->get_user_menu_toggle_xpath());
+        $expanded = $toggle->getAttribute('aria-expanded') === 'true';
+        if (is_null($not) && !$expanded) {
+            throw new ExpectationException('The user menu is not expanded', $this->getSession());
+        }
+        if (!is_null($not) && $expanded) {
+            throw new ExpectationException('The user menu is expanded', $this->getSession());
+        }
+    }
+
+    /**
      * Click on an entry in the user menu.
      * @Given /^I follow "(?P<nodetext_string>(?:[^"]|\\")*)" in the user menu$/
      *
@@ -165,16 +193,17 @@ class behat_navigation extends behat_base {
 
         if ($this->running_javascript()) {
             // The user menu must be expanded when JS is enabled.
-            $xpath = "//div[contains(concat(' ', @class, ' '), ' usermenu ')]//a[contains(concat(' ', @class, ' '), ' dropdown-toggle ')]";
-            $this->execute("behat_general::i_click_on", array($this->escape($xpath), "xpath_element"));
+            $this->i_open_the_user_menu();
+            // The menu is shown outside the navbar, and a submenu is opened by a button rather than a link.
+            $container = [$this->get_user_menu_xpath(), "xpath_element"];
+        } else {
+            // The CSS path is always present, with or without JS, and without JS it includes any submenus.
+            $container = [".usermenu .dropdown-menu", "css_element"];
         }
 
         // Now select the link.
-        // The CSS path is always present, with or without JS.
-        $csspath = ".usermenu .dropdown-menu";
-
         $this->execute('behat_general::i_click_on_in_the',
-                array($nodetext, "link", $csspath, "css_element")
+                array($nodetext, $this->get_user_menu_item_selector('link'), ...$container)
         );
     }
 
@@ -1463,7 +1492,7 @@ class behat_navigation extends behat_base {
     public function should_exist_in_user_menu($itemtext, $selectortype, $not = null) {
         $callfunction = is_null($not) ? 'should_exist_in_the' : 'should_not_exist_in_the';
         $this->execute("behat_general::{$callfunction}",
-            [$itemtext, $selectortype, $this->get_user_menu_xpath(), 'xpath_element']);
+            [$itemtext, $this->get_user_menu_item_selector($selectortype), $this->get_user_menu_xpath(), 'xpath_element']);
     }
 
     /**
@@ -1501,11 +1530,45 @@ class behat_navigation extends behat_base {
     }
 
     /**
+     * Return the xpath for the button that opens the user menu.
+     *
+     * @return string The xpath
+     */
+    protected function get_user_menu_toggle_xpath(): string {
+        return "//div[contains(concat(' ', @class, ' '),  ' usermenu ')]" .
+            "//*[contains(concat(' ', @class, ' '), ' dropdown-toggle ')]";
+    }
+
+    /**
+     * Return the selector to use for an item in the user menu.
+     *
+     * When JS is enabled an item that opens a submenu is a button, not a link, so a link may be either.
+     *
+     * @param string $selectortype The selector type that was asked for
+     * @return string The selector type to use
+     */
+    protected function get_user_menu_item_selector(
+        string $selectortype,
+    ): string {
+        if ($this->running_javascript() && $selectortype === 'link') {
+            return 'link_or_button';
+        }
+        return $selectortype;
+    }
+
+    /**
      * Return the xpath for the user menu element.
+     *
+     * With JS enabled the menu is the design system's, which is shown outside the navbar and is named by the button
+     * that opens it. Without JS it is the menu that is always in the navbar.
      *
      * @return string The xpath
      */
     protected function get_user_menu_xpath() {
+        if ($this->running_javascript()) {
+            return "//div[contains(concat(' ', @class, ' '), ' mds-dropdown-menu ')]" .
+                "[@aria-labelledby = " . $this->get_user_menu_toggle_xpath() . "/@id]";
+        }
         return "//div[contains(concat(' ', @class, ' '),  ' usermenu ')]" .
             "//div[contains(concat(' ', @class, ' '), ' dropdown-menu ')]" .
             "//div[@id='carousel-item-main']";
@@ -1514,10 +1577,17 @@ class behat_navigation extends behat_base {
     /**
      * Return the xpath for a given user submenu element.
      *
+     * With JS enabled the submenu is named by the menu item that opens it.
+     *
      * @param string $submenuname The name of the submenu
      * @return string The xpath
      */
     protected function get_user_submenu_xpath($submenuname) {
+        if ($this->running_javascript()) {
+            return "//div[contains(concat(' ', @class, ' '), ' mds-dropdown-menu ')]" .
+                "[@aria-labelledby = //span[contains(concat(' ', @class, ' '), ' mds-dropdown-item__label ')]" .
+                "[normalize-space(.) = '" . $submenuname . "']/@id]";
+        }
         return "//div[contains(concat(' ', @class, ' '),  ' usermenu ')]" .
             "//div[contains(concat(' ', @class, ' '), ' dropdown-menu ')]" .
             "//div[contains(concat(' ', @class, ' '), ' submenu ')][@aria-label='" . $submenuname . "']";

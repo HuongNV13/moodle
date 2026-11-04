@@ -63,6 +63,22 @@
                 height: 100%;
             }
         }
+        > [data-react-component] {
+            display: flex;
+        }
+        .mds-dropdown {
+            flex-direction: row;
+            align-items: center;
+            height: 100%;
+            .dropdown-toggle {
+                padding-top: 0;
+                padding-bottom: 0;
+                border-radius: 0;
+                display: flex;
+                align-items: center;
+                height: 100%;
+            }
+        }
         .userfirstname {
             margin-inline: $spacer * 0.5;
             max-width: 20ch;
@@ -291,4 +307,8 @@
             }
         }
     }
+}
+
+.mds-dropdown-menu {
+    z-index: $zindex-fixed + 1;
 }

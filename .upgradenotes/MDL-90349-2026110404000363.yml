@@ -1,0 +1,13 @@
+issueNumber: MDL-90349
+notes:
+  core:
+    - message: >-
+        The user menu in the navbar now renders using the design system Avatar
+        and Dropdown components, through the new core/UserMenu and 
+        core/UserAvatar React components. The previous HTML menu is still 
+        output inside the mount point, for before the component loads and for 
+        when JavaScript is off. Theme developers overriding the core/user_menu 
+        template, or styling the user menu (.usermenu .dropdown-menu, 
+        .carousel-item, .avatar, .userinitials), should review their overrides 
+        and CSS against the new markup.
+      type: changed

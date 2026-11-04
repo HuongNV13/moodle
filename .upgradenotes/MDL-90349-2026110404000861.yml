@@ -1,0 +1,15 @@
+issueNumber: MDL-90349
+notes:
+  core:
+    - message: >-
+        The array returned by \core\navigation\output\primary::get_user_menu()
+        now includes reactprops, the JSON props for core/UserMenu, and each
+        avatardata item also includes the user's picture as data (initials or
+        imageurl), alongside the existing content HTML. New methods
+        \core\output\user_picture::export_avatar_data() and
+        \core\output\user_picture::uses_initials() provide that data, and
+        \core\navigation\output\primary::export_user_menu_items() exports the
+        menu items. Items added by the \core_user\hook\extend_user_menu hook or
+        the customusermenuitems setting appear in the React menu in the same
+        order, with their classes and attributes.
+      type: improved

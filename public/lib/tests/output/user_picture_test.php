@@ -129,4 +129,60 @@ final class user_picture_test extends \advanced_testcase {
         // Except you are still allowed to view your own user picture.
         $this->assertTrue(user_picture::allow_view($user->id));
     }
+
+    /**
+     * A user without a picture is exported as initials only, matching what the rendered picture shows.
+     */
+    public function test_export_avatar_data_initials(): void {
+        global $PAGE;
+
+        $this->resetAfterTest();
+        $PAGE->set_url('/');
+        $user = $this->getDataGenerator()->create_user(['firstname' => 'Jane', 'lastname' => 'Doe', 'picture' => 0]);
+        $this->setUser($user);
+
+        $userpicture = new user_picture($user);
+        $data = $userpicture->export_avatar_data($PAGE);
+
+        $this->assertSame(['initials' => 'JD'], $data);
+        // The rendered picture shows the same initials, so the two cannot disagree.
+        $this->assertStringContainsString('>JD</span>', $PAGE->get_renderer('core')->render($userpicture));
+    }
+
+    /**
+     * A user with an uploaded picture is exported as the picture URL only.
+     */
+    public function test_export_avatar_data_uploaded_picture(): void {
+        global $PAGE;
+
+        $this->resetAfterTest();
+        $PAGE->set_url('/');
+        $user = $this->getDataGenerator()->create_user(['firstname' => 'Jane', 'lastname' => 'Doe', 'picture' => 7]);
+        $this->setUser($user);
+
+        $data = (new user_picture($user))->export_avatar_data($PAGE);
+
+        $this->assertSame(['imageurl'], array_keys($data));
+        $this->assertStringContainsString('/pluginfile.php/', $data['imageurl']);
+        $this->assertStringContainsString('/user/icon/', $data['imageurl']);
+    }
+
+    /**
+     * With Gravatar enabled a user without a picture is exported as the Gravatar URL, as the rendered picture shows
+     * an image rather than initials in that case.
+     */
+    public function test_export_avatar_data_gravatar(): void {
+        global $PAGE;
+
+        $this->resetAfterTest();
+        set_config('enablegravatar', 1);
+        $PAGE->set_url('/');
+        $user = $this->getDataGenerator()->create_user(['firstname' => 'Jane', 'lastname' => 'Doe', 'picture' => 0]);
+        $this->setUser($user);
+
+        $data = (new user_picture($user))->export_avatar_data($PAGE);
+
+        $this->assertSame(['imageurl'], array_keys($data));
+        $this->assertStringContainsString('gravatar.com/avatar/', $data['imageurl']);
+    }
 }

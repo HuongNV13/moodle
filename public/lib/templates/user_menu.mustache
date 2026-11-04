@@ -33,6 +33,8 @@
       * id - The id of the submenu.
       * title - The title of the submenu.
       * items - Array of the submenu items used in core/user_action_menu_submenu_items.
+    * reactprops - JSON encoded props for the core/UserMenu React component, which replaces the HTML menu below once it
+      loads. The HTML menu is what shows until then, and when JavaScript is off.
 
     Example context (json):
     {
@@ -51,7 +53,8 @@
                 "title": "Submenu title",
                 "items": []
             }
-        ]
+        ],
+        "reactprops": "{\"userfirstname\":\"Admin\",\"label\":\"User menu\",\"avatars\":[],\"metadata\":[],\"items\":[]}"
     }
 }}
 <div class="usermenu">
@@ -67,6 +70,11 @@
         </span>
     {{/unauthenticateduser}}
     {{^unauthenticateduser}}
+        {{#react}}
+        {
+            "component": "@moodle/lms/core/UserMenu",
+            "props": {{{reactprops}}}
+        }
         <div class="dropdown show">
             <a href="#" role="button" id="user-menu-toggle" data-bs-toggle="dropdown" aria-label="{{#str}}usermenu{{/str}}"
                aria-haspopup="true" aria-controls="user-action-menu" class="btn dropdown-toggle">
@@ -104,6 +112,7 @@
                 </div>
             </div>
         </div>
+        {{/react}}
     {{/unauthenticateduser}}
 </div>
 {{#js}}

@@ -28,9 +28,9 @@ Feature: Language selector menu
     # The language selector is present within the user menu.
     And "Language" "link" should exist in the user menu
     When I follow "Language" in the user menu
-    Then I should see "Language selector" user submenu
-    And "English ‎(en)‎" "link" should exist in the "Language selector" user submenu
-    And "English (pirate) ‎(en_ar)‎" "link" should exist in the "Language selector" user submenu
+    Then I should see "Language" user submenu
+    And "English ‎(en)‎" "link" should exist in the "Language" user submenu
+    And "English (pirate) ‎(en_ar)‎" "link" should exist in the "Language" user submenu
 
   Scenario: Non-logged user is presented with a language selector which is placed within the navbar
     Given the following config values are set as admin:

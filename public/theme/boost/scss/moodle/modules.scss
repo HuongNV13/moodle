@@ -1227,6 +1227,15 @@ div#dock {
     }
 }
 
+.usermenu .userbutton .avatars .avatar {
+    > img,
+    > .userinitials {
+        width: var(--mds-avatars-md, 2rem);
+        height: var(--mds-avatars-md, 2rem);
+        margin: 0;
+    }
+}
+
 .userloggedinas .usermenu {
     .userbutton .avatars {
         position: relative;
@@ -1235,6 +1244,7 @@ div#dock {
             &.current {
                 display: inline-block;
                 position: absolute;
+                z-index: 1;
                 bottom: 0;
                 right: 0;
                 width: 20px;
@@ -1250,16 +1260,27 @@ div#dock {
                     background-color: var(--#{$prefix}white);
                     font-size: $font-size-base * .6;
                 }
+                &:has(.mds-avatar) {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-sizing: border-box;
+                    border: $border-width solid $border-color;
+                    background-color: var(--#{$prefix}white);
+                }
             }
-            img {
+            > img {
                 width: inherit;
                 height: inherit;
             }
         }
         .realuser {
-            width: 35px;
-            height: 35px;
             display: inline-block;
+            > img,
+            > .userinitials {
+                width: var(--mds-avatars-md, 2rem);
+                height: var(--mds-avatars-md, 2rem);
+            }
         }
     }
 }

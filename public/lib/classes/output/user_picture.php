@@ -259,6 +259,41 @@ class user_picture implements renderable {
     }
 
     /**
+     * Whether this picture is shown as the user's initials rather than as an image.
+     *
+     * Initials are generated for users who have not uploaded a picture, unless Gravatar is enabled. They are not
+     * used on a Behat site, where a stable image is easier to assert on.
+     *
+     * @return bool
+     */
+    public function uses_initials(): bool {
+        global $CFG;
+
+        return $this->user->picture == 0 && empty($CFG->enablegravatar) && !defined('BEHAT_SITE_RUNNING');
+    }
+
+    /**
+     * Export the picture as data for the React user avatar component.
+     *
+     * This is the data equivalent of the HTML rendered for this picture: either the user's initials, or the URL of
+     * their picture, never both.
+     *
+     * @param moodle_page $page
+     * @param null|renderer_base $renderer
+     * @return array Either ['initials' => string] or ['imageurl' => string].
+     */
+    public function export_avatar_data(
+        moodle_page $page,
+        ?renderer_base $renderer = null,
+    ): array {
+        if ($this->uses_initials()) {
+            return ['initials' => \core_user::get_initials($this->user)];
+        }
+
+        return ['imageurl' => $this->get_url($page, $renderer)->out(false)];
+    }
+
+    /**
      * Works out the URL for the users picture.
      *
      * This method is recommended as it avoids costly redirects of user pictures

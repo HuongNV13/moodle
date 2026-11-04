@@ -10,5 +10,13 @@
   "EditModeSwitch": {
     "eject": "risky",
     "wrap": "risky"
+  },
+  "UserAvatar": {
+    "eject": "risky",
+    "wrap": "risky"
+  },
+  "UserMenu": {
+    "eject": "risky",
+    "wrap": "risky"
   }
 }

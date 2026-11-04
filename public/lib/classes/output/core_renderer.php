@@ -2374,8 +2374,6 @@ class core_renderer extends renderer_base {
      * @return string
      */
     protected function render_user_picture(user_picture $userpicture) {
-        global $CFG;
-
         $user = $userpicture->user;
         $canviewfullnames = has_capability('moodle/site:viewfullnames', $this->page->context);
 
@@ -2421,7 +2419,7 @@ class core_renderer extends renderer_base {
         }
 
         // Get the image html output first, auto generated based on initials if one isn't already set.
-        if ($user->picture == 0 && empty($CFG->enablegravatar) && !defined('BEHAT_SITE_RUNNING')) {
+        if ($userpicture->uses_initials()) {
             $initials = \core_user::get_initials($user);
             $fullname = fullname($userpicture->user, $canviewfullnames);
             // Don't modify in corner cases where neither the firstname nor the lastname appears.

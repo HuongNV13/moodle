@@ -413,6 +413,137 @@ class primary implements renderable, templatable {
     }
 
     /**
+     * Export the user menu items as data for the core/UserMenu React component.
+     *
+     * Dividers are separate entries, placed after the item that asked for one, and items that cannot be shown
+     * (invalid ones) are left out. The order of the items is kept, including items added by plugins and admins.
+     *
+     * @param array $navitems The user menu items, from \core\user::get_user_navigation_info().
+     * @param array $submenus The submenus the items can open, each with an id, a title and its items.
+     * @param renderer_base $output
+     * @return array The menu items, each an array with a 'type' of link, header, text, submenu or divider.
+     */
+    public function export_user_menu_items(
+        array $navitems,
+        array $submenus,
+        renderer_base $output,
+    ): array {
+        $submenusbyid = [];
+        foreach ($submenus as $submenu) {
+            $submenusbyid[$submenu->id] = $submenu;
+        }
+
+        $items = [];
+        foreach ($navitems as $item) {
+            switch ($item->itemtype ?? '') {
+                case 'link':
+                    $items[] = [
+                        'type' => 'link',
+                        'title' => (string) $item->title,
+                        'url' => (string) $item->url,
+                        'iconhtml' => $this->export_user_menu_icon($item, $output),
+                        'classes' => array_values($item->classes ?? []),
+                        'attributes' => array_values($item->attributes ?? []),
+                    ];
+                    break;
+                case 'header':
+                    $items[] = [
+                        'type' => 'header',
+                        'title' => (string) $item->title,
+                        'classes' => array_values($item->classes ?? []),
+                        'attributes' => array_values($item->attributes ?? []),
+                    ];
+                    break;
+                case 'text':
+                    $items[] = [
+                        'type' => 'text',
+                        'content' => (string) $item->content,
+                        'classes' => array_values($item->classes ?? []),
+                        'attributes' => array_values($item->attributes ?? []),
+                    ];
+                    break;
+                case 'submenu-link':
+                    if (!isset($submenusbyid[$item->submenuid])) {
+                        break;
+                    }
+                    $items[] = [
+                        'type' => 'submenu',
+                        'title' => (string) $item->title,
+                        'iconhtml' => $this->export_user_menu_icon($item, $output),
+                        'items' => array_map(fn(array $link): array => [
+                            'title' => (string) $link['text'],
+                            'url' => (string) $link['url'],
+                            'active' => !empty($link['isactive']),
+                            'attributes' => array_map(
+                                fn(array $attribute): array => ['name' => $attribute['key'], 'value' => $attribute['value']],
+                                $link['attributes'] ?? [],
+                            ),
+                        ], array_values($submenusbyid[$item->submenuid]->items)),
+                    ];
+                    break;
+            }
+            if (!empty($item->divider)) {
+                $items[] = ['type' => 'divider'];
+            }
+        }
+
+        return $items;
+    }
+
+    /**
+     * Render the icon of a user menu item as HTML, the same way the menu templates do.
+     *
+     * @param \stdClass $item The user menu item.
+     * @param renderer_base $output
+     * @return string The icon HTML, or an empty string when the item has no icon.
+     */
+    private function export_user_menu_icon(
+        \stdClass $item,
+        renderer_base $output,
+    ): string {
+        if (!empty($item->pixicon)) {
+            if (is_array($item->pixicon)) {
+                $icon = $item->pixicon;
+                return $output->pix_icon($icon['key'], $icon['title'] ?? '', $icon['component'] ?: 'moodle');
+            }
+            return $output->pix_icon($item->pixicon, '');
+        }
+        if (!empty($item->imgsrc)) {
+            return \html_writer::empty_tag('img', [
+                'class' => 'icon',
+                'aria-hidden' => 'true',
+                'src' => $item->imgsrc,
+                'alt' => $item->title,
+            ]);
+        }
+        return '';
+    }
+
+    /**
+     * Export the props for a core/UserAvatar React component.
+     *
+     * @param array $avatardata Either ['initials' => string] or ['imageurl' => string], from user_picture::export_avatar_data().
+     * @param string $size The size of the avatar, one of the design system's avatar sizes.
+     * @param string $classname The class name of the element the avatar is in, which the theme styles.
+     * @return array The props.
+     */
+    private function export_avatar_props(
+        array $avatardata,
+        string $size,
+        string $classname,
+    ): array {
+        $props = ['size' => $size];
+        if (isset($avatardata['imageurl'])) {
+            $props['imageSrc'] = $avatardata['imageurl'];
+        }
+        if (isset($avatardata['initials'])) {
+            $props['initials'] = $avatardata['initials'];
+        }
+        $props['className'] = $classname;
+        return $props;
+    }
+
+    /**
      * Get/Generate the user menu.
      *
      * This is leveraging the data from \core\user::get_user_navigation_info() and the logic in $OUTPUT->user_menu()
@@ -439,10 +570,11 @@ class primary implements renderable, templatable {
             return (array) $info;
         }
         // Gather all the avatar data to be displayed in the user menu.
+        // When logged in as someone else, the current user is a small badge on the real user's avatar.
         $usermenudata['avatardata'][] = [
             'content' => $info->metadata['useravatar'],
-            'classes' => 'current'
-        ];
+            'classes' => 'current',
+        ] + $info->metadata['useravatardata'];
         $usermenudata['userfullname'] = $info->metadata['realuserfullname'] ?? $info->metadata['userfullname'];
         $usermenudata['userfirstname'] = $info->metadata['realuserfirstname'] ?? $info->metadata['userfirstname'];
 
@@ -450,8 +582,8 @@ class primary implements renderable, templatable {
         if ($info->metadata['asotheruser']) {
             $usermenudata['avatardata'][] = [
                 'content' => $info->metadata['realuseravatar'],
-                'classes' => 'realuser'
-            ];
+                'classes' => 'realuser',
+            ] + $info->metadata['realuseravatardata'];
             $usermenudata['metadata'][] = [
                 'content' => get_string('loggedinas', 'moodle', $info->metadata['userfullname']),
                 'classes' => 'viewingas'
@@ -523,6 +655,25 @@ class primary implements renderable, templatable {
         $info->navitems[count($info->navitems) - 2]->divider = true;
         $usermenudata['items'] = $info->navitems;
         $usermenudata['submenus'] = array_values($submenusdata);
+
+        // When logged in as someone else, the current user is a small badge on the real user's avatar.
+        $avatars = [
+            $this->export_avatar_props(
+                $info->metadata['useravatardata'],
+                $info->metadata['asotheruser'] ? 'xs' : 'md',
+                'current',
+            ),
+        ];
+        if ($info->metadata['asotheruser']) {
+            $avatars[] = $this->export_avatar_props($info->metadata['realuseravatardata'], 'md', 'realuser');
+        }
+        $usermenudata['reactprops'] = json_encode([
+            'userfirstname' => $usermenudata['userfirstname'],
+            'label' => get_string('usermenu'),
+            'avatars' => $avatars,
+            'metadata' => $usermenudata['metadata'] ?? [],
+            'items' => $this->export_user_menu_items($info->navitems, $submenusdata, $output),
+        ], JSON_THROW_ON_ERROR);
 
         return $usermenudata;
     }

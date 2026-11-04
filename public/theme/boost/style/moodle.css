@@ -42101,6 +42101,13 @@ div#dock {
   margin: 0;
 }
 
+.usermenu .userbutton .avatars .avatar > img,
+.usermenu .userbutton .avatars .avatar > .userinitials {
+  width: var(--mds-avatars-md, 2rem);
+  height: var(--mds-avatars-md, 2rem);
+  margin: 0;
+}
+
 .userloggedinas .usermenu .userbutton .avatars {
   position: relative;
   display: inline-block;
@@ -42108,6 +42115,7 @@ div#dock {
 .userloggedinas .usermenu .userbutton .avatars .avatar.current {
   display: inline-block;
   position: absolute;
+  z-index: 1;
   bottom: 0;
   right: 0;
   width: 20px;
@@ -42124,14 +42132,25 @@ div#dock {
   background-color: var(--bs-white);
   font-size: 0.6rem;
 }
-.userloggedinas .usermenu .userbutton .avatars .avatar img {
+.userloggedinas .usermenu .userbutton .avatars .avatar.current:has(.mds-avatar) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 1px solid #dee2e6;
+  background-color: var(--bs-white);
+}
+.userloggedinas .usermenu .userbutton .avatars .avatar > img {
   width: inherit;
   height: inherit;
 }
 .userloggedinas .usermenu .userbutton .avatars .realuser {
-  width: 35px;
-  height: 35px;
   display: inline-block;
+}
+.userloggedinas .usermenu .userbutton .avatars .realuser > img,
+.userloggedinas .usermenu .userbutton .avatars .realuser > .userinitials {
+  width: var(--mds-avatars-md, 2rem);
+  height: var(--mds-avatars-md, 2rem);
 }
 
 .userinitials {
@@ -45921,6 +45940,22 @@ div.editor_atto_toolbar button .icon {
   align-items: center;
   height: 100%;
 }
+.navbar.fixed-top .usermenu > [data-react-component] {
+  display: flex;
+}
+.navbar.fixed-top .usermenu .mds-dropdown {
+  flex-direction: row;
+  align-items: center;
+  height: 100%;
+}
+.navbar.fixed-top .usermenu .mds-dropdown .dropdown-toggle {
+  padding-top: 0;
+  padding-bottom: 0;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
 .navbar.fixed-top .usermenu .userfirstname {
   margin-inline: 0.5rem;
   max-width: 20ch;
@@ -46117,6 +46152,10 @@ div.editor_atto_toolbar button .icon {
   .navbar.fixed-top #usernavigation .search-input-inline.expanded .searchform-navbar .form-control {
     padding-right: 2rem;
   }
+}
+
+.mds-dropdown-menu {
+  z-index: 1031;
 }
 
 /**

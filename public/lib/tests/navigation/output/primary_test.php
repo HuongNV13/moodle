@@ -689,6 +689,220 @@ final class primary_test extends \advanced_testcase {
     }
 
     /**
+     * Test that get_user_menu exports the current user's avatar as data for the React avatar, alongside the HTML.
+     */
+    public function test_get_user_menu_exports_avatar_data(): void {
+        global $PAGE;
+        $this->resetAfterTest();
+
+        $PAGE->set_url('/');
+        $user = $this->getDataGenerator()->create_user(['firstname' => 'Jane', 'lastname' => 'Doe', 'picture' => 0]);
+        $this->setUser($user);
+        $PAGE->initialise_theme_and_output();
+
+        $primary = new \core\navigation\output\primary($PAGE);
+        $usermenu = $primary->get_user_menu($PAGE->get_renderer('core'));
+
+        $this->assertCount(1, $usermenu['avatardata']);
+        $avatar = $usermenu['avatardata'][0];
+        $this->assertEquals('current', $avatar['classes']);
+        $this->assertEquals('JD', $avatar['initials']);
+        $this->assertArrayNotHasKey('imageurl', $avatar);
+        // The existing HTML is kept so themes and plugins that override the templates keep working.
+        $this->assertNotEmpty($avatar['content']);
+        // The React user menu renders the same avatar.
+        $props = json_decode($usermenu['reactprops'], true);
+        $this->assertEquals([['size' => 'md', 'initials' => 'JD', 'className' => 'current']], $props['avatars']);
+    }
+
+    /**
+     * Test that the user menu items are exported for the React user menu, keeping their order and types.
+     */
+    public function test_export_user_menu_items(): void {
+        global $PAGE;
+        $this->resetAfterTest();
+
+        $PAGE->set_url('/');
+        $PAGE->initialise_theme_and_output();
+        $renderer = $PAGE->get_renderer('core');
+
+        $navitems = [
+            (object) [
+                'itemtype' => 'link',
+                'link' => true,
+                'url' => new \moodle_url('/user/profile.php', ['id' => 2]),
+                'title' => 'Profile',
+                'classes' => ['fw-bold'],
+                'attributes' => [['name' => 'data-custom', 'value' => '1']],
+                'imgsrc' => 'https://example.com/icon.png',
+                'divider' => true,
+            ],
+            (object) ['itemtype' => 'header', 'header' => true, 'title' => 'Section', 'classes' => [], 'attributes' => []],
+            (object) ['itemtype' => 'text', 'text' => true, 'content' => 'Some text', 'classes' => ['small'], 'attributes' => []],
+            (object) ['itemtype' => 'invalid', 'title' => 'Broken', 'url' => null],
+            (object) [
+                'itemtype' => 'submenu-link',
+                'submenulink' => true,
+                'submenuid' => 'abc',
+                'title' => 'Language',
+                'divider' => false,
+            ],
+            (object) ['itemtype' => 'divider', 'divider' => true],
+            (object) [
+                'itemtype' => 'link',
+                'link' => true,
+                'url' => new \moodle_url('/login/logout.php'),
+                'title' => 'Log out',
+                'pixicon' => ['key' => 'i/logout', 'component' => 'core', 'title' => 'Log out'],
+            ],
+        ];
+        $submenus = [
+            (object) [
+                'id' => 'abc',
+                'title' => 'Language selector',
+                'items' => [
+                    [
+                        'title' => 'English',
+                        'text' => 'English',
+                        'link' => true,
+                        'isactive' => true,
+                        'url' => new \moodle_url('#'),
+                    ],
+                    [
+                        'title' => 'Español',
+                        'text' => 'Español',
+                        'link' => true,
+                        'isactive' => false,
+                        'url' => new \moodle_url('/', ['lang' => 'es']),
+                        'attributes' => [['key' => 'lang', 'value' => 'es']],
+                    ],
+                ],
+            ],
+        ];
+
+        $primary = new \core\navigation\output\primary($PAGE);
+        $items = $primary->export_user_menu_items($navitems, $submenus, $renderer);
+
+        $this->assertSame(
+            ['link', 'divider', 'header', 'text', 'submenu', 'divider', 'link'],
+            array_column($items, 'type'),
+        );
+
+        // A link keeps its url, plugin classes and attributes, and gets its icon as HTML.
+        $this->assertSame('Profile', $items[0]['title']);
+        $this->assertSame((string) new \moodle_url('/user/profile.php', ['id' => 2]), $items[0]['url']);
+        $this->assertSame(['fw-bold'], $items[0]['classes']);
+        $this->assertSame([['name' => 'data-custom', 'value' => '1']], $items[0]['attributes']);
+        $this->assertStringContainsString('src="https://example.com/icon.png"', $items[0]['iconhtml']);
+
+        // Headers and text.
+        $this->assertSame('Section', $items[2]['title']);
+        $this->assertSame('Some text', $items[3]['content']);
+        $this->assertSame(['small'], $items[3]['classes']);
+
+        // A submenu link takes its items from the matching submenu, with attributes as name and value.
+        $this->assertSame('Language', $items[4]['title']);
+        $this->assertSame(
+            [
+                ['title' => 'English', 'url' => '#', 'active' => true, 'attributes' => []],
+                [
+                    'title' => 'Español',
+                    'url' => (string) new \moodle_url('/', ['lang' => 'es']),
+                    'active' => false,
+                    'attributes' => [['name' => 'lang', 'value' => 'es']],
+                ],
+            ],
+            $items[4]['items'],
+        );
+
+        // A pix icon is rendered as HTML, and an item without an icon has none.
+        $this->assertNotSame('', $items[6]['iconhtml']);
+        $this->assertSame('', $items[2]['iconhtml'] ?? '');
+    }
+
+    /**
+     * Test that the user menu template mounts the React user menu, with the HTML menu inside it for before it loads.
+     */
+    public function test_user_menu_template_mounts_react_user_menu(): void {
+        global $PAGE;
+        $this->resetAfterTest();
+
+        $PAGE->set_url('/');
+        $user = $this->getDataGenerator()->create_user(['firstname' => 'Jane', 'lastname' => 'Doe', 'picture' => 0]);
+        $this->setUser($user);
+        $PAGE->initialise_theme_and_output();
+        $renderer = $PAGE->get_renderer('core');
+
+        $primary = new \core\navigation\output\primary($PAGE);
+        $html = $renderer->render_from_template('core/user_menu', $primary->get_user_menu($renderer));
+
+        $this->assertStringContainsString('data-react-component="@moodle/lms/core/UserMenu"', $html);
+        $this->assertStringContainsString('"userfirstname":"Jane"', $html);
+        // The HTML menu is still there for before the component loads, and for when JavaScript is off.
+        $this->assertStringContainsString('class="userinitials', $html);
+        $this->assertStringContainsString('/login/logout.php', $html);
+        // The avatar is rendered by the user menu, so it must not be a second mount point nested inside it.
+        $this->assertSame(1, substr_count($html, 'data-react-component='));
+    }
+
+    /**
+     * Test the props that get_user_menu hands to the React user menu.
+     */
+    public function test_get_user_menu_exports_react_props(): void {
+        global $PAGE;
+        $this->resetAfterTest();
+
+        $PAGE->set_url('/');
+        $user = $this->getDataGenerator()->create_user(['firstname' => 'Jane', 'lastname' => 'Doe']);
+        $this->setUser($user);
+        $PAGE->initialise_theme_and_output();
+
+        $primary = new \core\navigation\output\primary($PAGE);
+        $usermenu = $primary->get_user_menu($PAGE->get_renderer('core'));
+        $props = json_decode($usermenu['reactprops'], true);
+
+        $this->assertSame('Jane', $props['userfirstname']);
+        $this->assertSame(get_string('usermenu'), $props['label']);
+        $this->assertSame([], $props['metadata']);
+        $this->assertNotEmpty($props['items']);
+        $last = end($props['items']);
+        $this->assertSame('link', $last['type']);
+        $this->assertStringContainsString('/login/logout.php', $last['url']);
+    }
+
+    /**
+     * Test that get_user_menu exports an avatar for both users when logged in as another user.
+     */
+    public function test_get_user_menu_exports_avatar_data_when_logged_in_as(): void {
+        global $PAGE;
+        $this->resetAfterTest();
+
+        $this->setAdminUser();
+        $target = $this->getDataGenerator()->create_user(['firstname' => 'Jane', 'lastname' => 'Doe', 'picture' => 0]);
+        \core\session\manager::loginas($target->id, \context_system::instance(), false);
+        $PAGE->set_url('/');
+        $PAGE->initialise_theme_and_output();
+
+        $primary = new \core\navigation\output\primary($PAGE);
+        $usermenu = $primary->get_user_menu($PAGE->get_renderer('core'));
+
+        $this->assertCount(2, $usermenu['avatardata']);
+        $this->assertEquals('current', $usermenu['avatardata'][0]['classes']);
+        $this->assertEquals('JD', $usermenu['avatardata'][0]['initials']);
+        $this->assertEquals('realuser', $usermenu['avatardata'][1]['classes']);
+        $this->assertEquals('AU', $usermenu['avatardata'][1]['initials']);
+        // The user being viewed as is shown as a small badge on the real user's avatar.
+        $props = json_decode($usermenu['reactprops'], true);
+        $this->assertEquals(
+            [
+                ['size' => 'xs', 'initials' => 'JD', 'className' => 'current'],
+                ['size' => 'md', 'initials' => 'AU', 'className' => 'realuser'],
+            ],
+            $props['avatars'],
+        );
+    }
+
+    /**
      * Traverse the menu array structure (all nodes recursively) and fetch the node texts from the menu nodes that are
      * active/open (determined via param $nodetype that can be "inactive" or "isopen"). The returned array contains a
      * list of nade names that match this criterion.

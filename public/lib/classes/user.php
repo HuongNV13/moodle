@@ -2505,6 +2505,28 @@ class user {
     }
 
     /**
+     * Export a user's avatar as data for the React user avatar component.
+     *
+     * @param stdClass $user The user to export the avatar for.
+     * @param \moodle_page $page The current page.
+     * @param array $avataroptions The options used to render the HTML avatar, only 'size' is used.
+     * @return array Either ['initials' => string] or ['imageurl' => string].
+     */
+    private static function export_avatar_data(
+        stdClass $user,
+        \moodle_page $page,
+        array $avataroptions,
+    ): array {
+        global $OUTPUT;
+
+        $userpicture = new \core\output\user_picture($user);
+        if (isset($avataroptions['size'])) {
+            $userpicture->size = $avataroptions['size'];
+        }
+        return $userpicture->export_avatar_data($page, $OUTPUT);
+    }
+
+    /**
      * Get a list of essential user navigation items.
      *
      * @param stdClass $user user object.
@@ -2542,6 +2564,7 @@ class user {
             $avataroptions['size'] = $options['avatarsize'];
         }
         $returnobject->metadata['useravatar'] = $OUTPUT->user_picture($user, $avataroptions);
+        $returnobject->metadata['useravatardata'] = self::export_avatar_data($user, $page, $avataroptions);
 
         if ($returnobject->metadata['asmnetuser'] = is_mnet_remote_user($user)) {
             $mnetidprovider = $DB->get_record('mnet_host', ['id' => $user->mnethostid]);
@@ -2631,6 +2654,7 @@ class user {
                 ? $CFG->forcefirstname : $realuser->firstname;
             $returnobject->metadata['realuserprofileurl'] = new url('/user/profile.php', ['id' => $realuser->id]);
             $returnobject->metadata['realuseravatar'] = $OUTPUT->user_picture($realuser, $avataroptions);
+            $returnobject->metadata['realuseravatardata'] = self::export_avatar_data($realuser, $page, $avataroptions);
 
             $userrevert = new stdClass();
             $userrevert->itemtype = 'link';
