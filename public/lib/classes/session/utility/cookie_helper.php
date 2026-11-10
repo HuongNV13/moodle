@@ -98,7 +98,7 @@ final class cookie_helper {
             return self::cookie_response_header_matches_name($val, 'MoodleSession'.$CFG->sessioncookie);
         });
         if (!empty($setcookieheader)) {
-            $expirestr = 'Expires='.gmdate(DATE_RFC7231, time() - 60);
+            $expirestr = 'Expires=' . gmdate(\core_date::HTTP_DATE_FORMAT, time() - 60);
             self::add_attributes_to_cookie_response_header('MoodleSession'.$CFG->sessioncookie, [$expirestr]);
         } else {
             setcookie('MoodleSession'.$CFG->sessioncookie, '', time() - 60);
