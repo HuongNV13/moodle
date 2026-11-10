@@ -24,6 +24,7 @@
 
 import {call as fetchMany} from 'core/ajax';
 import Notification from 'core/notification';
+import Pending from 'core/pending';
 
 /**
  * Set the question version for the slot.
@@ -52,12 +53,19 @@ const registerEventListeners = () => {
         const slotId = e.target.dataset.slotId;
         const newVersion = parseInt(e.target.value);
 
+        // Keep this pending until the page has been reloaded. It is intentionally not resolved on success, because the
+        // reload discards the document. Otherwise automated tests could act on the old page while it is unloading.
+        const pendingPromise = new Pending('mod_quiz/question_slot:setversion');
+
         setQuestionVersion(slotId, newVersion === 0 ? null : newVersion)
             .then(() => {
                 location.reload();
                 return;
             })
-            .catch(Notification.exception);
+            .catch((error) => {
+                pendingPromise.resolve();
+                return Notification.exception(error);
+            });
     });
 };
 
