@@ -33,6 +33,13 @@
  * @author    Petr Skoda <petr.skoda@totaralms.com>
  */
 class core_date {
+    /**
+     * HTTP-date format (RFC 9110 IMF-fixdate, formerly RFC 7231) for use with a UTC/GMT date.
+     *
+     * Replaces the PHP 8.5 deprecated DATE_RFC7231 and DateTimeInterface::RFC7231 constants.
+     */
+    public const HTTP_DATE_FORMAT = 'D, d M Y H:i:s \\G\\M\\T';
+
     /** @var array list of recommended zones */
     protected static $goodzones = null;
 

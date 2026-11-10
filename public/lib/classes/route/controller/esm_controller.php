@@ -140,11 +140,11 @@ class esm_controller {
             ->withHeader('Accept-Ranges', 'none')
             ->withHeader(
                 'Last-Modified',
-                $modified->format(\DateTimeInterface::RFC7231)
+                $modified->format(\core_date::HTTP_DATE_FORMAT)
             )
             ->withHeader(
                 'Expires',
-                $expiry->format(\DateTimeInterface::RFC7231)
+                $expiry->format(\core_date::HTTP_DATE_FORMAT)
             );
 
         if ($etag) {

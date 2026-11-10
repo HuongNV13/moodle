@@ -36,6 +36,38 @@ defined('MOODLE_INTERNAL') || die();
 #[\PHPUnit\Framework\Attributes\CoversClass(\core_date::class)]
 #[\PHPUnit\Framework\Attributes\CoversClass(\core_date::class)]
 final class date_test extends advanced_testcase {
+    /**
+     * Test that the HTTP date format produces valid RFC 9110 / RFC 7231 IMF-fixdate output.
+     *
+     * The expected strings are hard-coded on purpose so that any change to the format string is caught.
+     *
+     * @param int $timestamp
+     * @param string $expected
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('http_date_format_provider')]
+    public function test_http_date_format(int $timestamp, string $expected): void {
+        $this->assertSame('D, d M Y H:i:s \G\M\T', core_date::HTTP_DATE_FORMAT);
+        $this->assertSame($expected, gmdate(core_date::HTTP_DATE_FORMAT, $timestamp));
+
+        $date = (new \DateTimeImmutable('@' . $timestamp))->setTimezone(new \DateTimeZone('UTC'));
+        $this->assertSame($expected, $date->format(core_date::HTTP_DATE_FORMAT));
+    }
+
+    /**
+     * Data provider for test_http_date_format.
+     *
+     * @return array
+     */
+    public static function http_date_format_provider(): array {
+        return [
+            'Epoch' => [0, 'Thu, 01 Jan 1970 00:00:00 GMT'],
+            'Past date' => [1700000000, 'Tue, 14 Nov 2023 22:13:20 GMT'],
+            'Single digit day is zero padded' => [1704067205, 'Mon, 01 Jan 2024 00:00:05 GMT'],
+            'Leap day' => [1709210096, 'Thu, 29 Feb 2024 12:34:56 GMT'],
+            'End of year' => [1798761599, 'Thu, 31 Dec 2026 23:59:59 GMT'],
+        ];
+    }
+
     public function test_get_default_php_timezone(): void {
         $this->resetAfterTest();
 
