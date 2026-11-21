@@ -225,6 +225,15 @@ $functions = array(
         'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
+    'mod_forum_mark_discussion_read' => [
+        'classname' => 'mod_forum\external\mark_discussion_read',
+        'methodname' => 'execute',
+        'description' => 'Mark all unread posts of a discussion as read for the current user.',
+        'type' => 'write',
+        'ajax' => true,
+        'capabilities' => 'mod/forum:viewdiscussion',
+    ],
+
     'mod_forum_set_read_state' => [
         'classname' => 'mod_forum\external\set_read_state',
         'methodname' => 'execute',
