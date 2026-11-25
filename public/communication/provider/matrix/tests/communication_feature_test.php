@@ -37,6 +37,7 @@ require_once(__DIR__ . '/../../../tests/communication_test_helper_trait.php');
  */
 #[\PHPUnit\Framework\Attributes\CoversClass(\communication_matrix\communication_feature::class)]
 #[\PHPUnit\Framework\Attributes\CoversClass(\communication_matrix\communication_feature::class)]
+#[\PHPUnit\Framework\Attributes\Group('noparallel')]
 final class communication_feature_test extends \advanced_testcase {
     use matrix_test_helper_trait;
     use communication_test_helper_trait;

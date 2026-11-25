@@ -32,6 +32,7 @@ require_once(__DIR__ . '/communication_test_helper_trait.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 #[\PHPUnit\Framework\Attributes\CoversClass(\core_communication\helper::class)]
+#[\PHPUnit\Framework\Attributes\Group('noparallel')]
 final class helper_test extends \advanced_testcase {
     use communication_test_helper_trait;
     use matrix_test_helper_trait;
