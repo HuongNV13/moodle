@@ -163,3 +163,54 @@ function phpunit_update_vars_for_process(): void {
         }
     }
 }
+
+/**
+ * Get the path of the file recording the number of parallel processes the test sites were initialised for.
+ *
+ * The file is in the phpunit directory of the main phpunit_dataroot, as everything else in the dataroot is wiped when
+ * it is reset. It is removed when the main test site is dropped, like all the other data of the test site.
+ * It needs $CFG->phpunit_dataroot, so config.php must have been loaded.
+ *
+ * @return string
+ */
+function phpunit_get_parallel_config_path(): string {
+    global $CFG;
+
+    if (!isset($CFG->phpunit_dataroot)) {
+        phpunit_bootstrap_error(PHPUNIT_EXITCODE_CONFIGERROR, 'Missing $CFG->phpunit_dataroot in config.php, can not run tests!');
+    }
+
+    return rtrim($CFG->phpunit_dataroot, '/\\') . '/phpunit/paratest.json';
+}
+
+/**
+ * Get the number of parallel processes the test sites were initialised for.
+ *
+ * @return int The number of processes, or 0 when the test site was not initialised for parallel runs.
+ */
+function phpunit_get_parallel_config(): int {
+    $path = phpunit_get_parallel_config_path();
+    if (!is_readable($path)) {
+        return 0;
+    }
+
+    $config = json_decode(file_get_contents($path), true);
+    return max(0, (int) ($config['parallel'] ?? 0));
+}
+
+/**
+ * Record the number of parallel processes the test sites were initialised for.
+ *
+ * @param int $processes The number of processes, 0 to remove the record.
+ */
+function phpunit_set_parallel_config(int $processes): void {
+    $path = phpunit_get_parallel_config_path();
+    if ($processes > 0) {
+        if (!is_dir(dirname($path))) {
+            mkdir(dirname($path), 02777, true);
+        }
+        file_put_contents($path, json_encode(['parallel' => $processes]));
+    } else if (file_exists($path)) {
+        unlink($path);
+    }
+}

@@ -53,9 +53,11 @@ list($options, $unrecognized) = cli_get_params(
         'disable-composer'     => false,
         'composer-upgrade'     => true,
         'composer-self-update' => true,
+        'parallel'             => 0,
     ],
     [
         'h' => 'help',
+        'j' => 'parallel',
     ]
 );
 
@@ -64,7 +66,7 @@ Utilities to initialise the PHPUnit test site.
 
 Usage:
   php init.php [--no-composer-self-update] [--no-composer-upgrade]
-               [--help]
+               [--parallel=N] [--help]
 
 --no-composer-self-update
                     Prevent upgrade of the composer utility using its self-update command
@@ -75,6 +77,12 @@ Usage:
 --disable-composer
                     A shortcut to disable composer self-update and dependency update
                     Note: Installation of composer and/or dependencies will still happen as required
+
+-j, --parallel=N    Initialise N separate test sites, one for each process of a parallel run.
+                    Process n uses its own data directory and database prefix, see
+                    \$CFG->phpunit_parallel_run in config-dist.php.
+                    run.php then runs the tests in parallel automatically. Initialising without
+                    this option (or with 1) goes back to a single process.
 
 -h, --help          Print out this help
 
@@ -106,24 +114,74 @@ if ($code != 0) {
 }
 
 chdir(__DIR__);
-$output = null;
-exec("php util.php --diag", $output, $code);
-if ($code == PHPUNIT_EXITCODE_INSTALL) {
-    passthru("php util.php --install", $code);
-    if ($code != 0) {
-        exit($code);
+
+if ($options['parallel'] === true) {
+    // A short option needs an equals sign, like -j=4, otherwise it has no value.
+    phpunit_bootstrap_error(1, '--parallel needs a number of processes, for example --parallel=4 or -j=4.');
+}
+$parallel = (int) $options['parallel'];
+if ($parallel < 0) {
+    phpunit_bootstrap_error(1, '--parallel must be a positive integer.');
+}
+if ($parallel < 2) {
+    // A single process is not run in parallel.
+    $parallel = 0;
+}
+
+// The test site is initialised for the number of processes from now on, to let run.php know how to run the tests.
+define('CLI_SCRIPT', true);
+define('ABORT_AFTER_CONFIG', true);
+require(__DIR__ . '/../../../../config.php');
+phpunit_set_parallel_config(0);
+
+/**
+ * Initialise the test site of a process, installing or reinstalling it as required.
+ *
+ * @param int $process The parallel run process number starting from 1, or 0 for the main test site.
+ */
+function phpunit_init_site(int $process): void {
+    if ($process) {
+        echo "\nInitialising the test site of parallel process {$process}...\n";
+        putenv('PARATEST=1');
+        putenv("TEST_TOKEN={$process}");
+    } else {
+        putenv('PARATEST');
+        putenv('TEST_TOKEN');
     }
 
-} else if ($code == PHPUNIT_EXITCODE_REINSTALL) {
-    passthru("php util.php --drop", $code);
-    passthru("php util.php --install", $code);
-    if ($code != 0) {
+    $output = null;
+    exec("php util.php --diag", $output, $code);
+    if ($code == PHPUNIT_EXITCODE_INSTALL) {
+        passthru("php util.php --install", $code);
+        if ($code != 0) {
+            exit($code);
+        }
+
+    } else if ($code == PHPUNIT_EXITCODE_REINSTALL) {
+        passthru("php util.php --drop", $code);
+        passthru("php util.php --install", $code);
+        if ($code != 0) {
+            exit($code);
+        }
+
+    } else if ($code != 0) {
+        echo implode("\n", $output) . "\n";
         exit($code);
     }
+}
 
-} else if ($code != 0) {
-    echo implode("\n", $output)."\n";
-    exit($code);
+if ($parallel) {
+    // The main test site is needed too, as ParaTest uses it to load the tests.
+    phpunit_init_site(0);
+    for ($process = 1; $process <= $parallel; $process++) {
+        phpunit_init_site($process);
+    }
+    phpunit_set_parallel_config($parallel);
+    // The configuration is shared, build it without the settings of any process.
+    putenv('PARATEST');
+    putenv('TEST_TOKEN');
+} else {
+    phpunit_init_site(0);
 }
 
 passthru("php util.php --buildconfig", $code);
