@@ -82,3 +82,84 @@ function phpunit_bootstrap_error($errorcode, $text = '') {
 
     testing_error($errorcode, $text);
 }
+
+/**
+ * Get the number of the parallel run process this script is running in.
+ *
+ * Parallel runs are driven by ParaTest, which sets PARATEST=1 and TEST_TOKEN=n (1..N) in the environment of each worker.
+ * Both must be present so that an unrelated TEST_TOKEN in the environment does not switch on parallel mode.
+ *
+ * @return int The process number starting from 1, or 0 when this is not a parallel run.
+ */
+function phpunit_get_run_process(): int {
+    if (!getenv('PARATEST')) {
+        return 0;
+    }
+
+    $token = getenv('TEST_TOKEN');
+    if ($token === false || $token === '') {
+        return 0;
+    }
+
+    if (!ctype_digit($token) || (int) $token < 1) {
+        phpunit_bootstrap_error(
+            PHPUNIT_EXITCODE_CONFIGERROR,
+            "Invalid TEST_TOKEN '{$token}', it must be a positive integer, can not run tests!",
+        );
+    }
+
+    return (int) $token;
+}
+
+/**
+ * Fix the phpunit_* variables for a parallel run process.
+ *
+ * Every process gets its own data directory and database prefix, so that the processes do not interfere with each other:
+ * - phpunit_dataroot = phpunit_dataroot/phpunit/phpunitrun{process}
+ * - phpunit_prefix = phpunit_prefix with the process number before the trailing underscore (phpu_ becomes phpu1_)
+ *
+ * The values can be overridden per process via $CFG->phpunit_parallel_run, indexed from 0, for example:
+ * $CFG->phpunit_parallel_run = [
+ *     ['phpunit_dataroot' => '/path/one', 'phpunit_prefix' => 'one_', 'phpunit_dbname' => 'phpunit1'],
+ *     ['phpunit_dataroot' => '/path/two', 'phpunit_prefix' => 'two_', 'phpunit_dbname' => 'phpunit2'],
+ * ];
+ *
+ * Nothing is changed when this is not a parallel run.
+ */
+function phpunit_update_vars_for_process(): void {
+    global $CFG;
+
+    $process = phpunit_get_run_process();
+    if (!$process) {
+        return;
+    }
+    $CFG->phpunit_parallel_process = $process;
+
+    $overrides = $CFG->phpunit_parallel_run[$process - 1] ?? [];
+    if (!is_array($overrides)) {
+        $overrides = [];
+    }
+
+    // The dataroot is inside the phpunit directory of the main one, because everything else in the main dataroot is
+    // wiped when it is reset. This way the processes only need write access to the main dataroot.
+    if (isset($CFG->phpunit_dataroot) && !isset($overrides['phpunit_dataroot'])) {
+        $CFG->phpunit_dataroot = rtrim($CFG->phpunit_dataroot, '/\\') . '/phpunit/phpunitrun' . $process;
+    }
+
+    // The process number goes before the trailing underscore (phpu_ becomes phpu1_), because the main site drops all
+    // the tables starting with its prefix, so the prefix of a process must not start with the main prefix.
+    // Only the number is added to keep the prefix short, as table names have a maximum length.
+    if (isset($CFG->phpunit_prefix) && !isset($overrides['phpunit_prefix'])) {
+        $CFG->phpunit_prefix = rtrim($CFG->phpunit_prefix, '_') . "{$process}_";
+    }
+
+    $allowedoverrides = [
+        'phpunit_dataroot', 'phpunit_prefix', 'phpunit_dbtype', 'phpunit_dblibrary', 'phpunit_dbhost',
+        'phpunit_dbname', 'phpunit_dbuser', 'phpunit_dbpass', 'phpunit_dboptions',
+    ];
+    foreach ($allowedoverrides as $name) {
+        if (isset($overrides[$name])) {
+            $CFG->{$name} = $overrides[$name];
+        }
+    }
+}

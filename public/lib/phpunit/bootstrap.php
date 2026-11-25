@@ -104,6 +104,10 @@ if (isset($CFG->phpunit_directorypermissions)) {
     $CFG->directorypermissions = 02777;
 }
 $CFG->filepermissions = ($CFG->directorypermissions & 0666);
+
+// When running in parallel each process uses its own dataroot and database prefix.
+phpunit_update_vars_for_process();
+
 if (!isset($CFG->phpunit_dataroot)) {
     phpunit_bootstrap_error(
         PHPUNIT_EXITCODE_CONFIGERROR,
@@ -113,7 +117,7 @@ if (!isset($CFG->phpunit_dataroot)) {
 
 // Create test dir if does not exists yet.
 if (!file_exists($CFG->phpunit_dataroot)) {
-    mkdir($CFG->phpunit_dataroot, $CFG->directorypermissions);
+    mkdir($CFG->phpunit_dataroot, $CFG->directorypermissions, true);
 }
 if (!is_dir($CFG->phpunit_dataroot)) {
     phpunit_bootstrap_error(

@@ -978,6 +978,17 @@ $CFG->admin = 'admin';
 // $CFG->phpunit_directorypermissions = 02777; // optional
 // $CFG->phpunit_profilingenabled = true; // optional to profile PHPUnit runs.
 //
+// When running PHPUnit in parallel (with ParaTest), each process automatically uses its own data directory
+// and database prefix. The data directory of process n is phpunit_dataroot/phpunit/phpunitrun{n}, and the prefix
+// is phpunit_prefix with the process number before its trailing underscore (phpu1_, phpu2_, ...).
+// To use different settings for some processes, set them for each process (the first is index 0):
+//   $CFG->phpunit_parallel_run = array(
+//       array('phpunit_dataroot' => '/home/example/phpu_moodledata1', 'phpunit_prefix' => 'phpu1_', 'phpunit_dbname' => 'phpunit1'),
+//       array('phpunit_dataroot' => '/home/example/phpu_moodledata2', 'phpunit_prefix' => 'phpu2_', 'phpunit_dbname' => 'phpunit2'),
+//   );
+// Supported keys: phpunit_dataroot, phpunit_prefix, phpunit_dbtype, phpunit_dblibrary, phpunit_dbhost,
+// phpunit_dbname, phpunit_dbuser, phpunit_dbpass and phpunit_dboptions.
+//
 //
 //=========================================================================
 // 10. SECRET PASSWORD SALT
