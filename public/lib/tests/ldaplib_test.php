@@ -223,6 +223,7 @@ final class ldaplib_test extends \advanced_testcase {
      * define('TEST_LDAPLIB_DOMAIN',  'dc=example,dc=local');
      *
      */
+    #[\PHPUnit\Framework\Attributes\Group('noparallel')]
     public function test_ldap_get_entries_moodle(): void {
         $this->resetAfterTest();
 
