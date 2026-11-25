@@ -302,6 +302,10 @@ final class overview_test extends \advanced_testcase {
      * @return \Generator
      */
     public static function get_extra_track_overview_provider(): \Generator {
+        global $CFG;
+        // The provider runs before setUpBeforeClass, and needs the constants defined in the library.
+        require_once($CFG->dirroot . '/mod/forum/lib.php');
+
         // Student role tests.
         yield 'Student. Tracking optional' => [
             'forumtype' => FORUM_TRACKING_OPTIONAL,
@@ -461,6 +465,10 @@ final class overview_test extends \advanced_testcase {
      * @return \Generator
      */
     public static function get_extra_subscribed_overview_provider(): \Generator {
+        global $CFG;
+        // The provider runs before setUpBeforeClass, and needs the constants defined in the library.
+        require_once($CFG->dirroot . '/mod/forum/lib.php');
+
         // Student role tests.
         yield 'Student. Tracking forced on' => [
             'forumtype' => FORUM_FORCESUBSCRIBE,
@@ -581,6 +589,10 @@ final class overview_test extends \advanced_testcase {
      * @return \Generator
      */
     public static function get_extra_emaildigest_overview_provider(): \Generator {
+        global $CFG;
+        // The provider runs before setUpBeforeClass, and needs the constants defined in the library.
+        require_once($CFG->dirroot . '/mod/forum/lib.php');
+
         // Student role tests.
         yield 'Student. Tracking forced on. No digest' => [
             'forumtype' => FORUM_FORCESUBSCRIBE,
