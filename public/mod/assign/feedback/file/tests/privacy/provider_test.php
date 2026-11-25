@@ -18,6 +18,9 @@ namespace assignfeedback_file\privacy;
 
 use mod_assign\privacy\assign_plugin_request_data;
 use assignfeedback_file\feedback_helper_trait;
+
+require_once(__DIR__ . '/../feedback_helper_trait.php');
+
 /**
  * Unit tests for mod/assign/feedback/file/classes/privacy/provider.
  *

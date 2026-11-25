@@ -19,6 +19,8 @@ namespace assignfeedback_comments\privacy;
 use assignfeedback_comments\feedback_helper_trait;
 use mod_assign\tests\provider_testcase;
 
+require_once(__DIR__ . '/../feedback_helper_trait.php');
+
 /**
  * Unit tests for mod/assign/feedback/comments/classes/privacy/
  *

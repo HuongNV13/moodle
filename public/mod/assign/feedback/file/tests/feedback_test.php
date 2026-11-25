@@ -23,7 +23,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/assign/tests/generator.php');
-require(__DIR__ . '/feedback_helper_trait.php');
+require_once(__DIR__ . '/feedback_helper_trait.php');
 
 /**
  * Unit tests for assignfeedback_file
