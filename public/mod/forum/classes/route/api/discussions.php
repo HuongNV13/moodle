@@ -18,13 +18,13 @@ namespace mod_forum\route\api;
 
 use core\exception\access_denied_exception;
 use core\exception\invalid_parameter_exception;
-use core\exception\not_found_exception;
 use core\param;
+use core\router\response\access_denied_response;
+use core\router\require_login;
 use core\router\route;
 use core\router\schema\example;
 use core\router\schema\objects\schema_object;
 use core\router\schema\objects\scalar_type;
-use core\router\schema\parameters\path_parameter;
 use core\router\schema\request_body;
 use core\router\schema\response\content\json_media_type;
 use core\router\schema\response\content\payload_response_type;
@@ -32,6 +32,9 @@ use core\router\schema\response\payload_response;
 use core\router\schema\response\response;
 use core\router\scope\scopeset;
 use mod_forum\local\container;
+use mod_forum\local\entities\discussion;
+use mod_forum\local\entities\forum;
+use mod_forum\route\parameters\path_discussion;
 use mod_forum\route\scope\discussion\read as discussion_read;
 use mod_forum\route\scope\discussion\write as discussion_write;
 use Psr\Http\Message\ResponseInterface;
@@ -40,13 +43,18 @@ use Psr\Http\Message\ServerRequestInterface;
 /**
  * REST API handlers for forum discussions.
  *
- * Resolves to /api/rest/v2/mod_forum/discussions.
+ * Resolves to /api/rest/v2/mod_forum/discussions/{discussionId}.
  *
  * @package   mod_forum
  * @copyright 2026 Phung Vo Anh <phung.voanh@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-#[route(path: '/discussions')]
+#[route(
+    path: '/discussions/{discussionId}',
+    pathtypes: [
+        new path_discussion(),
+    ],
+)]
 class discussions {
     /**
      * Update the state of a discussion for the current user.
@@ -56,21 +64,14 @@ class discussions {
      *
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
-     * @param int $discussionId The discussion identifier.
+     * @param discussion $discussion The discussion, loaded from the path parameter.
+     * @param forum $forum The forum the discussion belongs to.
      * @return payload_response
      */
     #[route(
-        path: '/{discussionId}',
         method: ['PATCH'],
         title: 'Update a discussion',
         description: 'Update the state of a discussion for the current user. Only read set to true is supported.',
-        pathtypes: [
-            new path_parameter(
-                name: 'discussionId',
-                type: param::INT,
-                description: 'The discussion identifier.',
-            ),
-        ],
         requestbody: new request_body(
             required: true,
             content: new payload_response_type(
@@ -83,6 +84,13 @@ class discussions {
                         ),
                     ],
                 ),
+                examples: [
+                    new example(
+                        name: 'Mark a discussion as read',
+                        summary: 'Marks every unread post in the discussion as read for the current user',
+                        value: ['read' => true],
+                    ),
+                ],
             ),
         ),
         responses: [
@@ -106,7 +114,9 @@ class discussions {
                     ),
                 ],
             ),
+            new access_denied_response(),
         ],
+        requirelogin: new require_login(false, true, 'course'),
     )]
     #[scopeset(
         new discussion_read(),
@@ -115,33 +125,22 @@ class discussions {
     public function update_discussion(
         ServerRequestInterface $request,
         ResponseInterface $response,
-        // The parameter name must match the {discussionId} path parameter for the router to inject it.
-        int $discussionId, // phpcs:ignore moodle.NamingConventions.ValidVariableName.VariableNameLowerCase
+        discussion $discussion,
+        forum $forum,
     ): payload_response {
         global $CFG, $USER;
 
         require_once($CFG->dirroot . '/mod/forum/lib.php');
 
-        $discussionid = $discussionId; // phpcs:ignore moodle.NamingConventions.ValidVariableName.VariableNameLowerCase
         $body = (array) $request->getParsedBody();
         // The request schema has already cleaned the value to a boolean-like 1 or 0.
         if (empty($body['read'])) {
             throw new invalid_parameter_exception("Only 'read' set to true is supported.");
         }
 
-        $vaultfactory = container::get_vault_factory();
-        $discussion = $vaultfactory->get_discussion_vault()->get_from_id($discussionid);
-        if (empty($discussion)) {
-            throw new not_found_exception('discussion', (string) $discussionid);
-        }
-        $forum = $vaultfactory->get_forum_vault()->get_from_id($discussion->get_forum_id());
-        if (empty($forum)) {
-            throw new not_found_exception('forum', (string) $discussion->get_forum_id());
-        }
-
-        try {
-            require_login($forum->get_course_record(), false, $forum->get_course_module_record(), false, true);
-        } catch (\require_login_exception $e) {
+        // The route-level course login does not cover the visibility or availability of the activity itself.
+        $cm = get_fast_modinfo($forum->get_course_record())->get_cm($forum->get_course_module_record()->id);
+        if (!$cm->uservisible) {
             throw new access_denied_exception('noviewdiscussionspermission', 'forum');
         }
 
