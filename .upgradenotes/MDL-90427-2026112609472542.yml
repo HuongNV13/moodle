@@ -1,0 +1,18 @@
+issueNumber: MDL-90427
+notes:
+  mod_forum:
+    - message: >-
+        The following functions in `mod_forum` have been deprecated and moved to
+        the new `\mod_forum\util\read_tracking` class:
+
+
+        | Function name | Replacement |
+
+        | ------------- | ----------- |
+
+        | `forum_tp_mark_posts_read` |
+        `\mod_forum\util\read_tracking::mark_posts_read()` |
+
+        | `forum_tp_mark_discussion_read` |
+        `\mod_forum\util\read_tracking::mark_discussion_read()` |
+      type: deprecated

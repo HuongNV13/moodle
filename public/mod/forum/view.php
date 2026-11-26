@@ -237,7 +237,7 @@ switch ($forum->get_type()) {
             $postids = array_map(function($post) {
                 return $post->get_id();
             }, array_merge([$post], array_values($replies)));
-            forum_tp_mark_posts_read($USER, $postids);
+            \mod_forum\util\read_tracking::mark_posts_read($USER, $postids);
         }
         break;
     case 'blog':
@@ -251,7 +251,7 @@ switch ($forum->get_type()) {
             $firstpostids = array_map(function($discussion) {
                 return $discussion->get_first_post()->get_id();
             }, array_values($discussions));
-            forum_tp_mark_posts_read($USER, $firstpostids);
+            \mod_forum\util\read_tracking::mark_posts_read($USER, $firstpostids);
         }
         break;
     default:

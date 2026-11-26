@@ -4132,93 +4132,6 @@ function forum_change_discussionid($postid, $discussionid) {
 // Functions to do with read tracking.
 
 /**
- * Mark posts as read.
- *
- * @global object
- * @global object
- * @param object $user object
- * @param array $postids array of post ids
- * @return boolean success
- */
-function forum_tp_mark_posts_read($user, $postids) {
-    global $CFG, $DB;
-
-    if (!forum_tp_can_track_forums(false, $user)) {
-        return true;
-    }
-
-    $status = true;
-
-    $now = time();
-    $cutoffdate = $now - ($CFG->forum_oldpostdays * 24 * 3600);
-
-    if (empty($postids)) {
-        return true;
-
-    } else if (count($postids) > 200) {
-        while ($part = array_splice($postids, 0, 200)) {
-            $status = forum_tp_mark_posts_read($user, $part) && $status;
-        }
-        return $status;
-    }
-
-    list($usql, $postidparams) = $DB->get_in_or_equal($postids, SQL_PARAMS_NAMED, 'postid');
-
-    $insertparams = array(
-        'userid1' => $user->id,
-        'userid2' => $user->id,
-        'userid3' => $user->id,
-        'firstread' => $now,
-        'lastread' => $now,
-        'cutoffdate' => $cutoffdate,
-    );
-    $params = array_merge($postidparams, $insertparams);
-
-    if ($CFG->forum_allowforcedreadtracking) {
-        $trackingsql = "AND (f.trackingtype = ".FORUM_TRACKING_FORCED."
-                        OR (f.trackingtype = ".FORUM_TRACKING_OPTIONAL." AND tf.id IS NULL))";
-    } else {
-        $trackingsql = "AND ((f.trackingtype = ".FORUM_TRACKING_OPTIONAL."  OR f.trackingtype = ".FORUM_TRACKING_FORCED.")
-                            AND tf.id IS NULL)";
-    }
-
-    // First insert any new entries.
-    $sql = "INSERT INTO {forum_read} (userid, postid, discussionid, forumid, firstread, lastread)
-
-            SELECT :userid1, p.id, p.discussion, d.forum, :firstread, :lastread
-                FROM {forum_posts} p
-                    JOIN {forum_discussions} d       ON d.id = p.discussion
-                    JOIN {forum} f                   ON f.id = d.forum
-                    LEFT JOIN {forum_track_prefs} tf ON (tf.userid = :userid2 AND tf.forumid = f.id)
-                    LEFT JOIN {forum_read} fr        ON (
-                            fr.userid = :userid3
-                        AND fr.postid = p.id
-                        AND fr.discussionid = d.id
-                        AND fr.forumid = f.id
-                    )
-                WHERE p.id $usql
-                    AND p.modified >= :cutoffdate
-                    $trackingsql
-                    AND fr.id IS NULL";
-
-    $status = $DB->execute($sql, $params) && $status;
-
-    // Then update all records.
-    $updateparams = array(
-        'userid' => $user->id,
-        'lastread' => $now,
-    );
-    $params = array_merge($postidparams, $updateparams);
-    $status = $DB->set_field_select('forum_read', 'lastread', $now, '
-                userid      =  :userid
-            AND lastread    <> :lastread
-            AND postid      ' . $usql,
-            $params) && $status;
-
-    return $status;
-}
-
-/**
  * Mark post as read.
  * @global object
  * @global object
@@ -4297,35 +4210,7 @@ function forum_tp_mark_forum_read($user, $forumid, $groupid=false) {
 
     if ($posts = $DB->get_records_sql($sql, $params)) {
         $postids = array_keys($posts);
-        return forum_tp_mark_posts_read($user, $postids);
-    }
-
-    return true;
-}
-
-/**
- * Marks a whole discussion as read, for a given user
- *
- * @global object
- * @global object
- * @param object $user
- * @param int $discussionid
- * @return bool
- */
-function forum_tp_mark_discussion_read($user, $discussionid) {
-    global $CFG, $DB;
-
-    $cutoffdate = time() - ($CFG->forum_oldpostdays*24*60*60);
-
-    $sql = "SELECT p.id
-              FROM {forum_posts} p
-                   LEFT JOIN {forum_read} r ON (r.postid = p.id AND r.userid = ?)
-             WHERE p.discussion = ?
-                   AND p.modified >= ? AND r.id is NULL";
-
-    if ($posts = $DB->get_records_sql($sql, array($user->id, $discussionid, $cutoffdate))) {
-        $postids = array_keys($posts);
-        return forum_tp_mark_posts_read($user, $postids);
+        return \mod_forum\util\read_tracking::mark_posts_read($user, $postids);
     }
 
     return true;

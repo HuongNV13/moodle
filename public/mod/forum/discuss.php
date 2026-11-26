@@ -368,6 +368,6 @@ if ($istracked && !$CFG->forum_usermarksread) {
         $postids = array_map(function($post) {
             return $post->get_id();
         }, array_merge([$post], array_values($replies)));
-        forum_tp_mark_posts_read($USER, $postids);
+        \mod_forum\util\read_tracking::mark_posts_read($USER, $postids);
     }
 }
