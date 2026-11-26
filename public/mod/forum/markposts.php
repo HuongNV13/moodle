@@ -82,7 +82,7 @@ if ($mark == 'read') {
             throw new \moodle_exception('invaliddiscussionid', 'forum');
         }
 
-        forum_tp_mark_discussion_read($user, $d);
+        \mod_forum\util\read_tracking::mark_discussion_read($user, $d);
     } else {
         // Mark all messages read in current group
         $currentgroup = groups_get_activity_group($cm);

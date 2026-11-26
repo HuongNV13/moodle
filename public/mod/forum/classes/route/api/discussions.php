@@ -31,12 +31,14 @@ use core\router\schema\response\content\payload_response_type;
 use core\router\schema\response\payload_response;
 use core\router\schema\response\response;
 use core\router\scope\scopeset;
-use mod_forum\local\container;
 use mod_forum\local\entities\discussion;
 use mod_forum\local\entities\forum;
+use mod_forum\local\factories\legacy_data_mapper;
+use mod_forum\local\factories\manager;
 use mod_forum\route\parameters\path_discussion;
 use mod_forum\route\scope\discussion\read as discussion_read;
 use mod_forum\route\scope\discussion\write as discussion_write;
+use mod_forum\util\read_tracking;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -66,6 +68,8 @@ class discussions {
      * @param ResponseInterface $response
      * @param discussion $discussion The discussion, loaded from the path parameter.
      * @param forum $forum The forum the discussion belongs to.
+     * @param legacy_data_mapper $mapper Injected dependency.
+     * @param manager $managerfactory Injected dependency.
      * @return payload_response
      */
     #[route(
@@ -127,6 +131,8 @@ class discussions {
         ResponseInterface $response,
         discussion $discussion,
         forum $forum,
+        legacy_data_mapper $mapper,
+        manager $managerfactory,
     ): payload_response {
         global $CFG, $USER;
 
@@ -144,17 +150,17 @@ class discussions {
             throw new access_denied_exception('noviewdiscussionspermission', 'forum');
         }
 
-        $capabilitymanager = container::get_manager_factory()->get_capability_manager($forum);
+        $capabilitymanager = $managerfactory->get_capability_manager($forum);
         if (!$capabilitymanager->can_view_discussion($USER, $discussion)) {
             throw new access_denied_exception('noviewdiscussionspermission', 'forum');
         }
 
-        $forumrecord = container::get_legacy_data_mapper_factory()->get_forum_data_mapper()->to_legacy_object($forum);
+        $forumrecord = $mapper->get_forum_data_mapper()->to_legacy_object($forum);
         if (!forum_tp_is_tracked($forumrecord, $USER)) {
             throw new access_denied_exception('forumnottracked', 'forum');
         }
 
-        forum_tp_mark_discussion_read($USER, $discussion->get_id());
+        read_tracking::mark_discussion_read($USER, $discussion->get_id());
 
         return new payload_response(
             payload: [

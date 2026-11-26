@@ -274,7 +274,7 @@ class mod_forum_external extends external_api {
         // Mark these posts as read.
         if (!empty($posts)) {
             if (!$CFG->forum_usermarksread && forum_tp_is_tracked($forum->get_id())) {
-                forum_tp_mark_posts_read($USER, array_keys($posts));
+                \mod_forum\util\read_tracking::mark_posts_read($USER, array_keys($posts));
             }
         }
 
@@ -729,7 +729,7 @@ class mod_forum_external extends external_api {
 
         // Mark as read if required.
         if (!$CFG->forum_usermarksread && forum_tp_is_tracked($forum)) {
-            forum_tp_mark_discussion_read($USER, $discussion->id);
+            \mod_forum\util\read_tracking::mark_discussion_read($USER, $discussion->id);
         }
 
         $result = array();
@@ -1864,7 +1864,7 @@ class mod_forum_external extends external_api {
             // Mark these posts as read.
             if (!empty($posts)) {
                 if (!$CFG->forum_usermarksread && forum_tp_is_tracked($forum->get_id())) {
-                    forum_tp_mark_posts_read($USER, array_keys($posts));
+                    \mod_forum\util\read_tracking::mark_posts_read($USER, array_keys($posts));
                 }
             }
         }
@@ -2431,7 +2431,7 @@ class mod_forum_external extends external_api {
         // Mark as read if required.
         $forum = $DB->get_record('forum', ['id' => $discussion->forum], '*', MUST_EXIST);
         if (!$CFG->forum_usermarksread && forum_tp_is_tracked($forum)) {
-            return forum_tp_mark_posts_read($USER, $postids);
+            return \mod_forum\util\read_tracking::mark_posts_read($USER, $postids);
         }
 
         return false;

@@ -69,3 +69,49 @@ function forum_tp_get_untracked_forums($userid, $courseid) {
         return [];
     }
 }
+
+/**
+ * Mark posts as read.
+ *
+ * @global object
+ * @global object
+ * @param object $user object
+ * @param array $postids array of post ids
+ * @return boolean success
+ * @deprecated since Moodle 6.0 MDL-90427 Use {@see \mod_forum\util\read_tracking::mark_posts_read()} instead.
+ * @todo MDL-90427 This function will be deleted in Moodle 7.0.
+ */
+#[\core\attribute\deprecated(
+    replacement: 'mod_forum\util\read_tracking::mark_posts_read',
+    since: '6.0',
+    mdl: 'MDL-90427',
+    reason: 'Read tracking helpers have been moved to a util class',
+)]
+function forum_tp_mark_posts_read($user, $postids) {
+    \core\deprecation::emit_deprecation(__FUNCTION__);
+
+    return \mod_forum\util\read_tracking::mark_posts_read($user, $postids);
+}
+
+/**
+ * Marks a whole discussion as read, for a given user
+ *
+ * @global object
+ * @global object
+ * @param object $user
+ * @param int $discussionid
+ * @return bool
+ * @deprecated since Moodle 6.0 MDL-90427 Use {@see \mod_forum\util\read_tracking::mark_discussion_read()} instead.
+ * @todo MDL-90427 This function will be deleted in Moodle 7.0.
+ */
+#[\core\attribute\deprecated(
+    replacement: 'mod_forum\util\read_tracking::mark_discussion_read',
+    since: '6.0',
+    mdl: 'MDL-90427',
+    reason: 'Read tracking helpers have been moved to a util class',
+)]
+function forum_tp_mark_discussion_read($user, $discussionid) {
+    \core\deprecation::emit_deprecation(__FUNCTION__);
+
+    return \mod_forum\util\read_tracking::mark_discussion_read($user, $discussionid);
+}

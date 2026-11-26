@@ -250,7 +250,7 @@ class send_user_digests extends \core\task\adhoc_task {
             if ($this->send_mail()) {
                 $this->log_finish("Digest sent with {$this->sentcount} messages.");
                 if (get_user_preferences('forum_markasreadonnotification', 1, $this->recipient->id) == 1) {
-                    forum_tp_mark_posts_read($this->recipient, $this->markpostsasread);
+                    \mod_forum\util\read_tracking::mark_posts_read($this->recipient, $this->markpostsasread);
                 }
             } else {
                 $this->log_finish("Issue sending digest. Skipping.");
