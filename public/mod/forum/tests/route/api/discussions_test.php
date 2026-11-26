@@ -242,6 +242,38 @@ final class discussions_test extends route_testcase {
     }
 
     /**
+     * Anonymous requests are rejected and nothing is marked.
+     *
+     * The exact status is not asserted: core does not yet return 401 for unauthenticated API requests
+     * (see moodle_api_authentication_middleware_test).
+     */
+    public function test_not_logged_in(): void {
+        $this->resetAfterTest();
+        [$user, $discussion, , $postids] = $this->setup_discussion();
+        $this->setUser(0);
+
+        $response = $this->patch("/discussions/{$discussion->id}", ['read' => true]);
+        $this->assertNotEquals(200, $response->getStatusCode());
+        $this->assertEquals(0, $this->count_read($user->id, $postids));
+    }
+
+    /**
+     * Users cannot mark a discussion as read in a forum they cannot see because it is hidden.
+     */
+    public function test_hidden_forum(): void {
+        $this->resetAfterTest();
+        [$user, $discussion, $forum, $postids] = $this->setup_discussion();
+        set_coursemodule_visible(
+            get_coursemodule_from_instance('forum', $forum->id, $forum->course, false, MUST_EXIST)->id,
+            0,
+        );
+
+        $response = $this->patch("/discussions/{$discussion->id}", ['read' => true]);
+        $this->assert_access_denied_response($response);
+        $this->assertEquals(0, $this->count_read($user->id, $postids));
+    }
+
+    /**
      * The route requires the discussion read and write scopes.
      */
     public function test_route_scopes(): void {
