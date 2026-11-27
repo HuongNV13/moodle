@@ -2,7 +2,8 @@ issueNumber: MDL-90406
 notes:
   mod_forum:
     - message: >-
-        A new web service, `mod_forum_get_discussion_list`, has been added to
-        get the discussion list of a forum, with sort order, paging and group
-        parameters.
+        Added the REST API route `GET /api/rest/v2/mod_forum/forums/{forumId}/discussions`
+        to get the discussions of a forum, with the `sortOrder`, `sortDirection`, `page`, `perPage` and
+        `groupId` query parameters. The route is protected by the new
+        `mod_forum:discussion:read` scope.
       type: improved
